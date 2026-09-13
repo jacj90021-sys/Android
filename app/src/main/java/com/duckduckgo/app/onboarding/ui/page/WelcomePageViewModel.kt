@@ -26,7 +26,6 @@ import com.duckduckgo.app.browser.omnibar.OmnibarType
 import com.duckduckgo.app.cta.ui.DaxBubbleCta.DaxDialogIntroOption
 import com.duckduckgo.app.global.DefaultRoleBrowserDialog
 import com.duckduckgo.app.global.install.AppInstallStore
-import com.duckduckgo.app.onboarding.DuckAiOnboardingAvailability
 import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboarding.ui.page.PreOnboardingDialogType.ADDRESS_BAR_POSITION
 import com.duckduckgo.app.onboarding.ui.page.PreOnboardingDialogType.ADD_TO_DOCK
@@ -75,8 +74,6 @@ import com.duckduckgo.browser.feature.toggles.AndroidBrowserConfigFeature
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.device.DeviceInfo
 import com.duckduckgo.di.scopes.FragmentScope
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.impl.wideevents.InputScreenOnboardingWideEvent
 import com.duckduckgo.sync.api.SyncAutoRestore
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -104,11 +101,8 @@ class WelcomePageViewModel @Inject constructor(
     private val appBuildConfig: AppBuildConfig,
     private val onboardingStore: OnboardingStore,
     private val androidBrowserConfigFeature: AndroidBrowserConfigFeature,
-    private val duckChat: DuckChat,
-    private val inputScreenOnboardingWideEvent: InputScreenOnboardingWideEvent,
     private val deviceInfo: DeviceInfo,
     private val syncAutoRestore: SyncAutoRestore,
-    private val duckAiOnboardingAvailability: DuckAiOnboardingAvailability,
 ) : ViewModel() {
     private val _commands = Channel<Command>(1, DROP_OLDEST)
     val commands: Flow<Command> = _commands.receiveAsFlow()
@@ -224,7 +218,6 @@ class WelcomePageViewModel @Inject constructor(
                 viewModelScope.launch {
                     _commands.send(OnboardingSkipped)
                     pixel.fire(PREONBOARDING_CONFIRM_SKIP_ONBOARDING_PRESSED)
-                    duckChat.setInputScreenUserSetting(true)
                 }
             }
 
@@ -257,22 +250,11 @@ class WelcomePageViewModel @Inject constructor(
                 viewModelScope.launch(dispatchers.io()) {
                     if (inputScreenSelected) {
                         pixel.fire(PREONBOARDING_AICHAT_SELECTED)
-                        inputScreenOnboardingWideEvent.onInputScreenEnabledDuringOnboarding(reinstallUser = reinstallUser)
                     } else {
                         pixel.fire(PREONBOARDING_SEARCH_ONLY_SELECTED)
                     }
-                    duckChat.setCosmeticInputScreenUserSetting(inputScreenSelected)
                     onboardingStore.storeInputScreenSelection(inputScreenSelected)
-                    val command = if (inputScreenSelected && duckAiOnboardingAvailability.isDuckAiOnboardingEnabled()) {
-                        Command.ShowInputScreenPreviewDialog(
-                            searchSuggestions = onboardingStore.getSearchOptions(),
-                            chatSuggestions = onboardingStore.getChatSuggestions(),
-                            duckAiDefault = false,
-                        )
-                    } else {
-                        Finish
-                    }
-                    _commands.send(command)
+                    _commands.send(Finish)
                 }
             }
 

@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.duckduckgo.anvil.annotations.ContributesViewModel
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.onboarding.api.LinearOnboardingHost
 import com.duckduckgo.onboarding.api.LinearOnboardingOrchestrator
 import com.duckduckgo.onboarding.api.LinearOnboardingState
@@ -40,15 +39,12 @@ import javax.inject.Inject
 @ContributesViewModel(ActivityScope::class)
 class NewUserBrowserOnboardingViewModel @Inject constructor(
     private val orchestrator: LinearOnboardingOrchestrator,
-    private val duckChat: DuckChat,
 ) : ViewModel() {
 
     sealed interface Command {
         /** The current step is hosted by [com.duckduckgo.app.onboarding.ui.OnboardingActivity]; BrowserActivity should hand off and finish. */
         data object HandOffToOnboardingActivity : Command
 
-        /** Open Duck.ai at [url] to run the onboarding demo. */
-        data class OpenDuckAiOnboardingDemo(val url: String) : Command
     }
 
     // Buffered (not conflated): HandOffToOnboardingActivity and OpenDuckAiOnboardingDemo are navigation
@@ -82,8 +78,6 @@ class NewUserBrowserOnboardingViewModel @Inject constructor(
         if (step is NewUserBrowserActivityStep) {
             when (val action = step.resolveAction()) {
                 is NewUserBrowserActivityAction.RunDuckAiOnboardingDemo -> {
-                    val url = duckChat.getDuckChatUrl(action.prompt, autoPrompt = true) + "&flow=mobile-app-onboarding"
-                    _commands.send(Command.OpenDuckAiOnboardingDemo(url))
                     orchestrator.onEvent(NewUserOnboardingEvent.Presented)
                 }
             }

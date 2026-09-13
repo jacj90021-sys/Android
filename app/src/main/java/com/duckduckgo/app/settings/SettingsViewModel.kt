@@ -40,7 +40,6 @@ import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_DEFAULT_BROWSER_PRESSED
 import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_FIRE_BUTTON_PRESSED
 import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_GENERAL_PRESSED
 import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_NEXT_STEPS_ADDRESS_BAR
-import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_NEXT_STEPS_VOICE_SEARCH
 import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_OPENED
 import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_PASSWORDS_PRESSED
 import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_PERMISSIONS_PRESSED
@@ -58,7 +57,6 @@ import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchAutofillPassw
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchAutofillSettings
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchCookiePopupProtectionScreen
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchDefaultBrowser
-import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchDuckChatScreen
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchEmailProtection
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchEmailProtectionNotSupported
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchFeedback
@@ -80,8 +78,6 @@ import com.duckduckgo.browser.feature.toggles.AndroidBrowserConfigFeature
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.mobile.android.app.tracking.AppTrackingProtection
 import com.duckduckgo.remote.messaging.api.Content
 import com.duckduckgo.remote.messaging.impl.store.ModalSurfaceStore
@@ -90,7 +86,6 @@ import com.duckduckgo.subscriptions.api.SubscriptionUnifiedFeedback
 import com.duckduckgo.subscriptions.api.SubscriptionUnifiedFeedback.SubscriptionFeedbackSource.DDG_SETTINGS
 import com.duckduckgo.subscriptions.api.Subscriptions
 import com.duckduckgo.sync.api.DeviceSyncState
-import com.duckduckgo.voice.api.VoiceSearchAvailability
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -119,9 +114,6 @@ class SettingsViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val autoconsent: Autoconsent,
     private val subscriptions: Subscriptions,
-    private val duckChat: DuckChat,
-    private val duckAiFeatureState: DuckAiFeatureState,
-    private val voiceSearchAvailability: VoiceSearchAvailability,
     private val modalSurfaceStore: ModalSurfaceStore,
     private val subscriptionUnifiedFeedback: SubscriptionUnifiedFeedback,
     private val settingsPixelDispatcher: SettingsPixelDispatcher,
@@ -143,14 +135,11 @@ class SettingsViewModel @Inject constructor(
         val isAutoconsentEnabled: Boolean = false,
         val isSubscriptionEnabled: Boolean = false,
         val isNewThreatProtectionSettingsEnabled: Boolean = false,
-        val isDuckChatEnabled: Boolean = false,
-        val isVoiceSearchVisible: Boolean = false,
         val isAddWidgetInProtectionsVisible: Boolean = false,
         val widgetsInstalled: Boolean = false,
         val showWhatsNew: Boolean = false,
         val showGetDesktopBrowser: Boolean = false,
         val nextStepsAddressBarDismissed: Boolean = false,
-        val nextStepsVoiceSearchDismissed: Boolean = false,
         val nextStepsSectionHidden: Boolean = false,
         val showNextStepsHideButton: Boolean = false,
     )
@@ -171,7 +160,6 @@ class SettingsViewModel @Inject constructor(
         data object LaunchCookiePopupProtectionScreen : Command()
         data object LaunchDataClearingSettingsScreen : Command()
         data object LaunchPermissionsScreen : Command()
-        data object LaunchDuckChatScreen : Command()
         data object LaunchAppearanceScreen : Command()
         data object LaunchAboutScreen : Command()
         data object LaunchGeneralSettingsScreen : Command()
@@ -192,17 +180,12 @@ class SettingsViewModel @Inject constructor(
 
     private var widgetPromptShown = false
     private var omnibarTypeBeforeNavigation: OmnibarType? = null
-    private var voiceSearchAvailableBeforeNavigation: Boolean? = null
 
     init {
         pixel.fire(SETTINGS_OPENED)
         pixel.fire(PRODUCT_TELEMETRY_SURFACE_SETTINGS_OPENED)
         pixel.fire(PRODUCT_TELEMETRY_SURFACE_SETTINGS_OPENED_DAILY, type = Pixel.PixelType.Daily())
         settingsPixelDispatcher.fireSettingsOpenedWithSubscriptionPurchaseAvailable()
-
-        duckAiFeatureState.showSettings.onEach { showDuckAiSettings ->
-            viewState.update { it.copy(isDuckChatEnabled = showDuckAiSettings) }
-        }.launchIn(viewModelScope)
     }
 
     override fun onStart(owner: LifecycleOwner) {
@@ -233,7 +216,6 @@ class SettingsViewModel @Inject constructor(
                     isAutoconsentEnabled = autoconsent.isSettingEnabled(),
                     isSubscriptionEnabled = subscriptions.isEligible(),
                     isNewThreatProtectionSettingsEnabled = androidBrowserConfigFeature.newThreatProtectionSettings().isEnabled(),
-                    isVoiceSearchVisible = voiceSearchAvailability.isVoiceSearchSupported,
                     isAddWidgetInProtectionsVisible = withContext(dispatcherProvider.io()) {
                         settingsPageFeature.self().isEnabled() && settingsPageFeature.widgetAsProtection().isEnabled()
                     },
@@ -248,9 +230,6 @@ class SettingsViewModel @Inject constructor(
                     },
                     nextStepsAddressBarDismissed = withContext(dispatcherProvider.io()) {
                         settingsDataStore.nextStepsAddressBarDismissed
-                    },
-                    nextStepsVoiceSearchDismissed = withContext(dispatcherProvider.io()) {
-                        settingsDataStore.nextStepsVoiceSearchDismissed
                     },
                     nextStepsSectionHidden = withContext(dispatcherProvider.io()) {
                         settingsDataStore.nextStepsSectionHidden
@@ -315,12 +294,6 @@ class SettingsViewModel @Inject constructor(
         pixel.fire(SETTINGS_NEXT_STEPS_ADDRESS_BAR)
     }
 
-    fun onEnableVoiceSearchClicked() {
-        voiceSearchAvailableBeforeNavigation = voiceSearchAvailability.isVoiceSearchAvailable
-        viewModelScope.launch { command.send(LaunchAccessibilitySettings) }
-        pixel.fire(SETTINGS_NEXT_STEPS_VOICE_SEARCH)
-    }
-
     fun onNextStepsHideClicked() {
         viewModelScope.launch(dispatcherProvider.io()) {
             settingsDataStore.nextStepsSectionHidden = true
@@ -334,12 +307,6 @@ class SettingsViewModel @Inject constructor(
                 settingsDataStore.nextStepsAddressBarDismissed = true
             }
             omnibarTypeBeforeNavigation = null
-        }
-        voiceSearchAvailableBeforeNavigation?.let { before ->
-            if (voiceSearchAvailability.isVoiceSearchAvailable != before) {
-                settingsDataStore.nextStepsVoiceSearchDismissed = true
-            }
-            voiceSearchAvailableBeforeNavigation = null
         }
     }
 
@@ -446,11 +413,6 @@ class SettingsViewModel @Inject constructor(
     fun onPermissionsSettingClicked() {
         viewModelScope.launch { command.send(LaunchPermissionsScreen) }
         pixel.fire(SETTINGS_PERMISSIONS_PRESSED)
-    }
-
-    fun onDuckChatSettingClicked() {
-        viewModelScope.launch { command.send(LaunchDuckChatScreen) }
-        settingsPixelDispatcher.fireDuckChatPressed()
     }
 
     fun onAppearanceSettingClicked() {

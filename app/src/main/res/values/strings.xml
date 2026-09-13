@@ -789,10 +789,10 @@
     <string name="onboardingSkippedPrivacyProDaxDialogTitle">Did you know?</string>
 
     <!-- Input Screen Onboarding step -->
-    <string name="preOnboardingInputScreenTitle">Want easy access to private AI chat?</string>
-    <string name="preOnboardingInputScreenTitleUpdated">Want easy access to private AI chat in the address bar?</string>
+    <string name="preOnboardingInputScreenTitle">Choose how you want to search</string>
+    <string name="preOnboardingInputScreenTitleUpdated">Choose how you want to search</string>
     <string name="preOnboardingInputScreenButton">Next</string>
-    <string name="preOnboardingInputScreenDescription"><![CDATA[AI features are private and optional. You can make changes in <b>Settings > AI Features</b>.]]></string>
+    <string name="preOnboardingInputScreenDescription"><![CDATA[You can make changes later in <b>Settings</b>.]]></string>
 
     <!--Onboarding Reinstall Quick Setup-->
     <string name="preOnboardingReinstallQuickSetupTitle">Welcome back!&lt;br/&gt;Want to customize anything?</string>
@@ -985,7 +985,7 @@
     <string name="onboardingPrivacyProCustomAiFlowDaxDialogDescription">We also offer a paid subscription featuring advanced AI models with higher chat limits from GPT and Claude, a secure VPN, and more.</string>
 
     <string name="input_screen_user_pref_without_ai_updated">Search only</string>
-    <string name="input_screen_user_pref_with_ai_updated">Toggle between\nSearch and Duck.ai</string>
+    <string name="input_screen_user_pref_with_ai_updated">Search only</string>
 
     <!-- New Address Bar Picker -->
     <string name="newAddressBarPickerDuckDuckGo" translatable="false">DuckDuckGo</string>

@@ -56,7 +56,6 @@ import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchAutofillSetti
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchCookiePopupProtectionScreen
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchDataClearingSettingsScreen
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchDefaultBrowser
-import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchDuckChatScreen
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchEmailProtection
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchEmailProtectionNotSupported
 import com.duckduckgo.app.settings.SettingsViewModel.Command.LaunchFeedback
@@ -92,7 +91,6 @@ import com.duckduckgo.common.utils.edgetoedge.EdgeToEdgeHandler
 import com.duckduckgo.common.utils.edgetoedge.EdgeToEdgeProvider
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckChatSettingsNoParams
 import com.duckduckgo.feedback.api.FeedbackLauncher
 import com.duckduckgo.internal.features.api.InternalFeaturePlugin
 import com.duckduckgo.mobile.android.app.tracking.ui.AppTrackingProtectionScreens.AppTrackerActivityWithEmptyParams
@@ -289,13 +287,11 @@ class SettingsActivity : DuckDuckGoActivity() {
             appearanceSetting.setClickListener { viewModel.onAppearanceSettingClicked() }
             accessibilitySetting.setClickListener { viewModel.onAccessibilitySettingClicked() }
             generalSetting.setClickListener { viewModel.onGeneralSettingClicked() }
-            includeDuckChatSetting.duckChatSetting.setOnClickListener { viewModel.onDuckChatSettingClicked() }
         }
 
         with(viewsNextSteps) {
             addWidgetToHomeScreenSetting.setOnClickListener { viewModel.userRequestedToAddHomeScreenWidget() }
             addressBarPositionSetting.setOnClickListener { viewModel.onChangeAddressBarPositionClicked() }
-            enableVoiceSearchSetting.setOnClickListener { viewModel.onEnableVoiceSearchClicked() }
         }
 
         with(viewsOther) {
@@ -371,8 +367,6 @@ class SettingsActivity : DuckDuckGoActivity() {
                     updateAutoconsent(it.isAutoconsentEnabled)
                     updateSubscription(it.isSubscriptionEnabled)
                     updateThreatProtection(it.isNewThreatProtectionSettingsEnabled)
-                    updateDuckChat(it.isDuckChatEnabled)
-                    updateVoiceSearchVisibility(it.isVoiceSearchVisible)
                     updateAddWidgetInProtections(it.isAddWidgetInProtectionsVisible, it.widgetsInstalled)
                     updateWhatsNewVisibility(it.showWhatsNew)
                     updateGetDesktopBrowserItemVisibility(it.showGetDesktopBrowser)
@@ -404,18 +398,6 @@ class SettingsActivity : DuckDuckGoActivity() {
         }
     }
 
-    private fun updateDuckChat(isDuckChatEnabled: Boolean) {
-        if (isDuckChatEnabled) {
-            viewsMain.includeDuckChatSetting.duckChatSetting.show()
-        } else {
-            viewsMain.includeDuckChatSetting.duckChatSetting.gone()
-        }
-    }
-
-    private fun updateVoiceSearchVisibility(isVisible: Boolean) {
-        viewsNextSteps.enableVoiceSearchSetting.isVisible = isVisible
-    }
-
     private fun updateAddWidgetInProtections(isVisible: Boolean, widgetsInstalled: Boolean) {
         if (isVisible) {
             viewsPrivacy.widgetPromptSetting.setStatus(isOn = widgetsInstalled)
@@ -434,9 +416,6 @@ class SettingsActivity : DuckDuckGoActivity() {
             if (viewState.nextStepsAddressBarDismissed) {
                 addressBarPositionSetting.gone()
             }
-            if (viewState.nextStepsVoiceSearchDismissed) {
-                enableVoiceSearchSetting.gone()
-            }
             if (viewState.isAddWidgetInProtectionsVisible || viewState.widgetsInstalled) {
                 viewsNextSteps.addWidgetToHomeScreenSetting.gone()
             } else {
@@ -445,9 +424,8 @@ class SettingsActivity : DuckDuckGoActivity() {
 
             // Check if all items are gone — hide the entire section
             val addressBarVisible = addressBarPositionSetting.isVisible
-            val voiceSearchVisible = enableVoiceSearchSetting.isVisible
             val widgetVisible = addWidgetToHomeScreenSetting.isVisible
-            if (!addressBarVisible && !voiceSearchVisible && !widgetVisible) {
+            if (!addressBarVisible && !widgetVisible) {
                 settingsSectionOther.gone()
                 return
             }
@@ -549,7 +527,6 @@ class SettingsActivity : DuckDuckGoActivity() {
             is LaunchCookiePopupProtectionScreen -> launchActivity(AutoconsentSettingsActivity.intent(this))
             is LaunchDataClearingSettingsScreen -> launchScreen(DataClearingSettingsScreenNoParams)
             is LaunchPermissionsScreen -> launchScreen(PermissionsScreenNoParams)
-            is LaunchDuckChatScreen -> launchScreen(DuckChatSettingsNoParams)
             is LaunchAppearanceScreen -> launchScreen(AppearanceScreen.Default)
             is LaunchAboutScreen -> launchScreen(AboutScreenNoParams)
             is LaunchGeneralSettingsScreen -> launchScreen(GeneralSettingsScreenNoParams)

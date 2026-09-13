@@ -52,14 +52,6 @@
                 app:primaryText="@string/privateSearchAutocompleteToggle"
                 app:showSwitch="true" />
 
-            <com.duckduckgo.common.ui.view.listitem.OneLineListItem
-                android:id="@+id/chatSuggestionsToggle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:primaryText="@string/privateSearchChatSuggestionsToggle"
-                app:showSwitch="true" />
-
             <com.duckduckgo.common.ui.view.text.DaxTextView
                 android:id="@+id/searchSuggestionsDescription"
                 android:layout_width="match_parent"
@@ -85,25 +77,6 @@
                 android:layout_marginEnd="@dimen/keyline_4"
                 android:layout_marginBottom="@dimen/keyline_4"
                 android:text="@string/privateSearchAutocompleteRecentlyVisitedSitesHint"
-                app:typography="body2" />
-
-            <com.duckduckgo.common.ui.view.listitem.OneLineListItem
-                android:id="@+id/voiceSearchToggle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:primaryText="@string/accessibilityVoiceSearchTitle"
-                app:showSwitch="true" />
-
-            <com.duckduckgo.common.ui.view.text.DaxTextView
-                android:id="@+id/voiceSearchDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/keyline_4"
-                android:layout_marginEnd="@dimen/keyline_4"
-                android:layout_marginBottom="@dimen/keyline_4"
-                android:visibility="gone"
-                android:text="@string/accessibilityVoiceSearchSubtitle"
                 app:typography="body2" />
 
             <com.duckduckgo.common.ui.view.divider.HorizontalDivider

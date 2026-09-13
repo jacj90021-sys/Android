@@ -45,9 +45,6 @@ import com.duckduckgo.browsermode.api.BrowserMode
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.SingleLiveEvent
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatEntryPoint
 import com.duckduckgo.history.api.NavigationHistory
 import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.savedsites.api.models.SavedSite
@@ -55,7 +52,6 @@ import com.duckduckgo.savedsites.api.models.SavedSite.Bookmark
 import com.duckduckgo.savedsites.api.models.SavedSite.Favorite
 import com.duckduckgo.savedsites.impl.SavedSitesPixelName
 import com.duckduckgo.savedsites.impl.dialogs.EditSavedSiteDialogFragment
-import com.duckduckgo.voice.api.VoiceSearchAvailability
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -80,9 +76,6 @@ import javax.inject.Inject
 
 @ContributesViewModel(ActivityScope::class)
 class SystemSearchViewModel @Inject constructor(
-    private val duckAiFeatureState: DuckAiFeatureState,
-    private val voiceSearchAvailability: VoiceSearchAvailability,
-    private val duckChat: DuckChat,
     private var userStageStore: UserStageStore,
     autoCompleteFactory: AutoCompleteFactory,
     private val browserMode: BrowserMode,
@@ -104,13 +97,8 @@ class SystemSearchViewModel @Inject constructor(
     )
 
     data class OmnibarViewState(
-        val isVoiceSearchButtonVisible: Boolean = false,
-        val isDuckAiButtonVisible: Boolean = false,
         val isClearButtonVisible: Boolean = false,
-    ) {
-        val isButtonDividerVisible: Boolean
-            get() = (isClearButtonVisible || isVoiceSearchButtonVisible) && isDuckAiButtonVisible
-    }
+    )
 
     sealed class Suggestions {
         data class SystemSearchResultsViewState(
@@ -173,8 +161,6 @@ class SystemSearchViewModel @Inject constructor(
         data object AutocompleteItemRemoved : Command()
 
         data object ExitSearch : Command()
-
-        data object LaunchDuckAiVoiceChat : Command()
     }
 
     private val isSearchOnly = MutableStateFlow(false)
@@ -186,7 +172,6 @@ class SystemSearchViewModel @Inject constructor(
     @VisibleForTesting
     internal val queryFlow = MutableStateFlow("")
     private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1)
-    private val voiceSearchState = MutableSharedFlow<Unit>(replay = 1)
     private val hiddenIds = MutableStateFlow(HiddenBookmarksIds())
     private var omnibarType: OmnibarType = appSettingsPreferencesStore.omnibarType
 
@@ -208,14 +193,7 @@ class SystemSearchViewModel @Inject constructor(
             }.flowOn(dispatchers.io())
             .catch { t: Throwable? -> logcat(WARN) { "Failed to get search results: ${t?.asLog()}" } }
             .map {
-                val result = it.copy(
-                    suggestions = if (isSearchOnly.value) {
-                        it.suggestions.filterNot { suggestion -> suggestion is AutoCompleteSuggestion.AutoCompleteDuckAIPrompt }
-                    } else {
-                        it.suggestions
-                    },
-                )
-                Suggestions.SystemSearchResultsViewState(autocompleteResults = result)
+                Suggestions.SystemSearchResultsViewState(autocompleteResults = it)
             }.stateIn(viewModelScope, SharingStarted.Lazily, Suggestions.SystemSearchResultsViewState())
 
     val favoritesViewState =
@@ -234,18 +212,12 @@ class SystemSearchViewModel @Inject constructor(
         }.stateIn(viewModelScope, SharingStarted.Lazily, Suggestions.QuickAccessItems())
 
     val omnibarViewState =
-        combine(
-            flow = voiceSearchState.map { voiceSearchAvailability.isVoiceSearchAvailable },
-            flow2 = queryFlow,
-            flow3 = duckAiFeatureState.showOmnibarShortcutOnNtpAndOnFocus,
-            flow4 = isSearchOnly,
-        ) { isVoiceSearchEnabled, query, isDuckAiEnabled, isSearchOnly ->
-            OmnibarViewState(
-                isVoiceSearchButtonVisible = isVoiceSearchEnabled,
-                isDuckAiButtonVisible = !isSearchOnly && isDuckAiEnabled,
-                isClearButtonVisible = query.isNotEmpty(),
-            )
-        }.stateIn(viewModelScope, SharingStarted.Lazily, OmnibarViewState())
+        queryFlow
+            .map { query ->
+                OmnibarViewState(
+                    isClearButtonVisible = query.isNotEmpty(),
+                )
+            }.stateIn(viewModelScope, SharingStarted.Lazily, OmnibarViewState())
 
     init {
         resetViewState()
@@ -274,7 +246,6 @@ class SystemSearchViewModel @Inject constructor(
 
         queryFlow.update { "" }
 
-        voiceSearchState.tryEmit(Unit)
         refreshTrigger.tryEmit(Unit)
     }
 
@@ -320,24 +291,6 @@ class SystemSearchViewModel @Inject constructor(
         command.value = Command.LaunchBrowser(query = capturedText)
     }
 
-    fun onVoiceSearchStateChanged() {
-        voiceSearchState.tryEmit(Unit)
-    }
-
-    fun onDuckAiRequested(query: String, entryPoint: DuckChatEntryPoint) {
-        duckChat.openDuckChatWithAutoPrompt(query, entryPoint)
-        command.value = Command.ExitSearch
-    }
-
-    fun onDigitalAssistOpened() {
-        viewModelScope.launch {
-            if (duckAiFeatureState.allowDuckAiAsDigitalAssistant.value && duckChat.isEnabled()) {
-                pixel.fire(AICHAT_VOICE_SESSION_DIGITAL_ASSISTANT_STARTED)
-                command.value = Command.LaunchDuckAiVoiceChat
-            }
-        }
-    }
-
     fun userUpdatedQuery(query: String) {
         if (autoCompleteSettings.autoCompleteSuggestionsEnabled) {
             queryFlow.update { query }
@@ -380,10 +333,6 @@ class SystemSearchViewModel @Inject constructor(
                 fireWidgetSearchMetricIfLaunchedFromWidget(suggestion.phrase)
                 command.value = Command.LaunchBrowserAndSwitchToTab(suggestion.phrase, suggestion.tabId)
                 pixel.fire(INTERSTITIAL_LAUNCH_BROWSER_QUERY)
-            }
-
-            is AutoCompleteSuggestion.AutoCompleteDuckAIPrompt -> {
-                onDuckAiRequested(suggestion.phrase, DuckChatEntryPoint.SUGGESTION_ASK_AI)
             }
 
             is AutoCompleteSuggestion.AutoCompleteDeviceAppSuggestion -> {

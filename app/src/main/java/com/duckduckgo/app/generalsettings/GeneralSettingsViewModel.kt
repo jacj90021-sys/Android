@@ -38,13 +38,8 @@ import com.duckduckgo.browser.api.autocomplete.AutoCompleteSettings
 import com.duckduckgo.browser.feature.toggles.AndroidBrowserConfigFeature
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.history.api.NavigationHistory
 import com.duckduckgo.malicioussiteprotection.api.MaliciousSiteProtection
-import com.duckduckgo.voice.api.VoiceSearchAvailability
-import com.duckduckgo.voice.impl.VoiceSearchPixelNames.VOICE_SEARCH_GENERAL_SETTINGS_OFF
-import com.duckduckgo.voice.impl.VoiceSearchPixelNames.VOICE_SEARCH_GENERAL_SETTINGS_ON
-import com.duckduckgo.voice.store.VoiceSearchRepository
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,28 +61,21 @@ class GeneralSettingsViewModel @Inject constructor(
     private val autoCompleteSettings: AutoCompleteSettings,
     private val pixel: Pixel,
     private val history: NavigationHistory,
-    private val voiceSearchAvailability: VoiceSearchAvailability,
-    private val voiceSearchRepository: VoiceSearchRepository,
     private val dispatcherProvider: DispatcherProvider,
     private val showOnAppLaunchFeature: ShowOnAppLaunchFeature,
     private val showOnAppLaunchOptionDataStore: ShowOnAppLaunchOptionDataStore,
     private val androidBrowserConfigFeature: AndroidBrowserConfigFeature,
     private val maliciousSiteProtection: MaliciousSiteProtection,
-    private val duckChat: DuckChat,
 ) : ViewModel() {
 
     data class ViewState(
         val autoCompleteSuggestionsEnabled: Boolean,
         val autoCompleteRecentlyVisitedSitesSuggestionsUserEnabled: Boolean,
         val storeHistoryEnabled: Boolean,
-        val showVoiceSearch: Boolean,
-        val voiceSearchEnabled: Boolean,
         val isShowOnAppLaunchOptionVisible: Boolean,
         val showOnAppLaunchSelectedOption: ShowOnAppLaunchOption,
         val maliciousSiteProtectionEnabled: Boolean,
         val maliciousSiteProtectionFeatureAvailable: Boolean,
-        val showChatSuggestionsToggle: Boolean = false,
-        val chatSuggestionsEnabled: Boolean = true,
         val showNTPAfterIdleReturn: Boolean = false,
     )
 
@@ -112,8 +100,6 @@ class GeneralSettingsViewModel @Inject constructor(
                 autoCompleteSuggestionsEnabled = autoCompleteSettings.autoCompleteSuggestionsEnabled,
                 autoCompleteRecentlyVisitedSitesSuggestionsUserEnabled = history.isHistoryUserEnabled(),
                 storeHistoryEnabled = history.isHistoryFeatureAvailable(),
-                showVoiceSearch = voiceSearchAvailability.isVoiceSearchSupported,
-                voiceSearchEnabled = voiceSearchAvailability.isVoiceSearchAvailable,
                 isShowOnAppLaunchOptionVisible = showOnAppLaunchFeature.self().isEnabled() ||
                     androidBrowserConfigFeature.showNTPAfterIdleReturn().isEnabled(),
                 showOnAppLaunchSelectedOption = showOnAppLaunchOptionDataStore.optionFlow.first(),
@@ -122,9 +108,6 @@ class GeneralSettingsViewModel @Inject constructor(
                 androidBrowserConfigFeature.enableMaliciousSiteProtection().isEnabled() &&
                     maliciousSiteProtection.isFeatureEnabled() &&
                     !androidBrowserConfigFeature.newThreatProtectionSettings().isEnabled(),
-                showChatSuggestionsToggle = duckChat.isEnabled() &&
-                    duckChat.observeInputScreenUserSettingEnabled().firstOrNull() == true,
-                chatSuggestionsEnabled = duckChat.observeChatSuggestionsUserSettingEnabled().firstOrNull() ?: true,
                 showNTPAfterIdleReturn = androidBrowserConfigFeature.showNTPAfterIdleReturn().isEnabled(),
             )
         }
@@ -164,18 +147,6 @@ class GeneralSettingsViewModel @Inject constructor(
         }
     }
 
-    fun onVoiceSearchChanged(checked: Boolean) {
-        viewModelScope.launch(dispatcherProvider.io()) {
-            voiceSearchRepository.setVoiceSearchUserEnabled(checked)
-            if (checked) {
-                pixel.fire(VOICE_SEARCH_GENERAL_SETTINGS_ON)
-            } else {
-                pixel.fire(VOICE_SEARCH_GENERAL_SETTINGS_OFF)
-            }
-            _viewState.value = _viewState.value?.copy(voiceSearchEnabled = voiceSearchAvailability.isVoiceSearchAvailable)
-        }
-    }
-
     fun onShowOnAppLaunchButtonClick() {
         sendCommand(Command.LaunchShowOnAppLaunchScreen)
         pixel.fire(AppPixelName.SETTINGS_GENERAL_APP_LAUNCH_PRESSED)
@@ -197,21 +168,6 @@ class GeneralSettingsViewModel @Inject constructor(
 
     fun maliciousSiteLearnMoreClicked() {
         sendCommand(Command.OpenMaliciousLearnMore)
-    }
-
-    fun onChatSuggestionsSettingChanged(enabled: Boolean) {
-        logcat(INFO) { "User changed chat suggestions setting, is now enabled: $enabled" }
-        viewModelScope.launch(dispatcherProvider.io()) {
-            duckChat.setChatSuggestionsUserSetting(enabled)
-            if (enabled) {
-                pixel.fire(CHAT_SUGGESTIONS_GENERAL_SETTINGS_TOGGLED_ON_COUNT)
-                pixel.fire(CHAT_SUGGESTIONS_GENERAL_SETTINGS_TOGGLED_ON_DAILY, type = Daily())
-            } else {
-                pixel.fire(CHAT_SUGGESTIONS_GENERAL_SETTINGS_TOGGLED_OFF_COUNT)
-                pixel.fire(CHAT_SUGGESTIONS_GENERAL_SETTINGS_TOGGLED_OFF_DAILY, type = Daily())
-            }
-            _viewState.value = _viewState.value?.copy(chatSuggestionsEnabled = enabled)
-        }
     }
 
     private fun observeShowOnAppLaunchOption() {

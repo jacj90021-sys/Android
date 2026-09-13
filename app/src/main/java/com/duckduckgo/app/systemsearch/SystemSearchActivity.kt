@@ -67,7 +67,6 @@ import com.duckduckgo.app.systemsearch.SystemSearchViewModel.Command.EditQuery
 import com.duckduckgo.app.systemsearch.SystemSearchViewModel.Command.LaunchBrowser
 import com.duckduckgo.app.systemsearch.SystemSearchViewModel.Command.LaunchBrowserAndSwitchToTab
 import com.duckduckgo.app.systemsearch.SystemSearchViewModel.Command.LaunchDeviceApplication
-import com.duckduckgo.app.systemsearch.SystemSearchViewModel.Command.LaunchDuckAiVoiceChat
 import com.duckduckgo.app.systemsearch.SystemSearchViewModel.Command.LaunchDuckDuckGo
 import com.duckduckgo.app.systemsearch.SystemSearchViewModel.Command.LaunchEditDialog
 import com.duckduckgo.app.systemsearch.SystemSearchViewModel.Command.ShowAppNotFoundMessage
@@ -90,13 +89,8 @@ import com.duckduckgo.common.utils.extensions.html
 import com.duckduckgo.common.utils.extensions.showKeyboard
 import com.duckduckgo.common.utils.text.TextChangedWatcher
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatEntryPoint
 import com.duckduckgo.savedsites.api.models.SavedSite
 import com.duckduckgo.savedsites.impl.dialogs.EditSavedSiteDialogFragment
-import com.duckduckgo.voice.api.VoiceSearchAvailability
-import com.duckduckgo.voice.api.VoiceSearchLauncher
-import com.duckduckgo.voice.api.VoiceSearchLauncher.Source.WIDGET
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -123,12 +117,6 @@ class SystemSearchActivity : DuckDuckGoActivity() {
 
     @Inject
     lateinit var gridViewColumnCalculator: GridViewColumnCalculator
-
-    @Inject
-    lateinit var voiceSearchLauncher: VoiceSearchLauncher
-
-    @Inject
-    lateinit var voiceSearchAvailability: VoiceSearchAvailability
 
     @Inject
     lateinit var settingsDataStore: SettingsDataStore
@@ -164,9 +152,6 @@ class SystemSearchActivity : DuckDuckGoActivity() {
     private lateinit var shadowContainer: MaterialCardView
     private lateinit var inputContainer: MaterialCardView
     private lateinit var logo: ImageView
-
-    @Inject
-    lateinit var duckChat: DuckChat
 
     private val textChangeWatcher =
         object : TextChangedWatcher() {
@@ -235,17 +220,12 @@ class SystemSearchActivity : DuckDuckGoActivity() {
         configureDaxButton()
         configureTextInput()
         configureQuickAccessGrid()
-        configureVoiceSearch()
 
         if (savedInstanceState == null) {
             intent?.let {
                 pendingLaunchSource = resolveLaunchSource(it)
                 sendLaunchPixels(it)
-                if (launchedFromAssist(it)) {
-                    handleDigitalAssistIntent()
-                } else {
-                    handleVoiceSearchLaunch(it)
-                }
+                handleDigitalAssistIntent()
             }
         }
 
@@ -285,11 +265,7 @@ class SystemSearchActivity : DuckDuckGoActivity() {
         viewModel.setLaunchedFromSearchOnlyWidget(launchedFromSearchOnlyWidget(intent))
         viewModel.setLaunchedFromWidget(launchedFromAnyWidget(intent))
         sendLaunchPixels(intent)
-        if (launchedFromAssist(intent)) {
-            handleDigitalAssistIntent()
-            return
-        }
-        handleVoiceSearchLaunch(intent)
+        handleDigitalAssistIntent()
     }
 
     private fun sendLaunchPixels(intent: Intent) {
@@ -302,14 +278,7 @@ class SystemSearchActivity : DuckDuckGoActivity() {
         }
     }
 
-    private fun handleVoiceSearchLaunch(intent: Intent) {
-        if (launchVoice(intent)) {
-            voiceSearchLauncher.launch(this)
-        }
-    }
-
     private fun handleDigitalAssistIntent() {
-        viewModel.onDigitalAssistOpened()
     }
 
     private fun configureFlowCollectors() {
@@ -431,24 +400,6 @@ class SystemSearchActivity : DuckDuckGoActivity() {
         viewModel.onOmnibarConfigured(settingsDataStore.omnibarType)
     }
 
-    private fun configureVoiceSearch() {
-        voiceSearchLauncher.registerResultsCallback(this, this, WIDGET) {
-            if (it is VoiceSearchLauncher.Event.VoiceRecognitionSuccess) {
-                when (val result = it.result) {
-                    is VoiceSearchLauncher.VoiceRecognitionResult.SearchResult -> {
-                        viewModel.onVoiceSearchResult(result.query)
-                    }
-
-                    is VoiceSearchLauncher.VoiceRecognitionResult.DuckAiResult -> {
-                        viewModel.onDuckAiRequested(result.query, DuckChatEntryPoint.VOICE)
-                    }
-                }
-            } else if (it is VoiceSearchLauncher.Event.VoiceSearchDisabled) {
-                viewModel.onVoiceSearchStateChanged()
-            }
-        }
-    }
-
     private fun showEditSavedSiteDialog(savedSite: SavedSite) {
         val dialog = EditSavedSiteDialogFragment.instance(savedSite)
         dialog.show(supportFragmentManager, "EDIT_BOOKMARK")
@@ -561,11 +512,6 @@ class SystemSearchActivity : DuckDuckGoActivity() {
             AutocompleteItemRemoved -> autocompleteItemRemoved()
 
             SystemSearchViewModel.Command.ExitSearch -> finish()
-
-            LaunchDuckAiVoiceChat -> {
-                duckChat.openVoiceDuckChat(DuckChatEntryPoint.DIGITAL_ASSISTANT)
-                finish()
-            }
         }
     }
 

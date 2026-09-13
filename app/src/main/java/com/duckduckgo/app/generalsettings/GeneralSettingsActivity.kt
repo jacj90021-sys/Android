@@ -81,14 +81,6 @@ class GeneralSettingsActivity : DuckDuckGoActivity() {
         viewModel.onMaliciousSiteProtectionSettingChanged(isChecked)
     }
 
-    private val chatSuggestionsToggleListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-        viewModel.onChatSuggestionsSettingChanged(isChecked)
-    }
-
-    private val voiceSearchChangeListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-        viewModel.onVoiceSearchChanged(isChecked)
-    }
-
     private val showOnAppLaunchClickListener = OnClickListener {
         viewModel.onShowOnAppLaunchButtonClick()
     }
@@ -155,16 +147,7 @@ class GeneralSettingsActivity : DuckDuckGoActivity() {
                         binding.autocompleteRecentlyVisitedSitesToggle.isVisible = false
                         binding.recentlyVisitedSitesDescription.isVisible = false
                     }
-                    binding.chatSuggestionsToggle.isVisible = it.showChatSuggestionsToggle
-                    if (it.showChatSuggestionsToggle) {
-                        binding.chatSuggestionsToggle.quietlySetIsChecked(
-                            newCheckedState = it.chatSuggestionsEnabled,
-                            changeListener = chatSuggestionsToggleListener,
-                        )
-                        binding.searchSuggestionsDescription.setText(R.string.privateSearchAutocompleteHintWithChatSuggestions)
-                    } else {
-                        binding.searchSuggestionsDescription.setText(R.string.privateSearchAutocompleteHint)
-                    }
+                    binding.searchSuggestionsDescription.setText(R.string.privateSearchAutocompleteHint)
 
                     if (it.maliciousSiteProtectionFeatureAvailable) {
                         binding.maliciousDisabledMessage.isVisible = !it.maliciousSiteProtectionEnabled
@@ -179,12 +162,6 @@ class GeneralSettingsActivity : DuckDuckGoActivity() {
                     binding.maliciousSiteDivider.isVisible = it.maliciousSiteProtectionFeatureAvailable
                     binding.maliciousSiteHeading.isVisible = it.maliciousSiteProtectionFeatureAvailable
                     binding.maliciousToggle.isVisible = it.maliciousSiteProtectionFeatureAvailable
-
-                    if (it.showVoiceSearch) {
-                        binding.voiceSearchToggle.isVisible = true
-                        binding.voiceSearchDescription.isVisible = true
-                        binding.voiceSearchToggle.quietlySetIsChecked(viewState.voiceSearchEnabled, voiceSearchChangeListener)
-                    }
 
                     binding.showOnAppLaunchButton.isVisible = it.isShowOnAppLaunchOptionVisible
                     setShowOnAppLaunchOptionSecondaryText(viewState.showOnAppLaunchSelectedOption)

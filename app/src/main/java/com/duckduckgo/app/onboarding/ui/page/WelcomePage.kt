@@ -89,7 +89,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.duckduckgo.duckchat.impl.R as DuckChatR
 import com.duckduckgo.mobile.android.R as CommonR
 
 @InjectWith(FragmentScope::class)
@@ -460,7 +459,7 @@ class WelcomePage : OnboardingPageFragment(R.layout.content_onboarding_welcome_p
                         if (showDuckAiCopy) {
                             R.string.input_screen_user_pref_without_ai_updated
                         } else {
-                            DuckChatR.string.input_screen_user_pref_without_ai
+                            R.string.input_screen_user_pref_without_ai_updated
                         },
                     )
 
@@ -468,7 +467,7 @@ class WelcomePage : OnboardingPageFragment(R.layout.content_onboarding_welcome_p
                         if (showDuckAiCopy) {
                             R.string.input_screen_user_pref_with_ai_updated
                         } else {
-                            DuckChatR.string.input_screen_user_pref_with_ai
+                            R.string.input_screen_user_pref_with_ai_updated
                         },
                     )
 
@@ -761,16 +760,16 @@ class WelcomePage : OnboardingPageFragment(R.layout.content_onboarding_welcome_p
         withAi: Boolean,
     ) {
         val withoutAiImageRes = when {
-            !withAi && isLightMode -> com.duckduckgo.duckchat.impl.R.drawable.searchbox_withoutai_active
-            !withAi && !isLightMode -> com.duckduckgo.duckchat.impl.R.drawable.searchbox_withoutai_active_dark
-            withAi && isLightMode -> com.duckduckgo.duckchat.impl.R.drawable.searchbox_withoutai_inactive
-            else -> com.duckduckgo.duckchat.impl.R.drawable.searchbox_withoutai_inactive_dark
+            !withAi && isLightMode -> R.drawable.searchbox_withoutai_active
+            !withAi && !isLightMode -> R.drawable.searchbox_withoutai_active_dark
+            withAi && isLightMode -> R.drawable.searchbox_withoutai_inactive
+            else -> R.drawable.searchbox_withoutai_inactive_dark
         }
         val withAiImageRes = when {
-            withAi && isLightMode -> com.duckduckgo.duckchat.impl.R.drawable.searchbox_withai_active
-            withAi && !isLightMode -> com.duckduckgo.duckchat.impl.R.drawable.searchbox_withai_active_dark
-            !withAi && isLightMode -> com.duckduckgo.duckchat.impl.R.drawable.searchbox_withai_inactive
-            else -> com.duckduckgo.duckchat.impl.R.drawable.searchbox_withai_inactive_dark
+            withAi && isLightMode -> R.drawable.searchbox_withai_active
+            withAi && !isLightMode -> R.drawable.searchbox_withai_active_dark
+            !withAi && isLightMode -> R.drawable.searchbox_withai_inactive
+            else -> R.drawable.searchbox_withai_inactive_dark
         }
 
         binding.daxDialogCta.duckAiInputScreenToggleWithoutAiImage.setImageResource(withoutAiImageRes)

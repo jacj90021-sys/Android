@@ -80,8 +80,4 @@
         app:primaryText="@string/settingsDataClearing"
         app:leadingIcon="@drawable/fire_color_24"/>
 
-    <include
-        android:id="@+id/includeDuckChatSetting"
-        layout="@layout/view_settings_item_duck_chat" />
-
 </LinearLayout>
