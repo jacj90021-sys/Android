@@ -45,7 +45,6 @@ import com.duckduckgo.common.utils.extensions.toTldPlusOneOrSelf
 import com.duckduckgo.common.utils.extensions.websiteFromGeoLocationsApiOrigin
 import com.duckduckgo.common.utils.extractDomain
 import com.duckduckgo.di.scopes.FragmentScope
-import com.duckduckgo.duckchat.api.DuckAiHostProvider
 import com.duckduckgo.site.permissions.api.SitePermissionsDialogLauncher
 import com.duckduckgo.site.permissions.api.SitePermissionsGrantedListener
 import com.duckduckgo.site.permissions.api.SitePermissionsManager.LocationPermissionRequest
@@ -82,7 +81,6 @@ class SitePermissionsDialogActivityLauncher @Inject constructor(
     private val pixel: Pixel,
     private val dispatcher: DispatcherProvider,
     @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
-    private val duckAiHostProvider: DuckAiHostProvider,
     private val browserMode: BrowserMode,
     private val drmPolicyFeature: DrmPolicyFeature,
     private val sitePermissionsDialogRedesignFeature: SitePermissionsDialogRedesignFeature,
@@ -98,7 +96,6 @@ class SitePermissionsDialogActivityLauncher @Inject constructor(
     private lateinit var permissionsHandledAutomatically: List<String>
     private var siteURL: String = ""
     private var tabId: String = ""
-    private var isDuckAiAudioCapture: Boolean = false
     private var isThirdParty: Boolean = false
 
     override fun registerPermissionLauncher(caller: ActivityResultCaller) {
@@ -125,7 +122,6 @@ class SitePermissionsDialogActivityLauncher @Inject constructor(
         this.permissionsGrantedListener = permissionsGrantedListener
         permissionsHandledByUser = permissionsRequested.userHandled
         permissionsHandledAutomatically = permissionsRequested.autoAccept
-        isDuckAiAudioCapture = false
         isThirdParty = isThirdPartyOrigin(url)
 
         if (isThirdParty && !sitePermissionsDialogRedesignFeature.self().isEnabled() &&
@@ -153,21 +149,17 @@ class SitePermissionsDialogActivityLauncher @Inject constructor(
             }
 
             permissionsHandledByUser.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE) -> {
-                if (request.origin.host == duckAiHostProvider.getHost()) {
-                    handleDuckAiAudioCapture()
-                } else {
-                    showSitePermissionsRationaleDialog(
-                        R.string.sitePermissionsMicDialogTitle,
-                        R.string.sitePermissionsMicDialogSubtitle,
-                        R.string.sitePermissionsTieredMicDialogTitle,
-                        CommonR.drawable.ic_microphone_24,
-                        url,
-                        SitePermissionsPixelValues.MICROPHONE,
-                        { rememberChoice ->
-                            askForMicPermissions(rememberChoice)
-                        },
-                    )
-                }
+                showSitePermissionsRationaleDialog(
+                    R.string.sitePermissionsMicDialogTitle,
+                    R.string.sitePermissionsMicDialogSubtitle,
+                    R.string.sitePermissionsTieredMicDialogTitle,
+                    CommonR.drawable.ic_microphone_24,
+                    url,
+                    SitePermissionsPixelValues.MICROPHONE,
+                    { rememberChoice ->
+                        askForMicPermissions(rememberChoice)
+                    },
+                )
             }
 
             permissionsHandledByUser.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE) -> {
@@ -601,12 +593,6 @@ class SitePermissionsDialogActivityLauncher @Inject constructor(
         }
     }
 
-    private fun handleDuckAiAudioCapture() {
-        // Grant mic access for this request only — never persist the site permission
-        isDuckAiAudioCapture = true
-        askForMicPermissions(rememberChoice = false)
-    }
-
     private fun askForMicPermissions(rememberChoice: Boolean = false) {
         permissionRequested = SitePermissionsRequestedType.AUDIO
         permissionPermanent = rememberChoice
@@ -721,7 +707,6 @@ class SitePermissionsDialogActivityLauncher @Inject constructor(
                         askForMicPermissions(rememberChoice)
                     }
                     when {
-                        isDuckAiAudioCapture -> R.string.duckAiMicPermissionDeniedSnackBarMessage
                         redesigned -> R.string.sitePermissionsTieredMicDeniedSnackBarMessage
                         else -> R.string.sitePermissionsMicDeniedSnackBarMessage
                     }
@@ -807,15 +792,7 @@ class SitePermissionsDialogActivityLauncher @Inject constructor(
 
         val openAppSettings: () -> Unit = { activity.launchApplicationInfoSettings() }
 
-        if (isDuckAiAudioCapture) {
-            showChangePermissionsDialog(
-                iconRes = CommonR.drawable.ic_microphone_24,
-                titleRes = R.string.duckAiMicPermissionDeniedDialogTitle,
-                contentRes = R.string.duckAiMicPermissionDeniedDialogContent,
-                buttonRes = R.string.sitePermissionsDialogChangePermissionsButton,
-                openAppSettings = openAppSettings,
-            )
-        } else if (sitePermissionsDialogRedesignFeature.self().isEnabled()) {
+        if (sitePermissionsDialogRedesignFeature.self().isEnabled()) {
             showChangePermissionsDialog(
                 iconRes = when (permissionRequested) {
                     SitePermissionsRequestedType.CAMERA, SitePermissionsRequestedType.CAMERA_AND_AUDIO -> CommonR.drawable.ic_video_24

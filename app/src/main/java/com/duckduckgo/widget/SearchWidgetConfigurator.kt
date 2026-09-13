@@ -16,21 +16,13 @@
 
 package com.duckduckgo.widget
 
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
-import com.duckduckgo.app.browser.BrowserActivity
 import com.duckduckgo.app.browser.R
-import com.duckduckgo.app.browser.mode.SearchWidgetDuckAi
-import com.duckduckgo.app.systemsearch.SystemSearchActivity
 import com.duckduckgo.common.ui.store.AppBrandDesignUpdateToggles
 import com.duckduckgo.common.utils.DispatcherProvider
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.voice.api.VoiceSearchAvailability
 import kotlinx.coroutines.withContext
-import logcat.logcat
 import javax.inject.Inject
 
 internal fun resolveSearchBarBackground(
@@ -55,8 +47,6 @@ internal fun resolveSearchBarBackground(
 }
 
 class SearchWidgetConfigurator @Inject constructor(
-    private val voiceSearchAvailability: VoiceSearchAvailability,
-    private val duckChat: DuckChat,
     private val dispatcherProvider: DispatcherProvider,
     private val appBrandDesignUpdateToggles: AppBrandDesignUpdateToggles,
 ) {
@@ -68,13 +58,6 @@ class SearchWidgetConfigurator @Inject constructor(
         fromSearchOnlyWidget: Boolean = false,
         widgetTheme: WidgetTheme,
     ) {
-        val (voiceSearchEnabled, duckAiEnabled) = withContext(dispatcherProvider.io()) {
-            voiceSearchAvailability.isVoiceSearchAvailable to (duckChat.isEnabled() && duckChat.wasOpenedBefore())
-        }
-
-        logcat { "SearchWidgetConfigurator voiceSearchEnabled=$voiceSearchEnabled, duckAiEnabled=$duckAiEnabled, searchOnly=$fromSearchOnlyWidget" }
-
-        val showDuckAi = !fromSearchOnlyWidget && duckAiEnabled
         withContext(dispatcherProvider.main()) {
             remoteViews.setInt(
                 if (fromFavWidget) R.id.widgetSearchBarContainer else R.id.widgetContainer,
@@ -84,59 +67,11 @@ class SearchWidgetConfigurator @Inject constructor(
                     isAddressBarRebrandEnabled = appBrandDesignUpdateToggles.addressBar().isEnabled(),
                 ),
             )
-            remoteViews.setViewVisibility(R.id.voiceSearch, if (voiceSearchEnabled) View.VISIBLE else View.GONE)
-            remoteViews.setViewVisibility(R.id.duckAi, if (showDuckAi) View.VISIBLE else View.GONE)
-            remoteViews.setViewVisibility(R.id.separator, if (voiceSearchEnabled && showDuckAi) View.VISIBLE else View.GONE)
-            remoteViews.setViewVisibility(R.id.search, if (!voiceSearchEnabled && !showDuckAi) View.VISIBLE else View.GONE)
-
-            if (voiceSearchEnabled) {
-                val pendingIntent = buildVoiceSearchPendingIntent(context, fromFavWidget, fromSearchOnlyWidget)
-                remoteViews.setOnClickPendingIntent(R.id.voiceSearch, pendingIntent)
-            }
-
-            if (showDuckAi) {
-                val pendingIntent = buildDuckAiPendingIntent(context)
-                remoteViews.setOnClickPendingIntent(R.id.duckAi, pendingIntent)
-            }
+            // Voice search and Duck.ai are removed; always show the plain search affordance.
+            remoteViews.setViewVisibility(R.id.voiceSearch, View.GONE)
+            remoteViews.setViewVisibility(R.id.duckAi, View.GONE)
+            remoteViews.setViewVisibility(R.id.separator, View.GONE)
+            remoteViews.setViewVisibility(R.id.search, View.VISIBLE)
         }
-    }
-
-    private fun buildVoiceSearchPendingIntent(
-        context: Context,
-        fromFavWidget: Boolean,
-        fromSearchOnlyWidget: Boolean,
-    ): PendingIntent {
-        val (intent, requestCode) = when {
-            fromFavWidget -> {
-                SystemSearchActivity.fromFavWidget(context, launchVoice = true) to REQUEST_CODE_SEARCH_WITH_FAV_WIDGET_VOICE_INTENT
-            }
-            fromSearchOnlyWidget -> {
-                SystemSearchActivity.fromSearchOnlyWidget(context, launchVoice = true) to REQUEST_CODE_SEARCH_ONLY_WIDGET_VOICE_INTENT
-            }
-            else -> {
-                SystemSearchActivity.fromWidget(context, launchVoice = true) to REQUEST_CODE_SEARCH_WIDGET_VOICE_INTENT
-            }
-        }
-        return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-    }
-
-    private fun buildDuckAiPendingIntent(
-        context: Context,
-    ): PendingIntent {
-        val intent = BrowserActivity.intent(
-            context,
-            launchSource = SearchWidgetDuckAi,
-            openDuckChat = true,
-            duckChatSessionActive = true,
-        ).also { it.action = Intent.ACTION_VIEW }
-        val requestCode = REQUEST_CODE_WIDGET_DUCK_AI_INTENT
-        return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-    }
-
-    private companion object {
-        private const val REQUEST_CODE_SEARCH_WIDGET_VOICE_INTENT = 1531
-        private const val REQUEST_CODE_SEARCH_WITH_FAV_WIDGET_VOICE_INTENT = 1541
-        private const val REQUEST_CODE_SEARCH_ONLY_WIDGET_VOICE_INTENT = 1551
-        private const val REQUEST_CODE_WIDGET_DUCK_AI_INTENT = 1561
     }
 }
