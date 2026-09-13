@@ -31,7 +31,6 @@ import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.pixels.AppPixelName.TAB_MANAGER_GRID_VIEW_BUTTON_CLICKED
 import com.duckduckgo.app.pixels.AppPixelName.TAB_MANAGER_LIST_VIEW_BUTTON_CLICKED
 import com.duckduckgo.app.pixels.BrowserModeSwitchSource
-import com.duckduckgo.app.pixels.duckchat.createWasUsedBeforePixelParams
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.Daily
 import com.duckduckgo.app.tabs.model.TabEntity
@@ -41,7 +40,6 @@ import com.duckduckgo.app.tabs.model.TabSwitcherData.LayoutType.GRID
 import com.duckduckgo.app.tabs.model.TabSwitcherData.LayoutType.LIST
 import com.duckduckgo.app.tabs.store.TabSwitcherDataStore
 import com.duckduckgo.app.tabs.ui.TabSwitcherItem.Tab
-import com.duckduckgo.app.tabs.ui.TabSwitcherItem.Tab.DuckAiTab
 import com.duckduckgo.app.tabs.ui.TabSwitcherItem.Tab.NormalTab
 import com.duckduckgo.app.tabs.ui.TabSwitcherItem.Tab.SelectableTab
 import com.duckduckgo.app.tabs.ui.TabSwitcherItem.TrackersAnimationInfoPanel
@@ -65,12 +63,6 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.SingleLiveEvent
 import com.duckduckgo.common.utils.extensions.combine
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckAiSessionCallback
-import com.duckduckgo.duckchat.api.DuckAiSessionExitTrigger
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatEntryPoint
-import com.duckduckgo.duckchat.impl.pixel.DuckChatPixelName
 import com.duckduckgo.remote.messaging.api.RemoteMessageModel
 import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.savedsites.api.models.SavedSite.Bookmark
@@ -106,8 +98,6 @@ class TabSwitcherViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val pixel: Pixel,
     private val swipingTabsFeature: SwipingTabsFeatureProvider,
-    private val duckChat: DuckChat,
-    private val duckAiFeatureState: DuckAiFeatureState,
     private val webTrackersBlockedAppRepository: WebTrackersBlockedAppRepository,
     private val tabSwitcherDataStore: TabSwitcherDataStore,
     private val faviconManager: FaviconManager,
@@ -115,7 +105,6 @@ class TabSwitcherViewModel @Inject constructor(
     private val trackersAnimationInfoPanelPixels: TrackersAnimationInfoPanelPixels,
     private val omnibarRepository: OmnibarRepository,
     private val tabTitleResolver: TabTitleResolver,
-    private val duckAiSessionCallback: DuckAiSessionCallback,
     @param:AppCoroutineScope private val appCoroutineScope: CoroutineScope,
     private val fireTabsPromos: FireTabsPromos,
     private val remoteMessageModel: RemoteMessageModel,
@@ -194,14 +183,12 @@ class TabSwitcherViewModel @Inject constructor(
         _viewState,
         tabSwitcherItemsFlow,
         tabRepositoryFlow.flatMapLatest { it.tabSwitcherData },
-        duckAiFeatureState.showOmnibarShortcutOnNtpAndOnFocus,
         currentMode,
         tabRepositoryProvider.forMode(BrowserMode.REGULAR).flowTabs.map { it.size },
-    ) { viewState, tabItems, tabSwitcherData, showDuckAiButton, browserMode, regularTabCount ->
+    ) { viewState, tabItems, tabSwitcherData, browserMode, regularTabCount ->
         viewState.copy(
             tabItems = tabItems,
             layoutType = tabSwitcherData.layoutType,
-            isDuckAIButtonVisible = showDuckAiButton,
             browserMode = browserMode,
             regularTabCount = regularTabCount,
         )
@@ -251,9 +238,6 @@ class TabSwitcherViewModel @Inject constructor(
     }
 
     fun onNewTabRequested(fromOverflowMenu: Boolean = false) = viewModelScope.launch {
-        tabRepository.getSelectedTab()?.tabId?.let { tabId ->
-            duckAiSessionCallback.onExitIntent(tabId, DuckAiSessionExitTrigger.NEW_TAB_OPENED)
-        }
         if (swipingTabsFeature.isEnabled) {
             val newTab = tabs.firstOrNull { tabItem ->
                 tabItem.isNewTabPage && !tabItem.hasSourceTab
@@ -317,9 +301,6 @@ class TabSwitcherViewModel @Inject constructor(
                 selectTab(tabId)
             }
         } else {
-            if (viewState.value.tabSwitcherItems.find { it.id == tabId } is DuckAiTab) {
-                duckChat.reportDuckChatEntry(DuckChatEntryPoint.TAB_SWITCHER_EXISTING_CHAT, opensNewTab = false, hasPrompt = false)
-            }
             tabRepository.select(tabId)
             command.value = Command.Close
             pixel.fire(
@@ -663,18 +644,6 @@ class TabSwitcherViewModel @Inject constructor(
         return@withContext null
     }
 
-    fun onDuckAIButtonClicked() {
-        viewModelScope.launch {
-            val params = duckChat.createWasUsedBeforePixelParams()
-            pixel.fire(DuckChatPixelName.DUCK_CHAT_OPEN_TAB_SWITCHER_FAB, parameters = params)
-
-            val url = duckChat.getDuckChatUrl("", false)
-            duckChat.reportDuckChatEntry(DuckChatEntryPoint.TAB_SWITCHER, opensNewTab = true, hasPrompt = false)
-            tabRepository.add(url, true)
-            command.value = Command.Close
-        }
-    }
-
     fun onFireTabsPromoDismissed() {
         if (!_viewState.value.isFireTabsPromoVisible) return
         tabSwitcherPromoHandled = true
@@ -713,12 +682,9 @@ class TabSwitcherViewModel @Inject constructor(
     ): List<TabSwitcherItem> {
         if (mode is Selection) {
             return tabEntities.map { entity ->
-                val uri = entity.url?.toUri()
-                val isDuckAi = uri != null && duckChat.isDuckChatUrl(uri)
                 SelectableTab(
                     entity = entity,
                     isSelected = entity.tabId in mode.selectedTabs,
-                    isDuckAi = isDuckAi,
                     title = tabTitleResolver.resolveTitle(entity, browserMode),
                 )
             }
@@ -727,12 +693,7 @@ class TabSwitcherViewModel @Inject constructor(
         val tabs = tabEntities.map { entity ->
             val isActive = entity.tabId == activeTab?.tabId
             val title = tabTitleResolver.resolveTitle(entity, browserMode)
-            val uri = entity.url?.toUri()
-            if (uri != null && duckChat.isDuckChatUrl(uri)) {
-                DuckAiTab(entity, isActive, title)
-            } else {
-                NormalTab(entity, isActive, title)
-            }
+            NormalTab(entity, isActive, title)
         }
 
         return if (!isTrackersAnimationInfoPanelHidden && browserMode != BrowserMode.FIRE) {
@@ -755,7 +716,6 @@ class TabSwitcherViewModel @Inject constructor(
         val tabItems: TabItems = TabItems.NotInitialized,
         val mode: Mode = Normal,
         val layoutType: LayoutType? = null,
-        val isDuckAIButtonVisible: Boolean = false,
         val isSplitOmnibarEnabled: Boolean = false,
         val browserMode: BrowserMode = BrowserMode.REGULAR,
         val regularTabCount: Int? = null,
@@ -773,7 +733,6 @@ class TabSwitcherViewModel @Inject constructor(
                 DynamicInterface(
                     isFireButtonVisible = !isSplitOmnibarEnabled,
                     isNewTabButtonVisible = !isSplitOmnibarEnabled,
-                    isDuckAIButtonVisible = isDuckAIButtonVisible,
                     isMenuButtonVisible = !isSplitOmnibarEnabled,
                     isSelectAllVisible = false,
                     isDeselectAllVisible = false,
@@ -805,7 +764,6 @@ class TabSwitcherViewModel @Inject constructor(
                 DynamicInterface(
                     isFireButtonVisible = false,
                     isNewTabButtonVisible = false,
-                    isDuckAIButtonVisible = false,
                     isMenuButtonVisible = true,
                     isSelectAllVisible = !areAllTabsSelected,
                     isDeselectAllVisible = areAllTabsSelected,
@@ -828,7 +786,6 @@ class TabSwitcherViewModel @Inject constructor(
         data class DynamicInterface(
             val isFireButtonVisible: Boolean,
             val isNewTabButtonVisible: Boolean,
-            val isDuckAIButtonVisible: Boolean,
             val isMenuButtonVisible: Boolean,
             val isSelectAllVisible: Boolean,
             val isDeselectAllVisible: Boolean,

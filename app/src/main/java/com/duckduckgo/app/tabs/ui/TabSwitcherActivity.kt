@@ -1001,7 +1001,6 @@ class TabSwitcherActivity :
             R.id.fireToolbarButton -> viewModel.onFireButtonTapped()
             R.id.popupMenuToolbarButton -> showPopupMenu(item.itemId)
             R.id.newTabToolbarButton -> onNewTabRequested(fromOverflowMenu = false)
-            R.id.duckAIToolbarButton -> viewModel.onDuckAIButtonClicked()
             android.R.id.home -> {
                 viewModel.onUpButtonPressed()
                 return true
