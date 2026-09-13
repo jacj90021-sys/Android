@@ -31,9 +31,6 @@ import com.duckduckgo.browsermode.api.BrowserMode
 import com.duckduckgo.browsermode.api.BrowserModeDataProvider
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.ViewScope
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatInputModeState
-import com.duckduckgo.duckchat.api.nativeinput.NativeInputState
 import com.duckduckgo.newtabpage.api.EscapeHatchTarget
 import com.duckduckgo.newtabpage.api.EscapeHatchTargetResolver
 import com.duckduckgo.newtabpage.api.NtpAfterIdleManager
@@ -58,8 +55,6 @@ class NewTabReturnHatchViewModel @Inject constructor(
     private val currentTabRepository: TabRepository,
     private val tabRepositoryProvider: BrowserModeDataProvider<TabRepository>,
     private val dispatchers: DispatcherProvider,
-    private val duckChat: DuckChat,
-    private val duckChatInputModeState: DuckChatInputModeState,
     private val duckDuckGoUrlDetector: DuckDuckGoUrlDetector,
     private val ntpAfterIdleManager: NtpAfterIdleManager,
     private val escapeHatchTargetResolver: EscapeHatchTargetResolver,
@@ -73,7 +68,6 @@ class NewTabReturnHatchViewModel @Inject constructor(
         val currentTabId: String = "",
         val shouldShow: Boolean = false,
         val mode: BrowserMode = BrowserMode.REGULAR,
-        val isDuckChat: Boolean = false,
         val isSerp: Boolean = false,
         val tabs: Int = 0,
         val showTabsButton: Boolean = false,
@@ -123,13 +117,7 @@ class NewTabReturnHatchViewModel @Inject constructor(
     // In search-only the hatch mirrors the legacy chrome, which has no tabs entry here.
     // It is also hidden when the nav bar flag is on: those users get a tabs button in the input-mode
     // nav bar instead, so the hatch shouldn't duplicate it.
-    private val shouldShowTabsButton: Flow<Boolean> = combine(
-        duckChat.observeNativeInputFieldUserSettingEnabled(),
-        duckChatInputModeState.inputModeCapability,
-        duckChat.observeNativeInputNavBarEnabled(),
-    ) { nativeInputEnabled, capability, navBarEnabled ->
-        nativeInputEnabled && capability != NativeInputState.InputMode.SEARCH_ONLY && !navBarEnabled
-    }
+    private val shouldShowTabsButton: Flow<Boolean> = MutableStateFlow(true)
 
     val viewState = snapshotTarget.flatMapLatest { target ->
         if (target == null) {
@@ -155,7 +143,6 @@ class NewTabReturnHatchViewModel @Inject constructor(
                         currentTabId = tab.tabId,
                         shouldShow = true,
                         mode = target.mode,
-                        isDuckChat = url.isNotEmpty() && duckChat.isDuckChatUrl(Uri.parse(url)),
                         isSerp = url.isNotEmpty() && duckDuckGoUrlDetector.isDuckDuckGoQueryUrl(url),
                         tabs = activityTabs.size,
                         showTabsButton = showTabs,

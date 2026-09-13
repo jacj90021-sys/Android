@@ -136,9 +136,6 @@ class NewTabReturnHatchView @JvmOverloads constructor(
     val targetMode: BrowserMode
         get() = viewModel.viewState.value.mode
 
-    val isDuckChat: Boolean
-        get() = viewModel.viewState.value.isDuckChat
-
     fun render(state: NewTabReturnHatchViewModel.ViewState) {
         faviconJob.cancel()
         if (state.shouldShow) {
@@ -149,12 +146,8 @@ class NewTabReturnHatchView @JvmOverloads constructor(
                 }
                 BrowserMode.REGULAR -> {
                     binding.returnHatchSiteTitle.text = state.titleOrPlaceholder()
-                    if (state.isDuckChat) {
-                        binding.returnHatchFavicon.setImageResource(CommonR.drawable.duckduckgo_duckai_96)
-                    } else {
-                        faviconJob += viewModel.viewModelScope.launch {
-                            faviconManager.loadToViewFromLocalWithRetry(state.tabId, state.url, binding.returnHatchFavicon)
-                        }
+                    faviconJob += viewModel.viewModelScope.launch {
+                        faviconManager.loadToViewFromLocalWithRetry(state.tabId, state.url, binding.returnHatchFavicon)
                     }
                 }
             }
@@ -191,7 +184,6 @@ class NewTabReturnHatchView @JvmOverloads constructor(
 
     private fun NewTabReturnHatchViewModel.ViewState.titleOrPlaceholder(): String {
         if (tabTitle.isNotEmpty()) return tabTitle
-        if (isDuckChat) return context.getString(R.string.newTabReturnHatchDuckChatPlaceholderTitle)
         if (isSerp) return context.getString(R.string.newTabReturnHatchSerpPlaceholderTitle)
         return tabTitle
     }
