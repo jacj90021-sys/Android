@@ -31,7 +31,6 @@ import com.duckduckgo.app.browser.animations.AddressBarTrackersAnimationManager
 import com.duckduckgo.app.browser.customtabs.CustomTabPixelNames
 import com.duckduckgo.app.browser.menu.BrowserMenuHighlight
 import com.duckduckgo.app.browser.menu.BrowserViewMode
-import com.duckduckgo.app.browser.nativeinput.NativeInputOmnibarFeature
 import com.duckduckgo.app.browser.omnibar.Omnibar.ViewMode
 import com.duckduckgo.app.browser.omnibar.Omnibar.ViewMode.Browser
 import com.duckduckgo.app.browser.omnibar.Omnibar.ViewMode.CustomTab
