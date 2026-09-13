@@ -68,9 +68,6 @@ class SearchWidgetConfigurator @Inject constructor(
                 ),
             )
             // Voice search and Duck.ai are removed; always show the plain search affordance.
-            remoteViews.setViewVisibility(R.id.voiceSearch, View.GONE)
-            remoteViews.setViewVisibility(R.id.duckAi, View.GONE)
-            remoteViews.setViewVisibility(R.id.separator, View.GONE)
             remoteViews.setViewVisibility(R.id.search, View.VISIBLE)
         }
     }

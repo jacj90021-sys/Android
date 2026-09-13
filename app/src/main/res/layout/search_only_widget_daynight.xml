@@ -41,13 +41,6 @@
         tools:ignore="ContentDescription" />
 
     <ImageView
-        android:id="@+id/voiceSearch"
-        style="@style/Widget.DuckDuckGo.SearchWidgetSearchIcon"
-        android:src="@drawable/ic_microphone_widget_daynight"
-        android:visibility="gone"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
         android:id="@+id/search"
         style="@style/Widget.DuckDuckGo.SearchWidgetSearchIcon"
         android:src="@drawable/ic_find_search_24_daynight"
