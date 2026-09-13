@@ -572,8 +572,6 @@ class BrowserTabFragment :
     lateinit var urlExtractorUserAgent: Provider<UserAgentProvider>
 
     @Inject
-
-    @Inject
     lateinit var printInjector: PrintInjector
 
     @Inject
@@ -640,10 +638,6 @@ class BrowserTabFragment :
 
     @Inject
     lateinit var duckPlayer: DuckPlayer
-
-    @Inject
-
-    @Inject
 
     @Inject
     lateinit var newAddressBarPickerManager: NewAddressBarPickerManager
