@@ -38,36 +38,6 @@
             android:layout_height="wrap_content"
             android:background="?attr/daxColorToolbar">
 
-            <ImageView
-                android:id="@+id/duckAiBack"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/keyline_3"
-                android:layout_marginTop="@dimen/omnibarCardMarginTop"
-                android:layout_marginBottom="@dimen/omnibarCardMarginBottom"
-                android:background="@drawable/selectable_item_rounded_corner_background"
-                android:contentDescription="@string/back"
-                android:padding="@dimen/keyline_1"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_close_24" />
-
-            <ImageView
-                android:id="@+id/duckAiSidebar"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="@dimen/keyline_3"
-                android:layout_marginTop="@dimen/omnibarCardMarginTop"
-                android:layout_marginBottom="@dimen/omnibarCardMarginBottom"
-                android:background="@drawable/selectable_item_rounded_corner_background"
-                android:contentDescription="@string/browserMenuChatHistory"
-                android:padding="@dimen/keyline_1"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/duckAiBack"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_chats_24" />
-
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="0dp"
@@ -79,7 +49,7 @@
                 android:paddingRight="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/iconsContainer"
-                app:layout_constraintStart_toEndOf="@id/duckAiSidebar"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:popupTheme="@style/Widget.DuckDuckGo.PopUpOverflowMenu">
 
@@ -241,37 +211,6 @@
                                 </FrameLayout>
                             </FrameLayout>
 
-                            <LinearLayout
-                                android:id="@+id/duckAIHeader"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintTop_toTopOf="parent">
-
-                                <ImageView
-                                    android:id="@+id/aiIcon"
-                                    android:layout_width="@dimen/toolbarIconSize"
-                                    android:layout_height="@dimen/toolbarIconSize"
-                                    android:layout_gravity="center"
-                                    android:importantForAccessibility="no"
-                                    android:scaleType="fitCenter"
-                                    android:layout_marginStart="@dimen/keyline_1"
-                                    app:srcCompat="@drawable/ic_ai_chat_omnibar_24"
-                                    tools:visibility="visible" />
-
-                                <com.duckduckgo.common.ui.view.text.DaxTextView
-                                    android:id="@+id/aiTitle"
-                                    android:layout_marginStart="@dimen/keyline_1"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/duck_chat_title"/>
-
-                            </LinearLayout>
-
                             <View
                                 android:id="@+id/animatedIconBackgroundView"
                                 android:layout_width="@dimen/omnibarCookieAnimationBannerHeight"
@@ -363,51 +302,9 @@
                                     android:src="@drawable/ic_close_circle_small_secondary_24"
                                     android:visibility="gone"
                                     app:layout_constraintBottom_toBottomOf="parent"
-                                    app:layout_constraintEnd_toStartOf="@id/voiceSearchButton"
-                                    app:layout_constraintTop_toTopOf="parent"
-                                    app:tint="?attr/daxColorPrimaryIcon"
-                                    tools:visibility="visible" />
-
-                                <ImageView
-                                    android:id="@+id/voiceSearchButton"
-                                    android:layout_width="@dimen/toolbarIcon"
-                                    android:layout_height="@dimen/toolbarIcon"
-                                    android:background="@drawable/selectable_item_rounded_corner_background"
-                                    android:contentDescription="@string/voiceSearchIconContentDescription"
-                                    android:scaleType="center"
-                                    android:visibility="gone"
-                                    app:layout_constraintBottom_toBottomOf="parent"
-                                    app:layout_constraintEnd_toStartOf="@id/verticalDivider"
-                                    app:layout_constraintTop_toTopOf="parent"
-                                    app:srcCompat="@drawable/ic_microphone_24"
-                                    app:tint="?attr/daxColorPrimaryIcon"
-                                    tools:visibility="visible" />
-
-                                <View
-                                    android:id="@+id/verticalDivider"
-                                    android:layout_width="1dp"
-                                    android:layout_height="20dp"
-                                    android:layout_marginHorizontal="2dp"
-                                    android:background="?daxColorLines"
-                                    android:importantForAccessibility="no"
-                                    app:layout_constraintBottom_toBottomOf="parent"
-                                    app:layout_constraintEnd_toStartOf="@id/aiChatIconMenu"
-                                    app:layout_constraintTop_toTopOf="parent"
-                                    tools:ignore="MissingVerticalDivider" />
-
-                                <ImageView
-                                    android:id="@+id/aiChatIconMenu"
-                                    android:layout_width="@dimen/toolbarIcon"
-                                    android:layout_height="@dimen/toolbarIcon"
-                                    android:layout_gravity="center"
-                                    android:background="@drawable/selectable_item_rounded_corner_background"
-                                    android:contentDescription="@string/browserPopupMenu"
-                                    android:scaleType="center"
-                                    android:src="@drawable/ic_ai_chat_24"
-                                    android:visibility="gone"
-                                    app:layout_constraintBottom_toBottomOf="parent"
                                     app:layout_constraintEnd_toEndOf="parent"
                                     app:layout_constraintTop_toTopOf="parent"
+                                    app:tint="?attr/daxColorPrimaryIcon"
                                     tools:visibility="visible" />
 
                             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -601,58 +498,6 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <LinearLayout
-                android:id="@+id/duckAIFreePill"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:background="@drawable/selectable_item_rounded_corner_background"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <com.duckduckgo.common.ui.view.text.DaxTextView
-                        android:id="@+id/duckAIFreePillTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/duckAiHeaderFreePlan"
-                        app:typography="body2_bold" />
-
-                    <ImageView
-                        android:id="@+id/duckAIFreePillChevron"
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:layout_marginStart="2dp"
-                        android:importantForAccessibility="no"
-                        android:scaleType="fitCenter"
-                        app:srcCompat="@drawable/ic_chevron_down_24_small" />
-                </LinearLayout>
-
-                <com.duckduckgo.common.ui.view.text.DaxTextView
-                    android:id="@+id/duckAIFreePillUpgrade"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/duckAiHeaderUpgrade"
-                    app:typography="caption"
-                    app:textType="secondary" />
-            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

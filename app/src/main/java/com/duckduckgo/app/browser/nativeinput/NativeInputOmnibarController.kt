@@ -21,7 +21,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
-import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.updateLayoutParams
@@ -97,7 +96,6 @@ class RealNativeInputOmnibarController(
         applyOnLayout(omnibarView) {
             makeOmnibarTransparent(omnibarView)
             hideOmnibarContent(omnibarView)
-            showDuckAiTitle(omnibarView)
             if (isSplitMode()) {
                 showOmnibarButtons(omnibarView)
             }
@@ -158,78 +156,14 @@ class RealNativeInputOmnibarController(
 
     private var upgradePillShown = false
 
-    private fun showDuckAiTitle(omnibarView: View) {
-        val header = omnibarView.findViewById<android.widget.LinearLayout?>(R.id.duckAIHeader)
-        omnibarView.findViewById<View?>(R.id.aiIcon)?.gone()
-        header?.show()
-        header?.gravity = Gravity.CENTER_VERTICAL or Gravity.START
-        header?.setBackgroundColor(Color.TRANSPARENT)
-        applyTierText(omnibarView)
-    }
-
     override fun updateTierTitle(tier: DuckAiTier, onUpgradeClicked: () -> Unit, onUpgradeShown: () -> Unit) {
         currentTier = tier
         currentUpgradeClick = onUpgradeClicked
         this.onUpgradeShown = onUpgradeShown
-        val omnibarView = omnibar.omnibarView as? View ?: return
-        applyTierText(omnibarView)
     }
 
     override fun setTierVisible(visible: Boolean) {
         tierVisible = visible
-        (omnibar.omnibarView as? View)?.let { applyTierText(it) }
-    }
-
-    private fun applyTierText(omnibarView: View) {
-        val pillSuppressedByKillSwitch = nativeInputStateBugKillSwitch.self().isEnabled() && !overlayActive
-
-        // Fire the free-label impression from the same conditions that render the upgradeable Free pill
-        // (below), so it measures an actual on-screen impression. This is triggered only once
-        // per hidden→shown  transition, resetting when it hides so the next display re-fires.
-        val upgradeablePillVisible = tierVisible && !pillSuppressedByKillSwitch && currentTier is DuckAiTier.Free
-        if (upgradeablePillVisible && !upgradePillShown) onUpgradeShown?.invoke()
-        upgradePillShown = upgradeablePillVisible
-
-        val aiTitle = omnibarView.findViewById<TextView?>(R.id.aiTitle)
-        val freePill = omnibarView.findViewById<View?>(R.id.duckAIFreePill)
-        val freePillUpgrade = omnibarView.findViewById<View?>(R.id.duckAIFreePillUpgrade)
-        val freePillChevron = omnibarView.findViewById<View?>(R.id.duckAIFreePillChevron)
-        if (!tierVisible) {
-            aiTitle?.gone()
-            freePill?.gone()
-            freePill?.setOnClickListener(null)
-            return
-        }
-        if (pillSuppressedByKillSwitch) {
-            freePill?.gone()
-            freePill?.setOnClickListener(null)
-            return
-        }
-        when (currentTier) {
-            is DuckAiTier.Free -> {
-                aiTitle?.gone()
-                freePill?.show()
-                freePillUpgrade?.show()
-                freePillChevron?.show()
-                freePill?.isClickable = true
-                freePill?.setOnClickListener { currentUpgradeClick?.invoke() }
-            }
-            is DuckAiTier.FreeNoUpgrade -> {
-                aiTitle?.gone()
-                freePill?.show()
-                freePillUpgrade?.gone()
-                freePillChevron?.gone()
-                freePill?.setOnClickListener(null)
-                freePill?.isClickable = false
-            }
-            is DuckAiTier.Paid, is DuckAiTier.Unknown -> {
-                freePill?.gone()
-                freePill?.setOnClickListener(null)
-                aiTitle?.show()
-                aiTitle?.text = aiTitle?.context?.getString(R.string.duckAiHeaderPaidTitle)
-                aiTitle?.textSize = 16f
-            }
-        }
     }
 
     private fun applyOnLayout(omnibarView: View, block: () -> Unit) {
@@ -292,8 +226,6 @@ class RealNativeInputOmnibarController(
         omnibarView.findViewById<View?>(R.id.endIconsContainer)?.show()
         omnibarView.findViewById<View?>(R.id.omnibarIconContainer)?.show()
         omnibarView.findViewById<View?>(R.id.omnibarTextInput)?.show()
-        omnibarView.findViewById<View?>(R.id.duckAIHeader)?.gone()
-        omnibarView.findViewById<View?>(R.id.duckAIFreePill)?.gone()
         if (isSplitMode()) {
             hideOmnibarButtons(omnibarView)
         }

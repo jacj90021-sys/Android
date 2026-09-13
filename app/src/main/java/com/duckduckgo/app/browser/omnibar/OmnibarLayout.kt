@@ -71,7 +71,6 @@ import com.duckduckgo.app.browser.api.OmnibarRepository
 import com.duckduckgo.app.browser.databinding.IncludeCustomTabToolbarBinding
 import com.duckduckgo.app.browser.databinding.IncludeFindInPageBinding
 import com.duckduckgo.app.browser.databinding.IncludeNewCustomTabToolbarBinding
-import com.duckduckgo.app.browser.nativeinput.applyDuckAiIconStyling
 import com.duckduckgo.app.browser.omnibar.Omnibar.ItemPressedListener
 import com.duckduckgo.app.browser.omnibar.Omnibar.LogoClickListener
 import com.duckduckgo.app.browser.omnibar.Omnibar.NativeInputLaunchListener
@@ -127,8 +126,6 @@ import com.duckduckgo.common.utils.FragmentViewModelFactory
 import com.duckduckgo.common.utils.extensions.replaceTextChangedListener
 import com.duckduckgo.common.utils.text.TextChangedWatcher
 import com.duckduckgo.di.scopes.FragmentScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.navigation.api.GlobalActivityStarter
 import com.duckduckgo.serp.logos.api.SerpEasterEggLogoAnimator
 import com.duckduckgo.serp.logos.api.SerpEasterEggLogosToggles
@@ -190,12 +187,6 @@ class OmnibarLayout @JvmOverloads constructor(
     lateinit var pixel: Pixel
 
     @Inject
-    lateinit var duckChat: DuckChat
-
-    @Inject
-    lateinit var duckAiFeatureState: DuckAiFeatureState
-
-    @Inject
     lateinit var dispatchers: DispatcherProvider
 
     @Inject
@@ -226,7 +217,6 @@ class OmnibarLayout @JvmOverloads constructor(
     lateinit var browserMode: BrowserMode
 
     private var previousTransitionState: TransitionState? = null
-    private var lastAppliedShowContextualSheetIcon: Boolean? = null
 
     private val lifecycleOwner: LifecycleOwner by lazy {
         requireNotNull(findViewTreeLifecycleOwner())
@@ -256,10 +246,6 @@ class OmnibarLayout @JvmOverloads constructor(
     private val backIcon: ImageView by lazy { findViewById(R.id.backIcon) }
     private val customTabToolbarContainerWrapper: ViewGroup by lazy { findViewById(R.id.customTabToolbarContainerWrapper) }
     private val leadingIconContainer: View by lazy { findViewById(R.id.omnibarIconContainer) }
-    private val duckAIHeader: View by lazy { findViewById(R.id.duckAIHeader) }
-    private val duckAIFreePill: View by lazy { findViewById(R.id.duckAIFreePill) }
-    private val duckAISidebar: View by lazy { findViewById(R.id.duckAiSidebar) }
-    private val duckAIBack: View by lazy { findViewById(R.id.duckAiBack) }
 
     private var isFindInPageVisible = false
     private val findInPageLayoutVisibilityChangeListener =
@@ -322,8 +308,6 @@ class OmnibarLayout @JvmOverloads constructor(
     internal val tabsMenu: TabSwitcherButton by lazy { findViewById(R.id.tabsMenu) }
     internal val fireIconMenu: FrameLayout by lazy { findViewById(R.id.fireIconMenu) }
     internal val plusIconMenu: FrameLayout by lazy { findViewById(R.id.plusIconMenu) }
-    internal val aiChatMenu: View? by lazy { findViewById(R.id.aiChatIconMenu) }
-    private val aiChatDivider: View by lazy { findViewById(R.id.verticalDivider) }
     internal val browserMenu: FrameLayout by lazy { findViewById(R.id.browserMenu) }
     internal val browserMenuHighlight: View by lazy { findViewById(R.id.browserMenuHighlight) }
     internal val animatedIconBackgroundView: View by lazy { findViewById(R.id.animatedIconBackgroundView) }
@@ -356,7 +340,6 @@ class OmnibarLayout @JvmOverloads constructor(
     internal val clearTextButton: ImageView by lazy { findViewById(R.id.clearTextButton) }
     internal val fireIconImageView: ImageView by lazy { findViewById(R.id.fireIconImageView) }
     internal val placeholder: View by lazy { findViewById(R.id.placeholder) }
-    internal val voiceSearchButton: ImageView by lazy { findViewById(R.id.voiceSearchButton) }
     internal val trackersAnimation: LottieAnimationView by lazy { findViewById(R.id.trackersAnimation) }
     internal val duckPlayerIcon: ImageView by lazy { findViewById(R.id.duckPlayerIcon) }
     internal val omniBarButtonTransitionSet: TransitionSet by lazy {
@@ -372,14 +355,10 @@ class OmnibarLayout @JvmOverloads constructor(
                 Fade().apply {
                     duration = omnibarAnimationManager.getFadeDuration()
                     addTarget(clearTextButton)
-                    addTarget(voiceSearchButton)
                     addTarget(fireIconMenu)
                     addTarget(plusIconMenu)
                     addTarget(tabsMenu)
-                    addTarget(aiChatMenu)
                     addTarget(browserMenu)
-                    addTarget(duckAISidebar)
-                    addTarget(duckAIBack)
                 },
             )
         }
@@ -613,10 +592,6 @@ class OmnibarLayout @JvmOverloads constructor(
         browserMenu.setOnClickListener {
             omnibarItemPressedListener?.onBrowserMenuPressed()
         }
-        aiChatMenu?.setOnClickListener {
-            viewModel.onDuckChatButtonPressed()
-            omnibarItemPressedListener?.onDuckChatButtonPressed(it)
-        }
         shieldIcon.setOnClickListener {
             if (isAttachedToWindow) {
                 viewModel.onPrivacyShieldButtonPressed()
@@ -628,21 +603,9 @@ class OmnibarLayout @JvmOverloads constructor(
                 viewModel.onClearTextButtonPressed()
             }
         }
-        voiceSearchButton.setOnClickListener {
-            omnibarItemPressedListener?.onVoiceSearchPressed()
-        }
         backIcon.setOnClickListener {
             viewModel.onBackButtonPressed()
             omnibarItemPressedListener?.onBackButtonPressed()
-        }
-        duckAIHeader.setOnClickListener {
-            viewModel.onDuckAiHeaderClicked()
-        }
-        duckAISidebar.setOnClickListener {
-            omnibarItemPressedListener?.onDuckAISidebarButtonPressed()
-        }
-        duckAIBack.setOnClickListener {
-            omnibarItemPressedListener?.onDuckAIBackButtonPressed()
         }
     }
 
@@ -673,10 +636,8 @@ class OmnibarLayout @JvmOverloads constructor(
             }
         }
 
-        duckAIHeader.isVisible = viewState.showDuckAIHeader
-
-        leadingIconContainer.isGone = viewState.showDuckAIHeader
-        omnibarTextInput.isGone = viewState.showDuckAIHeader
+        leadingIconContainer.isGone = false
+        omnibarTextInput.isGone = false
 
         if (viewState.leadingIconState == PrivacyShield) {
             renderPrivacyShield(
@@ -712,20 +673,6 @@ class OmnibarLayout @JvmOverloads constructor(
 
             iconsContainer.updateLayoutParams {
                 flipOmnibarMargins()
-            }
-
-            duckAISidebar.updateLayoutParams {
-                (this as MarginLayoutParams).apply {
-                    topMargin = omnibarCardMarginBottom
-                    bottomMargin = omnibarCardMarginTop
-                }
-            }
-
-            duckAIBack.updateLayoutParams {
-                (this as MarginLayoutParams).apply {
-                    topMargin = omnibarCardMarginBottom
-                    bottomMargin = omnibarCardMarginTop
-                }
             }
 
             shieldIconPulseAnimationContainer.updateLayoutParams {
@@ -930,7 +877,6 @@ class OmnibarLayout @JvmOverloads constructor(
         }
 
         clearTextButton.isVisible = viewState.showClearButton
-        voiceSearchButton.isVisible = viewState.showVoiceSearch
         tabsMenu.isVisible = newTransitionState.showTabsMenu
         // The fire/+ slot is shared: in a Duck.ai chat the + icon takes over from fire as the
         // leading action, but only when the native input field is enabled. Users with the
@@ -949,11 +895,6 @@ class OmnibarLayout @JvmOverloads constructor(
         )
         browserMenu.isVisible = newTransitionState.showBrowserMenu
         browserMenuHighlight.isVisible = newTransitionState.showBrowserMenuHighlight
-        aiChatMenu?.isVisible = newTransitionState.showChatMenu
-        applyAiChatMenuStyling(viewState.showContextualSheetIcon)
-        aiChatDivider.isVisible = (viewState.showVoiceSearch || viewState.showClearButton) && viewState.showChatMenu
-        duckAISidebar.isVisible = newTransitionState.showDuckSidebar
-        duckAIBack.isVisible = newTransitionState.showDuckBack
 
         if (omnibarAnimationManager.isFeatureEnabled()) {
             toolbarContainer.requestLayout()
@@ -1042,7 +983,6 @@ class OmnibarLayout @JvmOverloads constructor(
         } else {
             pageLoadingIndicator.isVisible = viewState.isLoading
         }
-        voiceSearchButton.isVisible = viewState.showVoiceSearch
         renderPulseAnimation(viewState)
     }
 
@@ -1691,13 +1631,7 @@ class OmnibarLayout @JvmOverloads constructor(
 
         applyEnabled(tabsMenu, nonFireEnabled)
         applyEnabled(browserMenu, nonFireEnabled)
-        aiChatMenu?.let { applyEnabled(it, nonFireEnabled) }
-        applyEnabled(voiceSearchButton, nonFireEnabled)
         applyEnabled(clearTextButton, nonFireEnabled)
-        applyEnabled(duckAISidebar, nonFireEnabled)
-        applyEnabled(duckAIHeader, nonFireEnabled)
-        applyEnabled(duckAIFreePill, nonFireEnabled)
-        applyEnabled(duckAIBack, nonFireEnabled)
         applyEnabled(shieldIcon, nonFireEnabled)
         applyEnabled(plusIconMenu, nonFireEnabled)
         applyEnabled(fireIconMenu, fireEnabled)
@@ -1720,15 +1654,6 @@ class OmnibarLayout @JvmOverloads constructor(
     private fun applyEnabled(view: View, enabled: Boolean) {
         view.isEnabled = enabled
         view.alpha = if (enabled) 1.0f else LOCKED_INPUT_ALPHA
-    }
-
-    private fun applyAiChatMenuStyling(showContextualSheetIcon: Boolean) {
-        // renderButtons fires on every view-state update; skip the call when the value hasn't
-        // changed so we don't keep triggering requestLayout() via setPaddingRelative,
-        // setImageResource, and updateLayoutParams.
-        if (lastAppliedShowContextualSheetIcon == showContextualSheetIcon) return
-        lastAppliedShowContextualSheetIcon = showContextualSheetIcon
-        (aiChatMenu as? android.widget.ImageView)?.applyDuckAiIconStyling(showContextualSheetIcon)
     }
 
     override fun setNativeInputLaunchListener(listener: NativeInputLaunchListener) {

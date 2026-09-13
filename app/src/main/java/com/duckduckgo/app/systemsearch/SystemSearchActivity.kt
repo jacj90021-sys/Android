@@ -160,13 +160,10 @@ class SystemSearchActivity : DuckDuckGoActivity() {
         get() = binding.includeSystemSearchOnboarding
 
     private lateinit var omnibarTextInput: KeyboardAwareEditText
-    private lateinit var voiceSearch: ImageView
     private lateinit var clearTextButton: ImageView
     private lateinit var shadowContainer: MaterialCardView
     private lateinit var inputContainer: MaterialCardView
     private lateinit var logo: ImageView
-    private lateinit var duckAi: ImageView
-    private lateinit var omnibarDivider: View
 
     @Inject
     lateinit var duckChat: DuckChat
@@ -183,7 +180,6 @@ class SystemSearchActivity : DuckDuckGoActivity() {
 
     private fun configureViewReferences(isOmnibarAtTop: Boolean) {
         omnibarTextInput = if (isOmnibarAtTop) binding.omnibarTextInput else binding.omnibarTextInputBottom
-        voiceSearch = if (isOmnibarAtTop) binding.voiceSearchButton else binding.voiceSearchButtonBottom
         clearTextButton = if (isOmnibarAtTop) binding.clearTextButton else binding.clearTextButtonBottom
         shadowContainer = if (isOmnibarAtTop) binding.omniBarContainerShadow else binding.omniBarContainerShadowBottom
         inputContainer = if (isOmnibarAtTop) binding.omniBarContainer else binding.omniBarContainerBottom
@@ -195,8 +191,6 @@ class SystemSearchActivity : DuckDuckGoActivity() {
             inputContainer,
         )
         logo = if (isOmnibarAtTop) binding.logo else binding.logoBottom
-        duckAi = if (isOmnibarAtTop) binding.aiChatIconMenu else binding.aiChatIconMenuBottom
-        omnibarDivider = if (isOmnibarAtTop) binding.verticalDivider else binding.verticalDividerBottom
     }
 
     /**
@@ -242,7 +236,6 @@ class SystemSearchActivity : DuckDuckGoActivity() {
         configureTextInput()
         configureQuickAccessGrid()
         configureVoiceSearch()
-        configureDuckAi()
 
         if (savedInstanceState == null) {
             intent?.let {
@@ -454,16 +447,6 @@ class SystemSearchActivity : DuckDuckGoActivity() {
                 viewModel.onVoiceSearchStateChanged()
             }
         }
-        voiceSearch.setOnClickListener {
-            omnibarTextInput.hideKeyboard()
-            voiceSearchLauncher.launch(this)
-        }
-    }
-
-    fun configureDuckAi() {
-        duckAi.setOnClickListener {
-            viewModel.onDuckAiRequested(omnibarTextInput.text.toString(), DuckChatEntryPoint.SYSTEM_SEARCH)
-        }
     }
 
     private fun showEditSavedSiteDialog(savedSite: SavedSite) {
@@ -511,10 +494,7 @@ class SystemSearchActivity : DuckDuckGoActivity() {
     }
 
     private fun renderOmnibarState(viewState: SystemSearchViewModel.OmnibarViewState) {
-        voiceSearch.isVisible = viewState.isVoiceSearchButtonVisible
         clearTextButton.isVisible = viewState.isClearButtonVisible
-        duckAi.isVisible = viewState.isDuckAiButtonVisible
-        omnibarDivider.isVisible = viewState.isButtonDividerVisible
     }
 
     private fun renderQuickAccessItems(it: SystemSearchViewModel.Suggestions.QuickAccessItems) {
