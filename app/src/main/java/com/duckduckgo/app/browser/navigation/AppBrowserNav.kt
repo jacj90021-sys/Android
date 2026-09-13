@@ -58,16 +58,13 @@ class AppBrowserNav @Inject constructor() : BrowserNav {
         return BrowserActivity.intent(
             context = context,
             launchSource = InAppNavigation,
-            openDuckChat = true,
-            duckChatUrl = duckChatUrl,
-            duckChatSessionActive = hasSessionActive,
         )
     }
 
     override fun closeDuckChat(
         context: Context,
     ): Intent {
-        return BrowserActivity.intent(context = context, launchSource = InAppNavigation, closeDuckChat = true)
+        return BrowserActivity.intent(context = context, launchSource = InAppNavigation)
     }
 
     override fun openExistingTab(

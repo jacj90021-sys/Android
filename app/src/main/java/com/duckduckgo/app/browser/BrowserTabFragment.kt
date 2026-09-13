@@ -2897,6 +2897,10 @@ class BrowserTabFragment :
             is Command.ExpandOmnibar -> {
                 omnibar.setExpanded(true)
             }
+
+            else -> {
+                // no-op: Duck.ai-only commands
+            }
         }
     }
 
