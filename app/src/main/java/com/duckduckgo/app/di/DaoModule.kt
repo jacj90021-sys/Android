@@ -33,7 +33,6 @@ import com.duckduckgo.app.privacy.db.NetworkLeaderboardDao
 import com.duckduckgo.app.privacy.db.PrivacyProtectionCountDao
 import com.duckduckgo.app.privacy.db.UserAllowListDao
 import com.duckduckgo.app.survey.db.SurveyDao
-import com.duckduckgo.app.tabs.db.DuckAiTabSessionDao
 import com.duckduckgo.app.tabs.db.TabPageContextDao
 import com.duckduckgo.app.tabs.db.TabsDao
 import com.duckduckgo.app.trackerdetection.db.TdsCnameEntityDao
@@ -94,9 +93,6 @@ object DaoModule {
 
     @Provides
     fun providesTabPageContextDao(database: AppDatabase): TabPageContextDao = database.tabPageContextDao()
-
-    @Provides
-    fun providesDuckAiTabSessionDao(database: AppDatabase): DuckAiTabSessionDao = database.duckAiTabSessionDao()
 
     @Provides
     fun surveyDao(database: AppDatabase): SurveyDao = database.surveyDao()

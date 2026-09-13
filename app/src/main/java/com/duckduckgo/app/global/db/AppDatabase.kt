@@ -57,8 +57,6 @@ import com.duckduckgo.app.statistics.model.QueryParamsTypeConverter
 import com.duckduckgo.app.statistics.store.PendingPixelDao
 import com.duckduckgo.app.survey.db.SurveyDao
 import com.duckduckgo.app.survey.model.Survey
-import com.duckduckgo.app.tabs.db.DuckAiTabSessionDao
-import com.duckduckgo.app.tabs.db.DuckAiTabSessionEntity
 import com.duckduckgo.app.tabs.db.TabPageContextDao
 import com.duckduckgo.app.tabs.db.TabPageContextEntity
 import com.duckduckgo.app.tabs.db.TabsDao
@@ -87,7 +85,7 @@ import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
  */
 @Database(
     exportSchema = true,
-    version = 64,
+    version = 65,
     entities = [
         TdsTracker::class,
         TdsEntity::class,
@@ -123,7 +121,6 @@ import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
         Entity::class,
         Relation::class,
         DefaultBrowserPromptsAppUsageEntity::class,
-        DuckAiTabSessionEntity::class,
     ],
 )
 @TypeConverters(
@@ -151,7 +148,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun networkLeaderboardDao(): NetworkLeaderboardDao
     abstract fun tabsDao(): TabsDao
     abstract fun tabPageContextDao(): TabPageContextDao
-    abstract fun duckAiTabSessionDao(): DuckAiTabSessionDao
     abstract fun webViewSessionDao(): WebViewSessionDao
     abstract fun bookmarksDao(): BookmarksDao
     abstract fun favoritesDao(): FavoritesDao
@@ -805,6 +801,18 @@ class MigrationsProvider(val context: Context, val settingsDataStore: SettingsDa
      * When updating the bookmarks table, you will need to update this creation script in order to properly maintain the above
      * constraint.
      */
+    private val MIGRATION_64_TO_65: Migration = object : Migration(64, 65) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("DROP TABLE IF EXISTS `duck_ai_tab_session`")
+        }
+    }
+
+    /**
+     * WARNING ⚠️
+     * This needs to happen because Room doesn't support UNIQUE (...) ON CONFLICT REPLACE when creating the bookmarks table.
+     * When updating the bookmarks table, you will need to update this creation script in order to properly maintain the above
+     * constraint.
+     */
     val BOOKMARKS_DB_ON_CREATE = object : RoomDatabase.Callback() {
         override fun onCreate(database: SupportSQLiteDatabase) {
             database.execSQL(
@@ -882,6 +890,7 @@ class MigrationsProvider(val context: Context, val settingsDataStore: SettingsDa
             MIGRATION_61_TO_62,
             MIGRATION_62_TO_63,
             MIGRATION_63_TO_64,
+            MIGRATION_64_TO_65,
         )
 
     @Deprecated(

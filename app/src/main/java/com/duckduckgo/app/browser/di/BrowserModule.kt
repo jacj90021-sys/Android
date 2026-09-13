@@ -31,7 +31,6 @@ import com.duckduckgo.app.bookmarks.BookmarkAddedDialogPlugin
 import com.duckduckgo.app.browser.*
 import com.duckduckgo.app.browser.addtohome.AddToHomeCapabilityDetector
 import com.duckduckgo.app.browser.addtohome.AddToHomeSystemCapabilityDetector
-import com.duckduckgo.app.browser.api.DuckAiChatDeletionListener
 import com.duckduckgo.app.browser.applinks.AppSchemeInterceptionFeature
 import com.duckduckgo.app.browser.applinks.ExternalAppIntentFlagsFeature
 import com.duckduckgo.app.browser.cookies.AppThirdPartyCookieManager
@@ -87,8 +86,6 @@ import com.duckduckgo.common.utils.device.DeviceInfo
 import com.duckduckgo.cookies.api.CookieManagerProvider
 import com.duckduckgo.cookies.api.ThirdPartyCookieNames
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckAiHostProvider
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.experiments.api.VariantManager
 import com.duckduckgo.httpsupgrade.api.HttpsUpgrader
 import com.duckduckgo.privacy.config.api.AmpLinks
@@ -123,7 +120,6 @@ class BrowserModule {
         statisticsStore: StatisticsDataStore,
         variantManager: VariantManager,
         appReferrer: AppReferrer,
-        duckChat: DuckChat,
         androidBrowserConfigFeature: AndroidBrowserConfigFeature,
         serpSettingsFeature: SerpSettingsFeature,
         deviceInfo: DeviceInfo,
@@ -133,7 +129,6 @@ class BrowserModule {
             statisticsStore,
             variantManager,
             appReferrer,
-            duckChat,
             androidBrowserConfigFeature,
             serpSettingsFeature,
             deviceInfo,
@@ -173,7 +168,6 @@ class BrowserModule {
         subscriptions: Subscriptions,
         externalAppIntentFlagsFeature: ExternalAppIntentFlagsFeature,
         duckPlayer: DuckPlayer,
-        duckChat: DuckChat,
         androidBrowserConfigFeature: AndroidBrowserConfigFeature,
         appSchemeInterceptionFeature: AppSchemeInterceptionFeature,
     ): SpecialUrlDetector = SpecialUrlDetectorImpl(
@@ -183,7 +177,6 @@ class BrowserModule {
         subscriptions,
         externalAppIntentFlagsFeature,
         duckPlayer,
-        duckChat,
         androidBrowserConfigFeature,
         appSchemeInterceptionFeature,
     )
@@ -323,9 +316,8 @@ class BrowserModule {
         cookieManagerProvider: CookieManagerProvider,
         authCookiesAllowedDomainsRepository: AuthCookiesAllowedDomainsRepository,
         thirdPartyCookieNames: ThirdPartyCookieNames,
-        duckAiHostProvider: DuckAiHostProvider,
     ): ThirdPartyCookieManager {
-        return AppThirdPartyCookieManager(cookieManagerProvider, authCookiesAllowedDomainsRepository, thirdPartyCookieNames, duckAiHostProvider)
+        return AppThirdPartyCookieManager(cookieManagerProvider, authCookiesAllowedDomainsRepository, thirdPartyCookieNames)
     }
 
     @Provides
@@ -384,9 +376,6 @@ annotation class IndonesiaNewTabSection
 
 @ContributesPluginPoint(scope = AppScope::class, boundType = BookmarkAddedDialogPlugin::class)
 private interface BookmarkAddedDialogPluginPoint
-
-@ContributesPluginPoint(scope = AppScope::class, boundType = DuckAiChatDeletionListener::class)
-private interface DuckAiChatDeletionListenerPluginPoint
 
 @ContributesPluginPoint(scope = AppScope::class, boundType = BrowserMenuHighlightPlugin::class)
 private interface BrowserMenuHighlightPluginPoint

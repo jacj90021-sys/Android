@@ -23,7 +23,6 @@ import com.duckduckgo.common.utils.AppUrl.ParamKey
 import com.duckduckgo.common.utils.AppUrl.ParamValue
 import com.duckduckgo.common.utils.device.DeviceInfo
 import com.duckduckgo.common.utils.device.isTablet
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.experiments.api.VariantManager
 import com.duckduckgo.referral.api.AppReferrer
 import com.duckduckgo.settings.api.SerpSettingsFeature
@@ -40,7 +39,6 @@ class DuckDuckGoRequestRewriter(
     private val statisticsStore: StatisticsDataStore,
     private val variantManager: VariantManager,
     private val appReferrer: AppReferrer,
-    private val duckChat: DuckChat,
     private val androidConfigFeatures: AndroidBrowserConfigFeature,
     private val serpSettingsFeature: SerpSettingsFeature,
     private val deviceInfo: DeviceInfo,
@@ -91,7 +89,7 @@ class DuckDuckGoRequestRewriter(
         builder.appendQueryParameter(ParamKey.HIDE_SERP, ParamValue.HIDE_SERP)
         if (!serpSettingsFeature.storeSerpSettings().isEnabled()) {
             // Once serpSettingsSync feature is permanently enabled this can be removed.
-            if (!duckChat.isEnabled() && hideDuckAiSerpKillSwitch) {
+            if (hideDuckAiSerpKillSwitch) {
                 builder.appendQueryParameter(ParamKey.HIDE_DUCK_AI, ParamValue.HIDE_DUCK_AI)
             }
         }

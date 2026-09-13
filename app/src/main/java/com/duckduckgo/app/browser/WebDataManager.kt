@@ -20,7 +20,6 @@ import android.content.Context
 import android.webkit.WebStorage
 import android.webkit.WebView
 import com.duckduckgo.anrs.api.CrashLogger
-import com.duckduckgo.app.browser.api.DuckAiChatDeletionListener
 import com.duckduckgo.app.browser.httpauth.WebViewHttpAuthStore
 import com.duckduckgo.app.browser.indexeddb.IndexedDBManager
 import com.duckduckgo.app.browser.weblocalstorage.WebLocalStorageManager
@@ -86,7 +85,6 @@ class WebViewDataManager @Inject constructor(
     private val appBuildConfig: AppBuildConfig,
     private val settingsDataStore: SettingsDataStore,
     private val dataClearingWideEvent: DataClearingWideEvent,
-    private val duckAiChatDeletionListeners: PluginPoint<DuckAiChatDeletionListener>,
 ) : WebDataManager {
 
     override suspend fun clearData(
@@ -99,10 +97,7 @@ class WebViewDataManager @Inject constructor(
         clearFormData(webView)
         clearAuthentication(webView)
         clearExternalCookies()
-        val shouldClearDuckAiData = withContext(dispatcherProvider.io()) {
-            settingsDataStore.clearDuckAiData
-        }
-        clearWebViewDirectories(shouldClearDuckAiData)
+        clearWebViewDirectories()
     }
 
     override suspend fun clearData(
@@ -118,11 +113,7 @@ class WebViewDataManager @Inject constructor(
             clearFormData(webView)
             clearAuthentication(webView)
             clearExternalCookies()
-            clearWebViewDirectories(false)
-        }
-
-        if (shouldClearDuckAiData) {
-            clearOnlyDuckAiWebViewDirectories()
+            clearWebViewDirectories()
         }
     }
 
@@ -183,7 +174,7 @@ class WebViewDataManager @Inject constructor(
      *
      *  the excluded directories above are to avoid clearing unnecessary cookies and because localStorage is cleared using clearWebStorage
      */
-    private suspend fun clearWebViewDirectories(shouldClearDuckAiData: Boolean) = withContext(dispatcherProvider.io()) {
+    private suspend fun clearWebViewDirectories() = withContext(dispatcherProvider.io()) {
         val dataDir = context.applicationInfo.dataDir
 
         fileDeleter.deleteContents(File(dataDir, "app_webview"), listOf("Default", "Cookies", "pir"))
@@ -202,17 +193,13 @@ class WebViewDataManager @Inject constructor(
         }
         if (androidBrowserConfigFeature.indexedDB().isEnabled()) {
             runCatching {
-                indexedDBManager.clearIndexedDB(shouldClearDuckAiData)
+                indexedDBManager.clearIndexedDB()
             }.onSuccess {
                 excludedDirectories.add("IndexedDB")
                 dataClearingWideEvent.stepSuccess(DataClearingFlowStep.INDEXEDDB_CLEAR_SELECTIVE)
             }.onFailure { t ->
                 dataClearingWideEvent.stepFailure(DataClearingFlowStep.INDEXEDDB_CLEAR_SELECTIVE, t)
                 logcat(WARN) { "Failed to clear IndexedDB, will delete it instead: ${t.asLog()}" }
-            }
-
-            if (shouldClearDuckAiData) {
-                notifyOnDuckChatsDeleted()
             }
         }
 
@@ -223,35 +210,6 @@ class WebViewDataManager @Inject constructor(
             .onFailure { e ->
                 dataClearingWideEvent.stepFailure(DataClearingFlowStep.WEBVIEW_DEFAULT_CLEAR, e)
             }
-    }
-
-    /**
-     * Clears only DuckAI-related WebView directories.
-     * All other website data is preserved.
-     */
-    private suspend fun clearOnlyDuckAiWebViewDirectories() {
-        withContext(dispatcherProvider.io()) {
-            // Clear DuckAI data from IndexedDB
-            if (androidBrowserConfigFeature.indexedDB().isEnabled()) {
-                runCatching {
-                    indexedDBManager.clearOnlyDuckAiData()
-                }.onSuccess {
-                    dataClearingWideEvent.stepSuccess(DataClearingFlowStep.INDEXEDDB_CLEAR_DUCKAI_ONLY)
-
-                    notifyOnDuckChatsDeleted()
-                }.onFailure { t ->
-                    dataClearingWideEvent.stepFailure(DataClearingFlowStep.INDEXEDDB_CLEAR_DUCKAI_ONLY, t)
-                    logcat(WARN) { "Failed to clear DuckAI data from IndexedDB: ${t.asLog()}" }
-                }
-            }
-        }
-    }
-
-    private suspend fun notifyOnDuckChatsDeleted() {
-        // Notify listeners that Duck AI chat data was cleared so sync can record the deletion timestamp.
-        duckAiChatDeletionListeners.getPlugins().forEach { listener ->
-            listener.onDuckAiChatsDeleted()
-        }
     }
 
     private suspend fun clearAuthentication(webView: WebView) {

@@ -47,7 +47,6 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.cookies.api.DuckDuckGoCookieManager
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckAiHostProvider
 import com.duckduckgo.history.api.NavigationHistory
 import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.site.permissions.api.SitePermissionsManager
@@ -83,7 +82,6 @@ object PrivacyModule {
         webTrackingRepository: WebTrackersBlockedRepository,
         tabVisitedSitesRepository: TabVisitedSitesRepository,
         webViewCapabilityChecker: WebViewCapabilityChecker,
-        duckAiHostProvider: DuckAiHostProvider,
         siteDataCleaner: SiteDataCleaner,
         sitePreferencesDataClearer: SitePreferencesDataClearer,
     ): ClearDataAction {
@@ -107,7 +105,6 @@ object PrivacyModule {
             webTrackingRepository,
             tabVisitedSitesRepository,
             webViewCapabilityChecker,
-            duckAiHostProvider,
             siteDataCleaner,
             sitePreferencesDataClearer,
         )

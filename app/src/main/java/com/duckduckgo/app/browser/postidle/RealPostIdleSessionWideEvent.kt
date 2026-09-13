@@ -25,7 +25,6 @@ import com.duckduckgo.browser.api.BrowserLifecycleObserver
 import com.duckduckgo.browser.api.wideevents.BrowserInteractionsPlugin
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckChatInputModeState
 import com.duckduckgo.newtabpage.api.interactions.HatchInteractionsPlugin
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dagger.SingleInstanceIn
@@ -45,7 +44,6 @@ import javax.inject.Inject
 @ContributesMultibinding(AppScope::class, boundType = HatchInteractionsPlugin::class)
 class RealPostIdleSessionWideEvent @Inject constructor(
     private val wideEventClient: WideEventClient,
-    private val duckChatInputModeState: DuckChatInputModeState,
     private val dispatchers: DispatcherProvider,
     @AppCoroutineScope appCoroutineScope: CoroutineScope,
 ) : BrowserInteractionsPlugin, HatchInteractionsPlugin, BrowserLifecycleObserver {
@@ -64,14 +62,6 @@ class RealPostIdleSessionWideEvent @Inject constructor(
 
     private val mutex = Mutex()
     private var activeSession: SessionState? = null
-
-    init {
-        // drop(1) skips the StateFlow's replayed snapshot — only later transitions are toggles.
-        duckChatInputModeState.displayedMode
-            .drop(1)
-            .onEach { onToggleUsedInternal() }
-            .launchIn(coroutineScope)
-    }
 
     private fun onSurfaceShown(surface: Surface) {
         coroutineScope.launch {

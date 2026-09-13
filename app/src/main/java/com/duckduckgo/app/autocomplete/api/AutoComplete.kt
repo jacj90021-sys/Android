@@ -52,7 +52,6 @@ import com.duckduckgo.common.utils.baseHost
 import com.duckduckgo.common.utils.extensions.combine
 import com.duckduckgo.common.utils.toStringDropScheme
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.history.api.HistoryEntry
 import com.duckduckgo.history.api.HistoryEntry.VisitedPage
 import com.duckduckgo.history.api.HistoryEntry.VisitedSERP
@@ -96,7 +95,6 @@ class AutoCompleteApi constructor(
     private val tabRepositoryProvider: BrowserModeDataProvider<TabRepository>,
     private val browserMode: BrowserMode,
     private val autocompleteTabsFeature: AutocompleteTabsFeature,
-    private val duckChat: DuckChat,
     private val history: NavigationHistory,
     private val dispatchers: DispatcherProvider,
     private val pixel: Pixel,
@@ -145,14 +143,9 @@ class AutoCompleteApi constructor(
                 searchSuggestions + deviceAppResults
             }
         }.map { suggestions ->
-            val duckAIPrompt = mutableListOf<AutoCompleteSuggestion>()
-            if (duckChat.isEnabled()) {
-                duckAIPrompt.add(AutoCompleteSuggestion.AutoCompleteDuckAIPrompt(query))
-            }
-
             AutoCompleteResult(
                 query = query,
-                suggestions = suggestions.ifEmpty { listOf(AutoCompleteDefaultSuggestion(query)) } + duckAIPrompt,
+                suggestions = suggestions.ifEmpty { listOf(AutoCompleteDefaultSuggestion(query)) },
             )
         }
     }
@@ -303,11 +296,6 @@ class AutoCompleteApi constructor(
             is AutoCompleteHistorySuggestion -> AutoCompletePixelNames.AUTOCOMPLETE_HISTORY_SITE_SELECTION
             is AutoCompleteHistorySearchSuggestion -> AutoCompletePixelNames.AUTOCOMPLETE_HISTORY_SEARCH_SELECTION
             is AutoCompleteSwitchToTabSuggestion -> AutoCompletePixelNames.AUTOCOMPLETE_SWITCH_TO_TAB_SELECTION
-            is AutoCompleteSuggestion.AutoCompleteDuckAIPrompt -> if (experimentalInputScreen) {
-                AutoCompletePixelNames.AUTOCOMPLETE_DUCKAI_PROMPT_EXPERIMENTAL_SELECTION
-            } else {
-                AutoCompletePixelNames.AUTOCOMPLETE_DUCKAI_PROMPT_LEGACY_SELECTION
-            }
             is AutoCompleteDeviceAppSuggestion -> {
                 pixel.fire(AutoCompletePixelNames.AUTOCOMPLETE_INSTALLED_APP_SELECTION)
                 return

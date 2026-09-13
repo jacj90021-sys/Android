@@ -27,7 +27,6 @@ import com.duckduckgo.app.fire.store.TabVisitedSitesRepository
 import com.duckduckgo.app.global.model.SiteFactory
 import com.duckduckgo.app.tabs.TabManagerFeatureFlags
 import com.duckduckgo.app.tabs.db.TabsDao
-import com.duckduckgo.app.tabs.model.DuckAiTabSessionRepository
 import com.duckduckgo.app.tabs.model.TabAtomicOperations
 import com.duckduckgo.app.tabs.model.TabDataRepository
 import com.duckduckgo.app.tabs.model.TabRepository
@@ -37,8 +36,6 @@ import com.duckduckgo.browsermode.api.RegularMode
 import com.duckduckgo.common.utils.CurrentTimeProvider
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.nativeinput.NativeInputStatePublisher
-import com.duckduckgo.duckchat.impl.store.DuckChatContextualDataStore
 import com.squareup.anvil.annotations.ContributesTo
 import dagger.Binds
 import dagger.Module
@@ -78,10 +75,7 @@ abstract class TabRepositoryModule {
             adClickManager: AdClickManager,
             webViewSessionStorage: WebViewSessionStorage,
             tabManagerFeatureFlags: TabManagerFeatureFlags,
-            duckChatContextualDataStore: DuckChatContextualDataStore,
             tabVisitedSitesRepository: TabVisitedSitesRepository,
-            nativeInputStatePublisher: NativeInputStatePublisher,
-            duckAiTabSessionRepository: DuckAiTabSessionRepository,
         ): TabDataRepository = TabDataRepository(
             tabsDao = tabsDao,
             siteFactory = siteFactory,
@@ -94,10 +88,7 @@ abstract class TabRepositoryModule {
             adClickManager = adClickManager,
             webViewSessionStorage = webViewSessionStorage,
             tabManagerFeatureFlags = tabManagerFeatureFlags,
-            duckChatContextualDataStore = duckChatContextualDataStore,
             tabVisitedSitesRepository = tabVisitedSitesRepository,
-            nativeInputStatePublisher = nativeInputStatePublisher,
-            duckAiTabSessionRepository = duckAiTabSessionRepository,
         )
 
         @Provides
@@ -115,10 +106,7 @@ abstract class TabRepositoryModule {
             adClickManager: AdClickManager,
             webViewSessionStorage: WebViewSessionStorage,
             tabManagerFeatureFlags: TabManagerFeatureFlags,
-            duckChatContextualDataStore: DuckChatContextualDataStore,
             tabVisitedSitesRepository: TabVisitedSitesRepository,
-            nativeInputStatePublisher: NativeInputStatePublisher,
-            duckAiTabSessionRepository: DuckAiTabSessionRepository,
         ): TabDataRepository = TabDataRepository(
             tabsDao = tabsDao,
             siteFactory = siteFactory,
@@ -131,10 +119,7 @@ abstract class TabRepositoryModule {
             adClickManager = adClickManager,
             webViewSessionStorage = webViewSessionStorage,
             tabManagerFeatureFlags = tabManagerFeatureFlags,
-            duckChatContextualDataStore = duckChatContextualDataStore,
             tabVisitedSitesRepository = tabVisitedSitesRepository,
-            nativeInputStatePublisher = nativeInputStatePublisher,
-            duckAiTabSessionRepository = duckAiTabSessionRepository,
         )
     }
 }

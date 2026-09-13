@@ -27,7 +27,6 @@ import com.duckduckgo.browsermode.api.BrowserMode
 import com.duckduckgo.browsermode.api.BrowserModeDataProvider
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.history.api.NavigationHistory
 import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.squareup.anvil.annotations.ContributesBinding
@@ -42,7 +41,6 @@ class AutoCompleteFactoryImpl @Inject constructor(
     private val autoCompleteScorer: AutoCompleteScorer,
     private val tabRepositoryProvider: BrowserModeDataProvider<TabRepository>,
     private val autocompleteTabsFeature: AutocompleteTabsFeature,
-    private val duckChat: DuckChat,
     private val history: NavigationHistory,
     private val dispatchers: DispatcherProvider,
     private val pixel: Pixel,
@@ -59,7 +57,6 @@ class AutoCompleteFactoryImpl @Inject constructor(
             tabRepositoryProvider = tabRepositoryProvider,
             browserMode = browserMode,
             autocompleteTabsFeature = autocompleteTabsFeature,
-            duckChat = duckChat,
             history = history,
             dispatchers = dispatchers,
             pixel = pixel,

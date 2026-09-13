@@ -31,7 +31,6 @@ import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType
 import com.duckduckgo.app.browser.applinks.AppSchemeInterceptionFeature
 import com.duckduckgo.app.browser.applinks.ExternalAppIntentFlagsFeature
 import com.duckduckgo.browser.feature.toggles.AndroidBrowserConfigFeature
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.privacy.config.api.AmpLinkType
 import com.duckduckgo.privacy.config.api.AmpLinks
 import com.duckduckgo.privacy.config.api.TrackingParameters
@@ -48,7 +47,6 @@ class SpecialUrlDetectorImpl(
     private val subscriptions: Subscriptions,
     private val externalAppIntentFlagsFeature: ExternalAppIntentFlagsFeature,
     private val duckPlayer: DuckPlayer,
-    private val duckChat: DuckChat,
     private val androidBrowserConfigFeature: AndroidBrowserConfigFeature,
     private val appSchemeInterceptionFeature: AppSchemeInterceptionFeature,
 ) : SpecialUrlDetector {
