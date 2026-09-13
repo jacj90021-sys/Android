@@ -44,9 +44,6 @@ import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.browser.feature.toggles.AndroidBrowserConfigFeature
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChatInputModeState
-import com.duckduckgo.duckchat.api.nativeinput.NativeInputState
 import com.squareup.anvil.annotations.ContributesBinding
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dagger.SingleInstanceIn
@@ -75,8 +72,6 @@ class RealAppReturnPixelSender @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
     private val idleThresholdResolver: IdleThresholdResolver,
     private val showOnAppLaunchOptionDataStore: ShowOnAppLaunchOptionDataStore,
-    private val duckChatInputModeState: DuckChatInputModeState,
-    private val duckAiFeatureState: DuckAiFeatureState,
     private val androidBrowserConfigFeature: AndroidBrowserConfigFeature,
     private val unsentForgetAllPixelStore: UnsentForgetAllPixelStore,
     private val dispatchers: DispatcherProvider,
@@ -108,16 +103,12 @@ class RealAppReturnPixelSender @Inject constructor(
             val exceededIdleThreshold = lastBackgrounded != 0L && elapsedMs >= idleThresholdSeconds * 1000
             val afterInactivityOption = showOnAppLaunchOptionDataStore.optionFlow.firstOrNull()
                 ?.let { ShowOnAppLaunchOption.getDailyPixelValue(it) }
-            val toggleVisible = duckChatInputModeState.inputModeCapability.value == NativeInputState.InputMode.SEARCH_AND_DUCK_AI
-
             val params = buildMap {
                 put(AppReturnPixelParameters.TIME_AWAY_BUCKET, timeAwayBucket(lastBackgrounded, elapsedMs))
                 put(AppReturnPixelParameters.EXCEEDED_IDLE_THRESHOLD, exceededIdleThreshold.toString())
                 put(AppReturnPixelParameters.IDLE_THRESHOLD_SECONDS, idleThresholdSeconds.toString())
                 afterInactivityOption?.let { put(AppReturnPixelParameters.AFTER_INACTIVITY_OPTION, it) }
                 put(AppReturnPixelParameters.FEATURE_ELIGIBLE, androidBrowserConfigFeature.showNTPAfterIdleReturn().isEnabled().toString())
-                put(AppReturnPixelParameters.UNIFIED_INPUT_AVAILABLE, duckAiFeatureState.nativeInputFieldEnabled.value.toString())
-                put(AppReturnPixelParameters.TOGGLE_VISIBLE, toggleVisible.toString())
                 put(AppReturnPixelParameters.LAUNCH_SOURCE, launchSource)
                 put(Pixel.PixelParameter.PETAL, Pixel.PixelValues.PETAL_RANDOMIZE)
             }

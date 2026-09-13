@@ -26,7 +26,6 @@ import com.duckduckgo.browser.ui.browsermenu.BrowserMenuViewState
 import com.duckduckgo.browser.ui.browsermenu.PageContextHeaderState
 import com.duckduckgo.di.scopes.AppScope
 import com.duckduckgo.downloads.api.NewDownloadState
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
 import com.squareup.anvil.annotations.ContributesBinding
 import dagger.SingleInstanceIn
 import javax.inject.Inject
@@ -48,7 +47,6 @@ interface BrowserMenuViewStateFactory {
 @ContributesBinding(AppScope::class)
 @SingleInstanceIn(AppScope::class)
 class RealBrowserMenuViewStateFactory @Inject constructor(
-    private val duckAiFeatureState: DuckAiFeatureState,
     private val newDownloadState: NewDownloadState,
     private val duckDuckGoUrlDetector: DuckDuckGoUrlDetector,
 ) : BrowserMenuViewStateFactory {
@@ -101,10 +99,10 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
         browserViewState: BrowserViewState,
     ): BrowserMenuViewState.NewTabPage {
         return BrowserMenuViewState.NewTabPage(
-            showDuckChatOption = browserViewState.showDuckChatOption,
-            showDuckChatHistoryOption = browserViewState.showDuckChatHistoryOption,
-            showDuckAiSection = duckAiFeatureState.showPopupMenuShortcut.value,
-            showDuckChatVoiceOption = duckAiFeatureState.showVoiceChatEntry.value,
+            showDuckChatOption = false,
+            showDuckChatHistoryOption = false,
+            showDuckAiSection = false,
+            showDuckChatVoiceOption = false,
             vpnMenuState = browserViewState.vpnMenuState,
             isEmailSignedIn = browserViewState.isEmailSignedIn,
             showAutofill = browserViewState.showAutofill,
@@ -122,9 +120,9 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
             canPrintPage = browserViewState.canPrintPage,
             showAutofill = browserViewState.showAutofill,
             showDownloadDot = newDownloadState.hasNewDownload(),
-            showDuckChatHistoryOption = browserViewState.showDuckChatHistoryOption,
-            showDuckAiSection = duckAiFeatureState.showPopupMenuShortcut.value,
-            showDuckChatVoiceOption = duckAiFeatureState.showVoiceChatEntry.value,
+            showDuckChatHistoryOption = false,
+            showDuckAiSection = false,
+            showDuckChatVoiceOption = false,
             pageContextHeader = PageContextHeaderState.DuckAi(title = title, tabId = tabId),
         )
     }
@@ -142,10 +140,10 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
         return BrowserMenuViewState.Browser(
             canGoBack = browserViewState.canGoBack,
             canGoForward = browserViewState.canGoForward,
-            showDuckChatOption = browserViewState.showDuckChatOption,
-            showDuckChatHistoryOption = browserViewState.showDuckChatHistoryOption,
-            showDuckAiSection = duckAiFeatureState.showPopupMenuShortcut.value,
-            showDuckChatVoiceOption = duckAiFeatureState.showVoiceChatEntry.value,
+            showDuckChatOption = false,
+            showDuckChatHistoryOption = false,
+            showDuckAiSection = false,
+            showDuckChatVoiceOption = false,
             canSharePage = browserViewState.canSharePage,
             showSelectDefaultBrowserMenuItem = browserViewState.showSelectDefaultBrowserMenuItem,
             canSaveSite = browserViewState.canSaveSite,

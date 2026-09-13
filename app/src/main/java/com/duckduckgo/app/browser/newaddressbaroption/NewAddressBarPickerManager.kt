@@ -27,8 +27,6 @@ import com.duckduckgo.common.ui.store.AppTheme
 import com.duckduckgo.common.utils.DefaultDispatcherProvider
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.squareup.anvil.annotations.ContributesBinding
 import dagger.SingleInstanceIn
@@ -48,8 +46,6 @@ interface NewAddressBarPickerManager {
 @SingleInstanceIn(AppScope::class)
 @ContributesBinding(AppScope::class)
 class RealNewAddressBarPickerManager @Inject constructor(
-    private val duckAiFeatureState: DuckAiFeatureState,
-    private val duckChat: DuckChat,
     private val userStageStore: UserStageStore,
     private val newAddressBarPickerDataStore: NewAddressBarPickerDataStore,
     private val newAddressBarPickerBottomSheetDialogFactory: NewAddressBarPickerBottomSheetDialogFactory,
@@ -77,31 +73,13 @@ class RealNewAddressBarPickerManager @Inject constructor(
     }
 
     private suspend fun validate(activity: Activity): Boolean =
-        isPickerEnabled() &&
-            isDuckAiEnabled() &&
-            isOnboardingCompleted() &&
-            isInputScreenNeverEnabled() &&
+        isOnboardingCompleted() &&
             hasNotShownBefore() &&
             isActivityValid(activity)
-
-    private fun isPickerEnabled(): Boolean =
-        duckAiFeatureState.showAIChatAddressBarOptionChoiceScreen.value.also {
-            logcat(DEBUG) { "NewAddressBarPickerManager: $it isPickerEnabled" }
-        }
-
-    private fun isDuckAiEnabled(): Boolean =
-        duckChat.isEnabled().also {
-            logcat(DEBUG) { "NewAddressBarPickerManager: $it isDuckAiEnabled" }
-        }
 
     private suspend fun isOnboardingCompleted(): Boolean =
         (userStageStore.getUserAppStage() == AppStage.ESTABLISHED).also {
             logcat(DEBUG) { "NewAddressBarPickerManager: $it isOnboardingCompleted" }
-        }
-
-    private suspend fun isInputScreenNeverEnabled(): Boolean =
-        (!duckChat.isInputScreenEverEnabled()).also {
-            logcat(DEBUG) { "NewAddressBarPickerManager: $it isInputScreenNeverEnabled" }
         }
 
     private suspend fun hasNotShownBefore(): Boolean =
@@ -134,10 +112,6 @@ class RealNewAddressBarPickerManager @Inject constructor(
                 override fun onConfirmed(searchAndAiSelected: Boolean) {
                     appCoroutineScope.launch {
                         newAddressBarPickerDataStore.setAsShown()
-                        if (searchAndAiSelected) {
-                            duckChat.setInputScreenUserSetting(true)
-                            duckChat.onAddressBarPickerDuckAiSelected()
-                        }
                     }
                     val params = mapOf(SELECTION_PARAM to if (searchAndAiSelected) SELECTION_SEARCH_AND_AI else SELECTION_SEARCH_ONLY)
                     pixel.fire(AppPixelName.NEW_ADDRESS_BAR_PICKER_V2_CONFIRMED_COUNT, parameters = params)

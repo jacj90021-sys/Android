@@ -84,8 +84,6 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.contentscopescripts.api.contentscopeExperiments.ContentScopeExperiments
 import com.duckduckgo.cookies.api.CookieManagerProvider
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatEntryPoint
 import com.duckduckgo.malicioussiteprotection.api.MaliciousSiteProtection.Feed
 import com.duckduckgo.privacy.config.api.AmpLinks
 import com.duckduckgo.subscriptions.api.Subscriptions
@@ -138,7 +136,6 @@ class BrowserWebViewClient @Inject constructor(
     private val duckDuckGoUrlDetector: DuckDuckGoUrlDetector,
     private val uriLoadedManager: UriLoadedManager,
     private val androidFeaturesHeaderPlugin: AndroidFeaturesHeaderPlugin,
-    private val duckChat: DuckChat,
     private val contentScopeExperiments: ContentScopeExperiments,
     private val appSchemeInterceptionFeature: AppSchemeInterceptionFeature,
     private val forceWebViewRecompositeFeature: ForceWebViewRecompositeFeature,
@@ -150,7 +147,6 @@ class BrowserWebViewClient @Inject constructor(
 
     // WebView clears hasGesture() on redirect hops, but the App Link rules assume Chromium's per-navigation gesture flag.
     private var mainFrameGestureOriginUrl: String? = null
-    private var duckChatEntryReportedForCurrentNavigation = false
     private var start: Long? = null
 
     // Needed for PageLoadWideEvent: it identifies the page load the wide event is currently measuring,
@@ -257,7 +253,6 @@ class BrowserWebViewClient @Inject constructor(
                 // Anchored to originalUrl, not the request's own URL, so both comparison sides share one source,
                 // stable across a chain's redirects, changes once an unrelated navigation commits.
                 mainFrameGestureOriginUrl = webView.originalUrl.takeIf { hasGesture }
-                duckChatEntryReportedForCurrentNavigation = false
             }
             val hasGestureInNavigation = hasGesture ||
                 (isForMainFrame && isRedirect && mainFrameGestureOriginUrl != null && mainFrameGestureOriginUrl == webView.originalUrl)
@@ -270,11 +265,6 @@ class BrowserWebViewClient @Inject constructor(
                 webView.loadUrl(ABOUT_BLANK)
                 webViewClientListener?.dosAttackDetected()
                 return false
-            }
-
-            // Redirect duck.ai links out of a custom tab into the Duck Chat experience instead of loading them in the custom tab.
-            if (isForMainFrame && duckChat.isDuckChatUrl(url) && webViewClientListener?.handleDuckChatUrlInCustomTab(url) == true) {
-                return true
             }
 
             return when (val urlType = specialUrlDetector.determineType(initiatingUrl = webView.originalUrl, uri = url)) {
@@ -311,17 +301,7 @@ class BrowserWebViewClient @Inject constructor(
                     false
                 }
 
-                is SpecialUrlDetector.UrlType.ShouldLaunchDuckChatLink -> {
-                    runCatching {
-                        val entryPoint = duckChatEntryPointFor(webView.originalUrl)
-                        val query = url.getQueryParameter(QUERY)
-                        if (query != null) {
-                            duckChat.openDuckChatWithPrefill(query, entryPoint)
-                        } else {
-                            duckChat.openDuckChat(entryPoint)
-                        }
-                    }.isSuccess
-                }
+                is SpecialUrlDetector.UrlType.ShouldLaunchDuckChatLink -> false
 
                 is SpecialUrlDetector.UrlType.ShouldLaunchDuckPlayerLink -> {
                     if (isRedirect && isForMainFrame) {
@@ -364,20 +344,6 @@ class BrowserWebViewClient @Inject constructor(
 
                 is SpecialUrlDetector.UrlType.SearchQuery -> false
                 is SpecialUrlDetector.UrlType.Web -> {
-                    if (
-                        isForMainFrame &&
-                        hasGestureInNavigation &&
-                        !duckChatEntryReportedForCurrentNavigation &&
-                        duckChat.isDuckChatUrl(url) &&
-                        webView.originalUrl?.toUri()?.let(duckChat::isDuckChatUrl) != true
-                    ) {
-                        duckChat.reportDuckChatEntry(
-                            entryPoint = duckChatEntryPointFor(webView.originalUrl),
-                            opensNewTab = false,
-                            hasPrompt = url.getQueryParameter("prompt") == "1" && !url.getQueryParameter(QUERY).isNullOrBlank(),
-                        )
-                        duckChatEntryReportedForCurrentNavigation = true
-                    }
                     shouldOverrideWebRequest(url, webView, isForMainFrame)
                 }
 
@@ -455,20 +421,6 @@ class BrowserWebViewClient @Inject constructor(
             }
             return false
         }
-    }
-
-    private fun duckChatEntryPointFor(initiatingUrl: String?): DuckChatEntryPoint {
-        val isSerp = initiatingUrl?.let(duckDuckGoUrlDetector::isDuckDuckGoQueryUrl) == true
-        val initiatingUri = initiatingUrl?.toUri()
-        val isDdgRoot = initiatingUri?.run { host == HOST && (path.isNullOrEmpty() || path == "/") } == true
-        val isDuckAiPage = isDdgRoot && initiatingUri?.let(duckChat::isDuckChatUrl) == true
-        val isDdgHomepage = isDdgRoot && !isDuckAiPage
-        val entryPoint = when {
-            isSerp -> DuckChatEntryPoint.SERP
-            isDdgHomepage -> DuckChatEntryPoint.DDG_HOMEPAGE
-            else -> DuckChatEntryPoint.DIRECT_URL
-        }
-        return entryPoint
     }
 
     private fun shouldOverrideWebRequest(
@@ -689,12 +641,6 @@ class BrowserWebViewClient @Inject constructor(
         isReload: Boolean,
     ) {
         super.doUpdateVisitedHistory(view, url, isReload)
-        url?.let {
-            if (duckChat.isDuckChatUrl(it.toUri())) {
-                logcat { "doUpdateVisitedHistory url=$it" }
-                if (it != view?.originalUrl) webViewClientListener?.onHistoryUrlChanged(it)
-            }
-        }
     }
 
     /**
@@ -800,10 +746,7 @@ class BrowserWebViewClient @Inject constructor(
                         }
                     }
                     uriLoadedManager.sendUriLoadedPixels()
-                    // Duck.ai loads in this WebView too, and its own surface pixel already counts it.
-                    if (!duckChat.isDuckChatUrl(url.toUri())) {
-                        uriLoadedManager.sendSurfaceUsagePixels(duckDuckGoUrlDetector.isDuckDuckGoQueryUrl(url))
-                    }
+                    uriLoadedManager.sendSurfaceUsagePixels(duckDuckGoUrlDetector.isDuckDuckGoQueryUrl(url))
 
                     webViewClientListener?.onSiteVisited(url, navigationList.currentItem?.title)
 
