@@ -73,16 +73,9 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.extractDomain
 import com.duckduckgo.common.utils.isLocalUrl
 import com.duckduckgo.di.scopes.FragmentScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatInputModeState
-import com.duckduckgo.duckchat.api.nativeinput.NativeInputState
-import com.duckduckgo.duckchat.impl.pixel.DuckChatPixelName
 import com.duckduckgo.privacy.dashboard.impl.pixels.PrivacyDashboardPixels
 import com.duckduckgo.serp.logos.api.SerpEasterEggLogosToggles
 import com.duckduckgo.serp.logos.api.SerpLogo
-import com.duckduckgo.voice.api.VoiceSearchAvailability
-import com.duckduckgo.voice.api.VoiceSearchAvailabilityPixelLogger
 import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -109,17 +102,12 @@ import com.duckduckgo.app.global.model.PrivacyShield as PrivacyShieldState
 @ContributesViewModel(FragmentScope::class)
 class OmnibarLayoutViewModel @Inject constructor(
     private val tabRepository: TabRepository,
-    private val voiceSearchAvailability: VoiceSearchAvailability,
-    private val voiceSearchPixelLogger: VoiceSearchAvailabilityPixelLogger,
     private val duckDuckGoUrlDetector: DuckDuckGoUrlDetector,
     private val duckPlayer: com.duckduckgo.adblocking.api.duckplayer.DuckPlayer,
     private val pixel: Pixel,
     private val userBrowserProperties: UserBrowserProperties,
     private val dispatcherProvider: DispatcherProvider,
     private val browserMenuHighlight: BrowserMenuHighlight,
-    private val duckChat: DuckChat,
-    private val duckAiFeatureState: DuckAiFeatureState,
-    private val duckChatInputModeState: DuckChatInputModeState,
     private val addressDisplayFormatter: AddressDisplayFormatter,
     private val settingsDataStore: SettingsDataStore,
     private val urlDisplayRepository: UrlDisplayRepository,
@@ -128,7 +116,6 @@ class OmnibarLayoutViewModel @Inject constructor(
     private val standardizedLeadingIconToggle: StandardizedLeadingIconFeatureToggle,
     private val omnibarPreFillKillSwitch: OmnibarPreFillKillSwitch,
     private val progressBarUpgradeFeature: ProgressBarUpgradeFeature,
-    private val nativeInputOmnibarFeature: NativeInputOmnibarFeature,
     private val browserMode: BrowserMode,
     appBrandDesignUpdateToggles: AppBrandDesignUpdateToggles,
 ) : ViewModel() {
@@ -146,7 +133,7 @@ class OmnibarLayoutViewModel @Inject constructor(
 
     private val _viewState = MutableStateFlow(
         ViewState(
-            showChatMenu = duckAiFeatureState.showOmnibarShortcutInAllStates.value,
+            showChatMenu = false,
             showFireIcon = !isSplitOmnibarEnabled,
             showTabsMenu = !isSplitOmnibarEnabled,
             showBrowserMenu = !isSplitOmnibarEnabled,
@@ -202,41 +189,12 @@ class OmnibarLayoutViewModel @Inject constructor(
         }
     }
 
-    private val showDuckAiButton = combine(
-        _viewState,
-        duckAiFeatureState.showOmnibarShortcutOnNtpAndOnFocus,
-        duckAiFeatureState.showOmnibarShortcutInAllStates,
-    ) { viewState, showOnNtpAndOnFocus, showInAllStates ->
-        when {
-            viewState.viewMode is CustomTab -> {
-                false
-            }
-
-            viewState.viewMode is ViewMode.DuckAI -> {
-                false
-            }
-
-            showInAllStates -> {
-                true
-            }
-
-            else -> showOnNtpAndOnFocus && (viewState.viewMode is NewTab || viewState.hasFocus && viewState.omnibarText.isNotBlank())
-        }
-    }.distinctUntilChanged()
-
     private val isFullUrlEnabled = urlDisplayRepository.isFullUrlEnabled
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = true,
         )
-
-    private val voiceActiveOnSelectedTab: StateFlow<Boolean> = combine(
-        duckChat.activeVoiceChatSessions,
-        tabRepository.flowSelectedTab,
-    ) { activeSessions, selectedTab ->
-        selectedTab?.tabId?.let { it in activeSessions } == true
-    }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val command = Channel<Command>(1, DROP_OLDEST)
     fun commands(): Flow<Command> = command.receiveAsFlow()
@@ -364,57 +322,6 @@ class OmnibarLayoutViewModel @Inject constructor(
     }
 
     init {
-        logVoiceSearchAvailability()
-        combine(
-            duckChat.observeNativeInputFieldUserSettingEnabled(),
-            duckChat.observeNativeChatInputEnabled(),
-            duckChatInputModeState.inputModeCapability,
-            combine(
-                nativeInputOmnibarFeature.self().enabled(),
-                nativeInputOmnibarFeature.nativeInputSearchOnly().enabled(),
-            ) { self, searchOnly -> self && searchOnly },
-        ) { nativeInputEnabled, nativeChatInputEnabled, inputModeCapability, searchOnlyRestoreEnabled ->
-            _viewState.update {
-                it.copy(
-                    isSearchOnly = inputModeCapability == NativeInputState.InputMode.SEARCH_ONLY,
-                    isNativeInputEnabled = nativeInputEnabled,
-                    isNativeChatInputEnabled = nativeChatInputEnabled,
-                    searchOnlyRestoreEnabled = searchOnlyRestoreEnabled,
-                )
-            }
-        }.launchIn(viewModelScope)
-
-        showDuckAiButton.onEach { showDuckAiButton ->
-            _viewState.update {
-                it.copy(showChatMenu = showDuckAiButton)
-            }
-        }.launchIn(viewModelScope)
-
-        // Re-evaluate the voice-search icon reactively when the user toggles "Private Voice Search",
-        // so it appears/disappears immediately even while the omnibar is unfocused, rather than only
-        // on the next focus or page-load event.
-        voiceSearchAvailability.observeVoiceSearchAvailability()
-            .onEach {
-                _viewState.update { state ->
-                    state.copy(
-                        showVoiceSearch = shouldShowVoiceSearch(
-                            viewMode = state.viewMode,
-                            hasFocus = state.hasFocus,
-                            query = state.omnibarText,
-                            hasQueryChanged = false,
-                            urlLoaded = state.url,
-                        ),
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-
-        voiceActiveOnSelectedTab.onEach { voiceActive ->
-            _viewState.update {
-                it.copy(showDuckAISidebar = shouldShowDuckAiSidebar(it.viewMode, it.hasFocus, voiceActive))
-            }
-        }.launchIn(viewModelScope)
-
         viewState.map {
             NewTabPixelParams(
                 isNtp = it.viewMode == NewTab,
@@ -594,10 +501,6 @@ class OmnibarLayoutViewModel @Inject constructor(
         }
     }
 
-    private fun logVoiceSearchAvailability() {
-        if (voiceSearchAvailability.isVoiceSearchSupported) voiceSearchPixelLogger.log()
-    }
-
     private fun getLeadingIconState(
         viewMode: ViewMode,
         hasFocus: Boolean,
@@ -659,36 +562,18 @@ class OmnibarLayoutViewModel @Inject constructor(
         query: String = "",
         hasQueryChanged: Boolean = false,
         urlLoaded: String = "",
-    ): Boolean {
-        return if (viewMode == ViewMode.DuckAI || viewMode is CustomTab) {
-            false
-        } else {
-            voiceSearchAvailability.shouldShowVoiceSearch(
-                hasFocus = hasFocus,
-                query = query,
-                hasQueryChanged = hasQueryChanged,
-                urlLoaded = urlLoaded,
-            )
-        }
-    }
+    ): Boolean = false
 
     private fun shouldShowDuckAiHeader(
         viewMode: ViewMode,
         hasFocus: Boolean,
-    ): Boolean {
-        logcat { "Omnibar: shouldShowDuckAiHeader $viewMode, focus: $hasFocus" }
-        return if (viewMode == ViewMode.DuckAI) {
-            !hasFocus
-        } else {
-            false
-        }
-    }
+    ): Boolean = false
 
     private fun shouldShowDuckAiSidebar(
         viewMode: ViewMode,
         hasFocus: Boolean,
-        voiceActive: Boolean = voiceActiveOnSelectedTab.value,
-    ): Boolean = shouldShowDuckAiHeader(viewMode, hasFocus) && !voiceActive
+        voiceActive: Boolean = false,
+    ): Boolean = false
 
     fun onViewModeChanged(viewMode: ViewMode) {
         val currentViewMode = _viewState.value.viewMode
@@ -1123,7 +1008,6 @@ class OmnibarLayoutViewModel @Inject constructor(
             AppPixelName.ADDRESS_BAR_SERP_CLOSED,
             AppPixelName.ADDRESS_BAR_WEBSITE_CLOSED,
         )
-        pixel.fire(DuckChatPixelName.DUCK_CHAT_EXPERIMENTAL_LEGACY_OMNIBAR_BACK_BUTTON_PRESSED)
     }
 
     fun onEnterKeyPressed() {
@@ -1220,15 +1104,7 @@ class OmnibarLayoutViewModel @Inject constructor(
     }
 
     fun onVoiceSearchDisabled(url: String) {
-        logcat { "Omnibar: onVoiceSearchDisabled" }
-        _viewState.update {
-            it.copy(
-                showVoiceSearch = shouldShowVoiceSearch(
-                    viewMode = _viewState.value.viewMode,
-                    urlLoaded = url,
-                ),
-            )
-        }
+        // no-op
     }
 
     fun onCustomTabTitleUpdate(decoration: ChangeCustomTabTitle) {
@@ -1245,27 +1121,7 @@ class OmnibarLayoutViewModel @Inject constructor(
     }
 
     fun onDuckChatButtonPressed() {
-        viewModelScope.launch {
-            val launchSource = when {
-                viewState.value.hasFocus -> "focused"
-                viewState.value.viewMode is NewTab -> "ntp"
-                viewState.value.viewMode is Browser -> when {
-                    duckDuckGoUrlDetector.isDuckDuckGoQueryUrl(viewState.value.url) -> "serp"
-                    else -> "website"
-                }
-
-                else -> "unknown"
-            }
-            val launchSourceParams = mapOf("source" to launchSource)
-            val wasUsedBeforeParams = duckChat.createWasUsedBeforePixelParams()
-
-            val params = mutableMapOf<String, String>().apply {
-                putAll(wasUsedBeforeParams)
-                putAll(launchSourceParams)
-            }
-
-            pixel.fire(DuckChatPixelName.DUCK_CHAT_SEARCHBAR_BUTTON_OPEN, parameters = params)
-        }
+        // no-op
     }
 
     fun setDraftTextIfNtpOrSerp(query: String) {
