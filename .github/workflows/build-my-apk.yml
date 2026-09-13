@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - full-removal
   workflow_dispatch:
 
 concurrency:
