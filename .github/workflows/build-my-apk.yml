@@ -1,0 +1,48 @@
+name: Build My APK
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_debug_apk:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build debug APK
+        run: ./gradlew assembleInternalDebug -Pforce-default-variant --stacktrace
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx6g"
+
+      - name: Locate APK
+        if: always()
+        run: |
+          find . -regex '.*outputs/apk/.*\.apk' -print || true
+
+      - name: Upload APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-browser-debug-apk
+          path: '**/outputs/apk/**/*.apk'
+          if-no-files-found: warn
