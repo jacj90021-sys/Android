@@ -127,13 +127,8 @@ import com.duckduckgo.common.utils.playstore.PlayStoreUtils
 import com.duckduckgo.dataclearing.api.fire.FireDialog
 import com.duckduckgo.dataclearing.api.fire.FireDialogProvider
 import com.duckduckgo.dataclearing.api.fire.FireDialogProvider.FireDialogOrigin.Browser
-import com.duckduckgo.dataclearing.api.fire.FireDialogProvider.FireDialogOrigin.DuckAiContextualChat
 import com.duckduckgo.di.scopes.ActivityScope
 import com.duckduckgo.downloads.api.DownloadsScreens.DownloadsScreenNoParams
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatEntryPoint
-import com.duckduckgo.duckchat.api.viewmodel.DuckChatSharedViewModel
 import com.duckduckgo.feedback.api.FeedbackScreenNoParams
 import com.duckduckgo.navigation.api.GlobalActivityStarter
 import com.duckduckgo.savedsites.impl.bookmarks.BookmarksActivity.Companion.SAVED_SITE_URL_EXTRA
@@ -157,12 +152,6 @@ import logcat.asLog
 import logcat.logcat
 import javax.inject.Inject
 import com.duckduckgo.mobile.android.R as CommonR
-
-private fun BrowserLaunchSource.toDuckChatEntryPoint(): DuckChatEntryPoint? = when (this) {
-    AppShortcutDuckAi, DuckAiPinShortcut -> DuckChatEntryPoint.ICON_SHORTCUT
-    SearchWidgetDuckAi -> DuckChatEntryPoint.WIDGET_QUICK_ACTIONS
-    else -> null
-}
 
 // open class so that we can test BrowserApplicationStateInfo
 @HasMemberInjections
@@ -220,12 +209,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
     lateinit var tabReuseDistanceReporter: TabReuseDistanceReporter
 
     @Inject
-    lateinit var duckChat: DuckChat
-
-    @Inject
-    lateinit var duckAiFeatureState: DuckAiFeatureState
-
-    @Inject
     lateinit var syncUrlIdentifier: SyncUrlIdentifier
 
     @Inject
@@ -266,7 +249,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
 
     private val viewModel: BrowserViewModel by bindViewModel()
     private val onboardingHostViewModel: NewUserBrowserOnboardingViewModel by bindViewModel()
-    private val duckChatViewModel: DuckChatSharedViewModel by viewModels()
 
     private var instanceStateBundles: CombinedInstanceState? = null
 
@@ -349,7 +331,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
     var destroyedByBackPress: Boolean = false
 
     var isDataClearingInProgress: Boolean = false
-    var isDuckChatVisible: Boolean = false
 
     private val startBookmarksActivityForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
@@ -420,7 +401,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
             .onEach { renderer.renderBrowserViewState(it) }
             .launchIn(lifecycleScope)
 
-        observeDuckChatSharedCommands()
         observeOnboardingHost()
         observeBrowserModeChanges()
 
@@ -485,7 +465,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
                     currentTab?.onFireDialogVisibilityChanged(isVisible = true)
                 }
                 FireDialog.EVENT_ON_CANCEL -> {
-                    pendingDuckAiOnboardingFire = false
                     pixel.fire(FIRE_DIALOG_CANCEL)
                     if (bundle.getString(FireDialog.RESULT_KEY_ORIGIN) == ORIGIN_CHAT_AUTOCOMPLETE) {
                         currentTab?.onChatDeleteCancelled()
@@ -498,9 +477,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
                 }
                 FireDialog.EVENT_CLEAR_WITHOUT_RESTART_STARTED -> {
                     currentTab?.onFireDialogVisibilityChanged(isVisible = false)
-                    if (pendingDuckAiOnboardingFire) {
-                        currentTab?.dismissDuckAiFireOnboardingCta()
-                    }
                 }
                 FireDialog.EVENT_ON_CHAT_CLEAR_COMPLETE -> {
                     if (bundle.getString(FireDialog.RESULT_KEY_ORIGIN) == ORIGIN_CHAT_AUTOCOMPLETE) {
@@ -514,41 +490,19 @@ open class BrowserActivity : DuckDuckGoActivity() {
                 }
                 FireDialog.EVENT_ON_SINGLE_TAB_CLEAR_COMPLETE -> {
                     val origin = bundle.getString(FireDialog.RESULT_KEY_ORIGIN)
-                    val isDuckAiContextual = origin == ORIGIN_DUCK_AI_CONTEXTUAL_CHAT
-                    val message = if (isDuckAiContextual) {
-                        getString(R.string.duckAiChatDeletedSnackbar)
-                    } else {
-                        resources.getQuantityString(R.plurals.tabsClearedSnackbarMessage, 1, 1)
-                    }
-                    showSnackbar(message)
-                    if (isDuckAiContextual) currentTab?.onContextualSheetFireComplete()
                     // Burning a tab from the return hatch closes the tab the user is on and opens a
                     // fresh new tab, so they land on a clean tab rather than back on the burned one.
+                    showSnackbar(resources.getQuantityString(R.plurals.tabsClearedSnackbarMessage, 1, 1))
                     if (origin == ORIGIN_HATCH) {
                         currentTab?.closeCurrentTab()
                         launchNewTab()
                     }
-                    if (pendingDuckAiOnboardingFire) {
-                        pendingDuckAiOnboardingFire = false
-                        closeDuckChatFullScreen()
-                        onboardingHostViewModel.onDuckAiFireCompleted()
-                    }
                 }
                 FireDialog.EVENT_ON_SINGLE_TAB_CLEAR_FEATURE_NOT_SUPPORTED -> {
                     showSnackbar(R.string.singleTabFireDialogClearNotSupportedSnackbar)
-                    if (pendingDuckAiOnboardingFire) {
-                        pendingDuckAiOnboardingFire = false
-                        closeDuckChatFullScreen()
-                        onboardingHostViewModel.onDuckAiFireCompleted()
-                    }
                 }
                 FireDialog.EVENT_ON_SINGLE_TAB_CLEAR_ERROR -> {
                     showSnackbar(R.string.singleTabFireDialogClearErrorSnackbar)
-                    if (pendingDuckAiOnboardingFire) {
-                        pendingDuckAiOnboardingFire = false
-                        closeDuckChatFullScreen()
-                        onboardingHostViewModel.onDuckAiFireCompleted()
-                    }
                 }
             }
         }
@@ -832,24 +786,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
             return
         }
 
-        if (intent.getBooleanExtra(OPEN_DUCK_CHAT, false)) {
-            val sourceTabId = intent.getStringExtra(SOURCE_TAB_ID_EXTRA)
-            intent.getStringExtra(DUCK_CHAT_ENTRY_POINT_EXTRA)?.let { source ->
-                runCatching { DuckChatEntryPoint.valueOf(source) }
-                    .getOrNull()
-                    ?.let { duckChat.reportDuckChatEntry(it, opensNewTab = true, hasPrompt = false) }
-            }
-            launchDuckAi(url = intent.getStringExtra(DUCK_CHAT_URL), sourceTabId = sourceTabId)
-            return
-        }
-
-        if (intent.getBooleanExtra(CLOSE_DUCK_CHAT, false)) {
-            if (currentTab?.isInDuckAiMode() == true) {
-                closeDuckChatFullScreen()
-            }
-            return
-        }
-
         val existingTabId = intent.getStringExtra(OPEN_EXISTING_TAB_ID_EXTRA)
         if (existingTabId != null) {
             openExistingTab(existingTabId)
@@ -858,19 +794,11 @@ open class BrowserActivity : DuckDuckGoActivity() {
 
         val sharedText = intent.intentText
         if (sharedText != null) {
-            isDuckChatVisible = false
             if (intent.getBooleanExtra(ShortcutBuilder.SHORTCUT_EXTRA_ARG, false)) {
                 logcat { "Shortcut opened with url $sharedText" }
                 lifecycleScope.launch { viewModel.onOpenShortcut(sharedText) }
             } else if (intent.getBooleanExtra(LAUNCH_FROM_FAVORITES_WIDGET, false)) {
                 logcat { "Favorite clicked from widget $sharedText" }
-                if (duckChat.isDuckChatUrl(sharedText.toUri())) {
-                    duckChat.reportDuckChatEntry(
-                        DuckChatEntryPoint.WIDGET_FAVORITE,
-                        opensNewTab = true,
-                        hasPrompt = hasAutoSubmittedPrompt(sharedText),
-                    )
-                }
                 lifecycleScope.launch { viewModel.onOpenFavoriteFromWidget(query = sharedText) }
             } else if (intent.getBooleanExtra(OPEN_IN_CURRENT_TAB_EXTRA, false)) {
                 logcat(WARN) { "open in current tab requested" }
@@ -887,13 +815,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
             } else {
                 val isExternal = intent.getBooleanExtra(LAUNCH_FROM_EXTERNAL_EXTRA, false)
                 val interstitialScreen = intent.getBooleanExtra(LAUNCH_FROM_INTERSTITIAL_EXTRA, false)
-                if (isExternal && duckChat.isDuckChatUrl(sharedText.toUri())) {
-                    duckChat.reportDuckChatEntry(
-                        DuckChatEntryPoint.DEEP_LINK_OTHER,
-                        opensNewTab = true,
-                        hasPrompt = hasAutoSubmittedPrompt(sharedText),
-                    )
-                }
                 logcat(WARN) { "opening in new tab requested for $sharedText isExternal $isExternal interstitial $interstitialScreen" }
                 if (!interstitialScreen) {
                     logcat(WARN) { "not launching from interstitial screen" }
@@ -1057,10 +978,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
         recreate()
     }
 
-    private var pendingDuckAiOnboardingFire = false
-
-    fun launchFire(launchedFromFocusedNtp: Boolean = false, isDuckAiOnboarding: Boolean = false) {
-        pendingDuckAiOnboardingFire = isDuckAiOnboarding
+    fun launchFire(launchedFromFocusedNtp: Boolean = false) {
         val params = mapOf(
             PixelParameter.FROM_FOCUSED_NTP to launchedFromFocusedNtp.toString(),
             PixelParameter.BROWSER_MODE to currentBrowserMode.name.lowercase(),
@@ -1090,30 +1008,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
 
     fun launchDownloads() {
         globalActivityStarter.start(this, DownloadsScreenNoParams)
-    }
-
-    private fun launchDuckAi(url: String?, sourceTabId: String? = null) {
-        isDuckChatVisible = true
-        // The tab to return to when this Duck.ai tab is closed.
-        // Use to the current tab if no explicit tab id is passed.
-        // Falls back to NTP otherwise.
-        val returnTabId = sourceTabId ?: currentTab?.tabId
-        val fullScreenUrl = url ?: duckChat.getDuckChatUrl("", false)
-        if (swipingTabsFeature.isEnabled) {
-            launchNewTab(query = fullScreenUrl, skipHome = false, sourceTabId = returnTabId)
-        } else {
-            lifecycleScope.launch { viewModel.onOpenInNewTabRequested(query = fullScreenUrl, sourceTabId = returnTabId, skipHome = false) }
-        }
-    }
-
-    private fun hasAutoSubmittedPrompt(url: String): Boolean = runCatching {
-        val uri = url.toUri()
-        uri.getQueryParameter("prompt") == "1" && !uri.getQueryParameter("q").isNullOrBlank()
-    }.getOrDefault(false)
-
-    fun closeDuckChatFullScreen() {
-        isDuckChatVisible = false
-        currentTab?.closeCurrentTab()
     }
 
     private fun configureOnBackPressedListener() {
@@ -1155,37 +1049,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
             }
         }
 
-    private fun observeDuckChatSharedCommands() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                duckChatViewModel.command.collect { command ->
-                    when (command) {
-                        DuckChatSharedViewModel.Command.LaunchFire -> launchFire()
-                        DuckChatSharedViewModel.Command.LaunchContextualChatFire -> {
-                            lifecycleScope.launch {
-                                val dialog = fireDialogProvider.createFireDialog(DuckAiContextualChat)
-                                dialog.show(supportFragmentManager)
-                            }
-                        }
-                        DuckChatSharedViewModel.Command.LaunchTabSwitcher -> {
-                            val intent = TabSwitcherActivity.intent(this@BrowserActivity)
-                            tabSwitcherActivityResult.launch(intent)
-                        }
-
-                        is DuckChatSharedViewModel.Command.SearchRequested -> {
-                            isDuckChatVisible = false
-                            currentTab?.submitQuery(command.query)
-                        }
-
-                        is DuckChatSharedViewModel.Command.OpenTab -> {
-                            openExistingTab(command.tabId)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private fun observeOnboardingHost() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -1194,14 +1057,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
                         NewUserBrowserOnboardingViewModel.Command.HandOffToOnboardingActivity -> {
                             startActivity(OnboardingActivity.intent(this@BrowserActivity))
                             finish()
-                        }
-                        is NewUserBrowserOnboardingViewModel.Command.OpenDuckAiOnboardingDemo -> {
-                            duckChat.reportDuckChatEntry(
-                                DuckChatEntryPoint.ONBOARDING,
-                                opensNewTab = true,
-                                hasPrompt = hasAutoSubmittedPrompt(command.url),
-                            )
-                            launchDuckAi(url = command.url)
                         }
                     }
                 }
@@ -1293,10 +1148,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
             isExternal: Boolean = false,
             interstitialScreen: Boolean = false,
             openExistingTabId: String? = null,
-            openDuckChat: Boolean = false,
-            closeDuckChat: Boolean = false,
-            duckChatUrl: String? = null,
-            duckChatSessionActive: Boolean = false,
             deletedTabCount: Int = 0,
         ): Intent {
             val intent = Intent(context, BrowserActivity::class.java)
@@ -1309,11 +1160,6 @@ open class BrowserActivity : DuckDuckGoActivity() {
             intent.putExtra(LAUNCH_FROM_EXTERNAL_EXTRA, isExternal)
             intent.putExtra(LAUNCH_FROM_INTERSTITIAL_EXTRA, interstitialScreen)
             intent.putExtra(OPEN_EXISTING_TAB_ID_EXTRA, openExistingTabId)
-            intent.putExtra(OPEN_DUCK_CHAT, openDuckChat)
-            intent.putExtra(DUCK_CHAT_ENTRY_POINT_EXTRA, launchSource.toDuckChatEntryPoint()?.name)
-            intent.putExtra(CLOSE_DUCK_CHAT, closeDuckChat)
-            intent.putExtra(DUCK_CHAT_URL, duckChatUrl)
-            intent.putExtra(DUCK_CHAT_SESSION_ACTIVE, duckChatSessionActive)
             intent.putExtra(DELETED_TAB_COUNT_EXTRA, deletedTabCount)
             intent.putExtra(LAUNCH_REQUIRES_REGULAR_MODE, launchSource.requiresRegularMode)
             intent.putExtra(LAUNCH_SOURCE_PIXEL_VALUE, launchSource.toPixelLaunchSourceValue())
@@ -1808,9 +1654,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
                     omnibarToolbarMockupBinding.omniBarContainerMockup,
                 )
 
-                if (!duckAiFeatureState.showOmnibarShortcutOnNtpAndOnFocus.value) {
-                    omnibarToolbarMockupBinding.aiChatIconMockup.isVisible = false
-                }
+                omnibarToolbarMockupBinding.aiChatIconMockup.isVisible = false
 
                 omnibarToolbarMockupBinding.mockOmniBarContainerShadow.addBottomShadow()
 
@@ -1833,9 +1677,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
                     omnibarToolbarMockupBottomBinding.omniBarContainerMockup,
                 )
 
-                if (!duckAiFeatureState.showOmnibarShortcutOnNtpAndOnFocus.value) {
-                    omnibarToolbarMockupBottomBinding.aiChatIconMockup.isVisible = false
-                }
+                omnibarToolbarMockupBottomBinding.aiChatIconMockup.isVisible = false
 
                 omnibarToolbarMockupBottomBinding.mockOmniBarContainerShadow.addBottomShadow()
             }
