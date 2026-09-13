@@ -290,7 +290,6 @@ class SubscriptionWebViewViewModel @Inject constructor(
                         GoToPIR
                     }
                 }
-                DUCK_AI -> GoToDuckAI
                 else -> null
             }
             if (hasPurchasedSubscription()) {
@@ -298,7 +297,6 @@ class SubscriptionWebViewViewModel @Inject constructor(
                     GoToITR -> pixelSender.reportOnboardingIdtrClick()
                     is GoToNetP -> pixelSender.reportOnboardingVpnClick()
                     GoToPIR, GoToPIRDashboard -> pixelSender.reportOnboardingPirClick()
-                    GoToDuckAI -> pixelSender.reportOnboardingDuckAiClick()
                     else -> {} // no-op
                 }
             }
@@ -822,7 +820,6 @@ class SubscriptionWebViewViewModel @Inject constructor(
         data object GoToPIR : Command()
         data object GoToPIRDashboard : Command()
         data class GoToNetP(val activityParams: ActivityParams) : Command()
-        data object GoToDuckAI : Command()
         data object Reload : Command()
     }
 

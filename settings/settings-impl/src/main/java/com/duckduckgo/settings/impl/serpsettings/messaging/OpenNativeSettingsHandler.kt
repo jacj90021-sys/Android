@@ -21,7 +21,6 @@ import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.common.utils.AppUrl
 import com.duckduckgo.contentscopescripts.api.ContentScopeJsMessageHandlersPlugin
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckChatNativeSettingsNoParams
 import com.duckduckgo.js.messaging.api.JsMessage
 import com.duckduckgo.js.messaging.api.JsMessageCallback
 import com.duckduckgo.js.messaging.api.JsMessageHandler
@@ -52,23 +51,12 @@ class OpenNativeSettingsHandler @Inject constructor(
             ) {
                 val params = jsMessage.params
 
-                when (val screenParam = params.optString("screen", "")) {
-                    AI_FEATURES_SCREEN_NAME -> {
-                        pixel.fire(SERP_SETTINGS_OPEN_DUCK_AI)
-                        globalActivityStarter.start(context, DuckChatNativeSettingsNoParams)
-                    }
-                    else -> {
-                        logcat(WARN) { "No action for given screen param: $screenParam" }
-                    }
-                }
+                val screenParam = params.optString("screen", "")
+                logcat(WARN) { "No action for given screen param: $screenParam" }
             }
 
             override val allowedDomains: List<String> = listOf(AppUrl.Url.HOST)
             override val featureName: String = "serpSettings"
             override val methods: List<String> = listOf("openNativeSettings")
         }
-
-    companion object {
-        private const val AI_FEATURES_SCREEN_NAME = "aiFeatures"
-    }
 }

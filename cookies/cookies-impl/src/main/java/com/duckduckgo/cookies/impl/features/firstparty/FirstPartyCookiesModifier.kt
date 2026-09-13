@@ -31,7 +31,6 @@ import com.duckduckgo.cookies.impl.SQLCookieRemover
 import com.duckduckgo.cookies.impl.redactStacktraceInBase64
 import com.duckduckgo.cookies.store.CookiesRepository
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckAiHostProvider
 import com.duckduckgo.privacy.config.api.UnprotectedTemporary
 import com.squareup.anvil.annotations.ContributesBinding
 import kotlinx.coroutines.withContext
@@ -52,7 +51,6 @@ class RealFirstPartyCookiesModifier @Inject constructor(
     private val pixel: Pixel,
     private val fireproofRepository: FireproofRepository,
     private val dispatcherProvider: DispatcherProvider,
-    private val duckAiHostProvider: DuckAiHostProvider,
 ) : FirstPartyCookiesModifier {
 
     private val databaseErrorHandler = DatabaseErrorHandler()
@@ -78,7 +76,7 @@ class RealFirstPartyCookiesModifier @Inject constructor(
             userAllowListRepository.domainsInUserAllowList() +
             unprotectedTemporary.unprotectedTemporaryExceptions.map { it.domain } +
             fireproofRepository.fireproofWebsites() +
-            listOf(AppUrl.Url.COOKIES, AppUrl.Url.SURVEY_COOKIES, "https://${duckAiHostProvider.getHost()}").map { it.toUri().host!! }
+            listOf(AppUrl.Url.COOKIES, AppUrl.Url.SURVEY_COOKIES).map { it.toUri().host!! }
 
     private fun buildSQLWhereClause(timestampThreshold: Long, isOldDb: Boolean, excludedSites: List<String>): String {
         val httpOnly = if (isOldDb) "httponly" else "is_httponly"

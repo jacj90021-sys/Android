@@ -23,7 +23,6 @@ import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.extensions.toTldPlusOne
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckAiHostProvider
 import com.duckduckgo.js.messaging.api.JsCallbackData
 import com.duckduckgo.js.messaging.api.JsMessage
 import com.duckduckgo.js.messaging.api.JsMessageCallback
@@ -58,7 +57,6 @@ class SubscriptionMessagingInterface @Inject constructor(
     @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
     pixelSender: SubscriptionPixelSender,
     subscriptionsChecker: SubscriptionsChecker,
-    duckAiHostProvider: DuckAiHostProvider,
     subscriptionsFeature: SubscriptionsFeature,
 ) : JsMessaging {
     private val moshi = Moshi.Builder().add(JSONObjectAdapter()).build()
@@ -129,7 +127,7 @@ class SubscriptionMessagingInterface @Inject constructor(
     override val context: String = "subscriptionPages"
     override val callbackName: String = "messageCallback"
     override val secret: String = "duckduckgo-android-messaging-secret"
-    override val allowedDomains: List<String> = listOf("duckduckgo.com", duckAiHostProvider.getHost())
+    override val allowedDomains: List<String> = listOf("duckduckgo.com")
 
     private fun isUrlAllowed(url: String?): Boolean {
         if (allowedDomains.isEmpty()) return true

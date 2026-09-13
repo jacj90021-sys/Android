@@ -70,8 +70,6 @@ import com.duckduckgo.downloads.api.DownloadStateListener
 import com.duckduckgo.downloads.api.DownloadsFileActions
 import com.duckduckgo.downloads.api.FileDownloader
 import com.duckduckgo.downloads.api.FileDownloader.PendingFileDownload
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatEntryPoint
 import com.duckduckgo.js.messaging.api.JsCallbackData
 import com.duckduckgo.js.messaging.api.JsMessageCallback
 import com.duckduckgo.js.messaging.api.JsMessaging
@@ -99,7 +97,6 @@ import com.duckduckgo.subscriptions.impl.ui.SubscriptionWebViewViewModel.Command
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionWebViewViewModel.Command.BackToSettings
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionWebViewViewModel.Command.BackToSettingsActivateSuccess
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionWebViewViewModel.Command.ComputeUserSettings
-import com.duckduckgo.subscriptions.impl.ui.SubscriptionWebViewViewModel.Command.GoToDuckAI
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionWebViewViewModel.Command.GoToITR
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionWebViewViewModel.Command.GoToNetP
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionWebViewViewModel.Command.GoToPIR
@@ -192,9 +189,6 @@ class SubscriptionsWebViewActivity : DuckDuckGoActivity(), DownloadConfirmationD
 
     @Inject
     lateinit var pixel: Pixel
-
-    @Inject
-    lateinit var duckChat: DuckChat
 
     @Inject
     lateinit var subscriptions: Subscriptions
@@ -580,7 +574,6 @@ class SubscriptionsWebViewActivity : DuckDuckGoActivity(), DownloadConfirmationD
             is GoToPIR -> goToPIR()
             is GoToPIRDashboard -> goToPIRDashboard()
             is GoToNetP -> goToNetP(command.activityParams)
-            is GoToDuckAI -> goToDuckAI()
             is ComputeUserSettings -> computeUserSettings(command.id)
             is RequestNotificationsPermission -> launchNotificationsPermission(command.id)
             Reload -> binding.webview.reload()
@@ -610,10 +603,6 @@ class SubscriptionsWebViewActivity : DuckDuckGoActivity(), DownloadConfirmationD
 
     private fun goToNetP(params: ActivityParams) {
         globalActivityStarter.start(this, params)
-    }
-
-    private fun goToDuckAI() {
-        duckChat.openDuckChat(DuckChatEntryPoint.PAID_SETTINGS)
     }
 
     private fun computeUserSettings(id: String) {
