@@ -61,7 +61,6 @@ import com.duckduckgo.app.browser.SSLErrorType.UNTRUSTED_HOST
 import com.duckduckgo.app.browser.SSLErrorType.WRONG_HOST
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.AppLink
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.NonHttpAppLink
-import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.ShouldLaunchDuckChatLink
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.ShouldLaunchSubscriptionLink
 import com.duckduckgo.app.browser.WebViewErrorResponse.BAD_URL
 import com.duckduckgo.app.browser.WebViewErrorResponse.CONNECTION
@@ -116,7 +115,6 @@ import com.duckduckgo.app.browser.commands.Command.InjectEmailAddress
 import com.duckduckgo.app.browser.commands.Command.LaunchAddWidgetOnboarding
 import com.duckduckgo.app.browser.commands.Command.LaunchAutofillSettings
 import com.duckduckgo.app.browser.commands.Command.LaunchBookmarksActivity
-import com.duckduckgo.app.browser.commands.Command.LaunchDuckAiOnboardingFireDialog
 import com.duckduckgo.app.browser.commands.Command.LaunchFireDialogFromOnboardingDialog
 import com.duckduckgo.app.browser.commands.Command.LaunchNewTab
 import com.duckduckgo.app.browser.commands.Command.LaunchPopupMenu
@@ -260,9 +258,6 @@ import com.duckduckgo.app.cta.ui.BrokenSitePromptDialogCta
 import com.duckduckgo.app.cta.ui.Cta
 import com.duckduckgo.app.cta.ui.CtaViewModel
 import com.duckduckgo.app.cta.ui.DaxBubbleCta
-import com.duckduckgo.app.cta.ui.DaxDuckAiEndBrandDesignUpdateBubbleCta
-import com.duckduckgo.app.cta.ui.DaxDuckAiEndBubbleCta
-import com.duckduckgo.app.cta.ui.DaxDuckAiFireButtonBrandDesignUpdateContextualCta
 import com.duckduckgo.app.cta.ui.DaxEndBrandDesignUpdateBubbleCta
 import com.duckduckgo.app.cta.ui.DaxFireButtonBrandDesignUpdateContextualCta
 import com.duckduckgo.app.cta.ui.DaxMainNetworkBrandDesignUpdateContextualCta
@@ -307,7 +302,6 @@ import com.duckduckgo.app.pixels.AppPixelName.AUTOCOMPLETE_RESULT_DELETE_BUTTON_
 import com.duckduckgo.app.pixels.AppPixelName.ONBOARDING_SEARCH_CUSTOM
 import com.duckduckgo.app.pixels.AppPixelName.ONBOARDING_VISIT_SITE_CUSTOM
 import com.duckduckgo.app.pixels.AppPixelName.TAB_MANAGER_CLICKED_DAILY
-import com.duckduckgo.app.pixels.duckchat.createWasUsedBeforePixelParams
 import com.duckduckgo.app.privacy.db.NetworkLeaderboardDao
 import com.duckduckgo.app.privacy.db.UserAllowListRepository
 import com.duckduckgo.app.settings.db.SettingsDataStore
@@ -318,9 +312,7 @@ import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.Count
 import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.Daily
 import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.Unique
 import com.duckduckgo.app.surrogates.SurrogateResponse
-import com.duckduckgo.app.tabs.model.DuckAiTabSessionRepository
 import com.duckduckgo.app.tabs.model.TabEntity
-import com.duckduckgo.app.tabs.model.TabPageContextRepository
 import com.duckduckgo.app.tabs.model.TabRepository
 import com.duckduckgo.app.tabs.store.TabStatsBucketing
 import com.duckduckgo.app.trackerdetection.model.TrackingEvent
@@ -383,21 +375,6 @@ import com.duckduckgo.downloads.api.FileDownloader.PendingFileDownload
 import com.duckduckgo.downloads.api.NewDownloadState
 import com.duckduckgo.downloads.api.model.DownloadItem
 import com.duckduckgo.downloads.store.DownloadStatus
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckAiHostProvider
-import com.duckduckgo.duckchat.api.DuckAiSessionCallback
-import com.duckduckgo.duckchat.api.DuckAiSessionExitTrigger
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatEntryPoint
-import com.duckduckgo.duckchat.api.DuckChatInputModeState
-import com.duckduckgo.duckchat.api.nativeinput.NativeInputState
-import com.duckduckgo.duckchat.impl.contextual.PageContextJSHelper
-import com.duckduckgo.duckchat.impl.contextual.RealPageContextJSHelper.Companion.PAGE_CONTEXT_FEATURE_NAME
-import com.duckduckgo.duckchat.impl.helper.DuckChatJSHelper
-import com.duckduckgo.duckchat.impl.helper.NativeAction
-import com.duckduckgo.duckchat.impl.helper.RealDuckChatJSHelper.Companion.DUCK_CHAT_FEATURE_NAME
-import com.duckduckgo.duckchat.impl.messaging.sync.SyncStatusChangedObserver
-import com.duckduckgo.duckchat.impl.pixel.DuckChatPixelName
 import com.duckduckgo.feature.toggles.api.Toggle
 import com.duckduckgo.history.api.NavigationHistory
 import com.duckduckgo.js.messaging.api.JsCallbackData
@@ -551,10 +528,6 @@ class BrowserTabViewModel @Inject constructor(
     private val newTabPixels: Lazy<NewTabPixels>, // Lazy to construct the instance and deps only when actually sending the pixel
     private val httpErrorPixels: Lazy<HttpErrorPixels>,
     private val duckPlayer: DuckPlayer,
-    private val duckChat: DuckChat,
-    private val duckAiHostProvider: DuckAiHostProvider,
-    private val duckAiFeatureState: DuckAiFeatureState,
-    private val duckChatInputModeState: DuckChatInputModeState,
     private val duckPlayerJSHelper: DuckPlayerJSHelper,
     private val refreshPixelSender: RefreshPixelSender,
     private val privacyProtectionTogglePlugin: PluginPoint<PrivacyProtectionTogglePlugin>,
@@ -568,7 +541,6 @@ class BrowserTabViewModel @Inject constructor(
     private val siteErrorHandler: StringSiteErrorHandler,
     private val siteHttpErrorHandler: HttpCodeSiteErrorHandler,
     private val subscriptionsJSHelper: SubscriptionsJSHelper,
-    private val duckChatJSHelper: DuckChatJSHelper,
     private val tabManager: TabManager,
     private val addressDisplayFormatter: AddressDisplayFormatter,
     private val nonHttpAppLinkChecker: NonHttpAppLinkChecker,
@@ -579,9 +551,6 @@ class BrowserTabViewModel @Inject constructor(
     private val omnibarRepository: OmnibarRepository,
     private val contentScopeScriptsSubscriptionEventPluginPoint: PluginPoint<ContentScopeScriptsSubscriptionEventPlugin>,
     private val serpSettingsFeature: SerpSettingsFeature,
-    private val pageContextJSHelper: PageContextJSHelper,
-    private val tabPageContextRepository: TabPageContextRepository,
-    private val syncStatusChangedObserver: SyncStatusChangedObserver,
     private val serpEasterEggLogosToggles: SerpEasterEggLogosToggles,
     private val serpLogos: SerpLogos,
     private val tabVisitedSitesRepository: TabVisitedSitesRepository,
@@ -593,7 +562,6 @@ class BrowserTabViewModel @Inject constructor(
     private val ntpAfterIdleManager: NtpAfterIdleManager,
     private val returnSessionLandingListener: ReturnSessionLandingListener,
     private val browserInteractionsPlugins: PluginPoint<BrowserInteractionsPlugin>,
-    private val duckAiTabSessionRepository: DuckAiTabSessionRepository,
     private val browserRefreshTriggerPlugins: PluginPoint<BrowserRefreshTriggerPlugin>,
     private val brokenSiteReportTriggerPlugins: PluginPoint<BrokenSiteReportTriggerPlugin>,
     private val inlinePdfHandler: InlinePdfHandler,
@@ -616,7 +584,6 @@ class BrowserTabViewModel @Inject constructor(
     private val suggestRedirectEvaluator: SuggestRedirectEvaluator,
     private val badUrlErrorPageWideEvent: BadUrlErrorPageWideEvent,
     private val customErrorPagesFeature: CustomErrorPagesFeature,
-    private val duckAiSessionCallback: DuckAiSessionCallback,
 ) : ViewModel(),
     WebViewClientListener,
     EditSavedSiteListener,
@@ -657,9 +624,6 @@ class BrowserTabViewModel @Inject constructor(
     var skipHome = false
     var hasCtaBeenShownForCurrentPage: AtomicBoolean = AtomicBoolean(false)
 
-    @VisibleForTesting
-    internal var suppressDuckAiOnboardingCta = false
-    private var duckAiOnboardingCtaUnblockJob: Job? = null
     val tabs: LiveData<List<TabEntity>> = tabRepository.liveTabs
     val liveSelectedTab: LiveData<TabEntity> = tabRepository.liveSelectedTab
     val command: SingleLiveEvent<Command> = SingleLiveEvent()
@@ -670,12 +634,6 @@ class BrowserTabViewModel @Inject constructor(
 
     private val _subscriptionEventDataChannel = Channel<SubscriptionEventData>(capacity = Channel.BUFFERED)
     val subscriptionEventDataFlow: Flow<SubscriptionEventData> = _subscriptionEventDataChannel.receiveAsFlow()
-
-    // DuckChat replies can be held open for a long time (the edit screen suspends this reply until the
-    // user submits or cancels) while the fragment is stopped, so this can't share the single-slot
-    // command LiveData: a command set while stopped would overwrite the pending reply and lose it.
-    private val _duckChatJsResponseChannel = Channel<JsCallbackData>(capacity = Channel.BUFFERED)
-    val duckChatJsResponseFlow: Flow<JsCallbackData> = _duckChatJsResponseChannel.receiveAsFlow()
 
     data class HiddenBookmarksIds(
         val favorites: List<String> = emptyList(),
@@ -711,44 +669,8 @@ class BrowserTabViewModel @Inject constructor(
      */
     private val omnibarTextStateFlow = MutableStateFlow("")
 
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     internal val omnibarAutocompleteCache: StateFlow<AutoCompleteResult> =
-        duckChat.observeNativeInputFieldUserSettingEnabled()
-            .catch { t ->
-                logcat(WARN) { "Native input setting flow failed: ${t.asLog()}" }
-                emit(false)
-            }
-            .flatMapLatest { isNativeInputEnabled ->
-                if (!isNativeInputEnabled) {
-                    flowOf(AutoCompleteResult("", emptyList()))
-                } else {
-                    omnibarTextStateFlow
-                        .debounce(300)
-                        .distinctUntilChanged()
-                        .flatMapLatest { query ->
-                            // Skip page URLs — omnibarViewState emits on every navigation, and
-                            // running the fetch against full URLs would be both wasteful and
-                            // wrong (the autocomplete API expects user-typed queries).
-                            val isQueryLike = query.isNotBlank() &&
-                                !UriString.isWebUrl(query) &&
-                                !duckPlayer.isDuckPlayerUri(query)
-                            if (!isQueryLike || !autoCompleteSettings.autoCompleteSuggestionsEnabled) {
-                                flowOf(AutoCompleteResult(query, emptyList()))
-                            } else {
-                                // Catch inside flatMapLatest so a failed fetch only drops this query's
-                                // result — without it, .catch + stateIn(Eagerly) would terminate the
-                                // pipeline for the ViewModel's lifetime (no equivalent of the existing
-                                // pipeline's ConflatedJob restart).
-                                autoComplete.autoComplete(query)
-                                    .catch { t ->
-                                        logcat(WARN) { "Failed to get omnibar autocomplete: ${t.asLog()}" }
-                                        emit(AutoCompleteResult(query, emptyList()))
-                                    }
-                            }
-                        }
-                }
-            }
-            .flowOn(dispatchers.io())
+        flowOf(AutoCompleteResult("", emptyList()))
             .stateIn(viewModelScope, SharingStarted.Eagerly, AutoCompleteResult("", emptyList()))
 
     private val fireproofWebsiteState: LiveData<List<FireproofWebsiteEntity>> = fireproofWebsiteRepository.getFireproofWebsites()
@@ -758,10 +680,10 @@ class BrowserTabViewModel @Inject constructor(
     private val showPulseAnimation: LiveData<Boolean> =
         combine(
             ctaViewState.asFlow().map {
-                it.cta is OnboardingDaxDialogCta.DaxDuckAiFireButtonCta || it.cta is DaxDuckAiFireButtonBrandDesignUpdateContextualCta
+                false
             }.distinctUntilChanged(),
             ctaViewModel.showFireButtonPulseAnimation,
-        ) { isShowingDuckAiFireButtonCta, showPulseAnimation -> isShowingDuckAiFireButtonCta || showPulseAnimation }
+        ) { _, showPulseAnimation -> showPulseAnimation }
             .asLiveData(context = viewModelScope.coroutineContext)
 
     private var autoCompleteJob = ConflatedJob()
@@ -813,7 +735,6 @@ class BrowserTabViewModel @Inject constructor(
     private var customTab: CustomTabContext? = null
 
     private var alreadyShownKeyboard: Boolean = false
-    private var pendingDuckChatAuthUpdate: Boolean = false
 
     private val pdfDownloadCommandFlow = MutableSharedFlow<DownloadCommand>(extraBufferCapacity = 1)
 
@@ -913,8 +834,6 @@ class BrowserTabViewModel @Inject constructor(
             addressBarTrackersAnimationManager.fetchFeatureState()
         }
 
-        observeSyncStatusChangesForDuckChat()
-        observeSubscriptionChangesForDuckChat()
 
         tabRepository.childClosedTabs
             .onEach { closedTab ->
@@ -1026,33 +945,11 @@ class BrowserTabViewModel @Inject constructor(
                 previousUrl = it
             }
             buildSiteFactory(it, stillExternal = isExternal)
-            // Detect the duck.ai onboarding flow as early as possible so the omnibar is locked
-            enterDuckAiOnboardingFlowIfApplicable(it.toUri())
         }
-    }
-
-    private fun enterDuckAiOnboardingFlowIfApplicable(uri: Uri?) {
-        if (uri == null) return
-        if (currentBrowserViewState().isOmnibarLockedForOnboarding) return
-        if (!duckChat.isDuckChatUrl(uri)) return
-        if (uri.getQueryParameter("flow") != "mobile-app-onboarding") return
-
-        // Delay showing onboarding CTA until FE finishes generating response to initial prompt.
-        // Fallback timer is armed from pageFinished once duck.ai actually loads.
-        suppressDuckAiOnboardingCta = true
-        browserViewState.value = currentBrowserViewState().copy(isOmnibarLockedForOnboarding = true)
     }
 
     private fun observePendingVoiceSessionEnd(tabId: String) {
-        pendingVoiceSessionEndJob?.cancel()
-        pendingVoiceSessionEndJob = viewModelScope.launch {
-            duckChat.observeTriggerVoiceChatSessionEnd()
-                .filter { it == tabId }
-                .collect {
-                    val event = duckChatJSHelper.onNativeAction(NativeAction.END_VOICE_SESSION)
-                    _subscriptionEventDataChannel.send(event)
-                }
-        }
+        // Voice chat sessions have been removed from the app.
     }
 
     fun setIsCustomTab(isCustomTab: Boolean, clientPackage: String? = null, referrerPackage: String? = null) {
@@ -1111,56 +1008,15 @@ class BrowserTabViewModel @Inject constructor(
     }
 
     private fun observeSyncStatusChangesForDuckChat() {
-        syncStatusChangedObserver.syncStatusChangedEvents
-            .onEach { payload ->
-                // Only send sync status events when viewing duck.ai
-                val currentUrl = url
-                if (currentUrl != null && duckChat.isDuckChatUrl(currentUrl.toUri())) {
-                    withContext(dispatchers.main()) {
-                        val event = SubscriptionEventData(
-                            featureName = DUCK_CHAT_FEATURE_NAME,
-                            subscriptionName = "submitSyncStatusChanged",
-                            params = payload,
-                        )
-                        _subscriptionEventDataChannel.trySend(event)
-                        logcat { "DuckChat-Sync: sent sync status event from BrowserTabViewModel $payload" }
-                    }
-                }
-            }
-            .flowOn(dispatchers.io())
-            .launchIn(viewModelScope)
+        // no-op
     }
 
     private fun observeSubscriptionChangesForDuckChat() {
-        subscriptions.getSubscriptionStatusFlow()
-            .map { status -> Pair(status, subscriptions.getAccessToken()) }
-            .distinctUntilChanged()
-            .onEach { _ ->
-                if (!androidBrowserConfig.refreshDuckAiOnSubscriptionChanges().isEnabled()) return@onEach
-
-                // Only send subscription auth events when viewing duck.ai
-                val currentUrl = url
-                if (currentUrl != null && duckChat.isDuckChatUrl(currentUrl.toUri())) {
-                    // Mark pending in case WebView is paused (e.g., during purchase flow)
-                    pendingDuckChatAuthUpdate = true
-                    // Try to send immediately (will work if WebView is active)
-                    withContext(dispatchers.main()) {
-                        sendDuckChatAuthUpdate()
-                    }
-                }
-            }
-            .flowOn(dispatchers.io())
-            .launchIn(viewModelScope)
+        // no-op
     }
 
     private fun sendDuckChatAuthUpdate() {
-        val authUpdateEvent = SubscriptionEventData(
-            featureName = SUBSCRIPTIONS_FEATURE_NAME,
-            subscriptionName = "authUpdate",
-            params = JSONObject(),
-        )
-        _subscriptionEventDataChannel.trySend(authUpdateEvent)
-        logcat { "DuckChat-Subscription: sent authUpdate event from BrowserTabViewModel" }
+        // no-op
     }
 
     override fun getCurrentTabId(): String = tabId
@@ -1274,8 +1130,7 @@ class BrowserTabViewModel @Inject constructor(
         updated: AutoCompleteViewState,
     ) {
         if (updated.suggestionsDisplayed() && !previous.suggestionsDisplayed()) {
-            pixel.fire(DuckChatPixelName.PRODUCT_TELEMETRY_SURFACE_AUTOCOMPLETE_DISPLAYED)
-            pixel.fire(DuckChatPixelName.PRODUCT_TELEMETRY_SURFACE_AUTOCOMPLETE_DISPLAYED_DAILY, type = Daily())
+            // no-op: Duck.ai telemetry removed
         }
     }
 
@@ -1334,7 +1189,7 @@ class BrowserTabViewModel @Inject constructor(
 
         browserViewState.value =
             currentBrowserViewState().copy(
-                showDuckChatOption = duckAiFeatureState.showPopupMenuShortcut.value,
+                showDuckChatOption = false,
             )
 
         viewModelScope.launch {
@@ -1342,16 +1197,6 @@ class BrowserTabViewModel @Inject constructor(
         }
 
         refreshShowDuckChatHistoryOption()
-
-        // Send pending auth update if returning to duck.ai after subscription change (e.g., after purchase flow)
-        // ensures we emit the event even if the WebView was paused
-        if (pendingDuckChatAuthUpdate) {
-            val currentUrl = url
-            if (currentUrl != null && duckChat.isDuckChatUrl(currentUrl.toUri())) {
-                sendDuckChatAuthUpdate()
-                pendingDuckChatAuthUpdate = false
-            }
-        }
     }
 
     fun onViewHidden() {
@@ -1383,7 +1228,9 @@ class BrowserTabViewModel @Inject constructor(
                     is AutoCompleteHistorySuggestion -> onUserSubmittedQuery(suggestion.url, FromAutocomplete(isNav = true))
                     is AutoCompleteHistorySearchSuggestion -> onUserSubmittedQuery(suggestion.phrase, FromAutocomplete(isNav = false))
                     is AutoCompleteSwitchToTabSuggestion -> onUserSwitchedToTab(suggestion.tabId)
-                    is AutoCompleteSuggestion.AutoCompleteDuckAIPrompt -> onUserTappedDuckAiPromptAutocomplete(suggestion.phrase)
+                    is AutoCompleteSuggestion.AutoCompleteDuckAIPrompt -> {
+                        // no-op, Duck.ai is no longer part of the app
+                    }
                     is AutoCompleteSuggestion.AutoCompleteDeviceAppSuggestion -> {
                         // no-op, installed apps search is disabled in tabs
                     }
@@ -1560,21 +1407,7 @@ class BrowserTabViewModel @Inject constructor(
         val verticalParameter = extractVerticalParameter(url)
         var urlToNavigate = queryUrlConverter.convertQueryToUrl(trimmedInput, verticalParameter, queryOrigin)
 
-        val isDuckAiDirectNavigation =
-            submissionSource == QuerySubmissionSource.USER && queryOrigin is QueryOrigin.FromUser && isTypedDuckAiUrl(urlToNavigate)
-        if (isDuckAiDirectNavigation) {
-            fireDuckAiDirectNavigationPixel()
-        }
-
         when (val type = specialUrlDetector.determineType(trimmedInput)) {
-            is ShouldLaunchDuckChatLink -> {
-                runCatching {
-                    logcat { "Duck.ai: ShouldLaunchDuckChatLink $urlToNavigate" }
-                    openDuckChatForUrl(urlToNavigate.toUri())
-                    return
-                }
-            }
-
             is ShouldLaunchSubscriptionLink -> {
                 if (webNavigationState == null || webNavigationState?.hasNavigationHistory == false) {
                     closeCurrentTab()
@@ -1592,13 +1425,6 @@ class BrowserTabViewModel @Inject constructor(
             }
 
             else -> {
-                if (isDuckAiDirectNavigation) {
-                    duckChat.reportDuckChatEntry(
-                        DuckChatEntryPoint.DIRECT_URL,
-                        opensNewTab = false,
-                        hasPrompt = hasAutoSubmittedPrompt(urlToNavigate),
-                    )
-                }
                 if (type is SpecialUrlDetector.UrlType.ExtractedAmpLink) {
                     logcat { "AMP link detection: Using extracted URL: ${type.extractedUrl}" }
                     urlToNavigate = type.extractedUrl
@@ -1628,18 +1454,14 @@ class BrowserTabViewModel @Inject constructor(
 
         globalLayoutState.value = Browser(isNewTabState = false)
         findInPageViewState.value = FindInPageViewState(visible = false)
-        // A submitted Duck.ai URL opens in full-screen Duck.ai mode (empty address bar), so never
-        // paint its URL into the omnibar — otherwise it flashes for the brief window between submit
-        // and full-screen mode engaging, and lingers if the user navigates back during that window.
-        val isDuckChatUrl = duckChat.isDuckChatUrl(trimmedInput.toUri())
         omnibarViewState.value =
             currentOmnibarViewState().copy(
-                omnibarText = when {
-                    isDuckChatUrl -> ""
-                    isFullUrlEnabled.value -> trimmedInput
-                    else -> addressDisplayFormatter.getShortUrl(trimmedInput)
+                omnibarText = if (isFullUrlEnabled.value) {
+                    trimmedInput
+                } else {
+                    addressDisplayFormatter.getShortUrl(trimmedInput)
                 },
-                queryOrFullUrl = if (isDuckChatUrl) "" else trimmedInput,
+                queryOrFullUrl = trimmedInput,
                 forceExpand = true,
             )
         suggestRedirectJob.cancel()
@@ -1687,26 +1509,10 @@ class BrowserTabViewModel @Inject constructor(
         INTERNAL_NAVIGATION,
     }
 
-    private fun isTypedDuckAiUrl(url: String): Boolean {
-        val host = runCatching { url.toUri().host }.getOrNull()?.lowercase() ?: return false
-        val duckAiHost = duckAiHostProvider.getHost().lowercase()
-        return host == duckAiHost || host == "www.$duckAiHost"
-    }
-
     private fun hasAutoSubmittedPrompt(url: String): Boolean = runCatching {
         val uri = url.toUri()
         uri.getQueryParameter("prompt") == "1" && !uri.getQueryParameter(QUERY).isNullOrBlank()
     }.getOrDefault(false)
-
-    private fun fireDuckAiDirectNavigationPixel() {
-        val inputScreenEnabled = duckChatInputModeState.inputModeCapability.value == NativeInputState.InputMode.SEARCH_AND_DUCK_AI
-        val params = mapOf(
-            "duck_ai_enabled" to duckChat.isEnabled().toString(),
-            "input_screen_enabled" to inputScreenEnabled.toString(),
-        )
-        pixel.fire(AppPixelName.AI_CHAT_DUCK_AI_DIRECT_NAVIGATION_COUNT, parameters = params)
-        pixel.fire(AppPixelName.AI_CHAT_DUCK_AI_DIRECT_NAVIGATION_DAILY, parameters = params, type = Daily())
-    }
 
     private fun getUrlHeaders(url: String?): Map<String, String> = url?.let { customHeadersProvider.getCustomHeaders(it) } ?: emptyMap()
 
@@ -1983,7 +1789,6 @@ class BrowserTabViewModel @Inject constructor(
         val hasSourceTab = tabRepository.liveSelectedTab.value?.sourceTabId != null
 
         if (isNavigationToEmptyUrlFromParent(hasSourceTab, isCustomTab)) {
-            recordPendingDuckAiBackExit()
             viewModelScope.launch {
                 removeCurrentTabFromRepository()
             }
@@ -1991,7 +1796,6 @@ class BrowserTabViewModel @Inject constructor(
         }
 
         val navigation = webNavigationState ?: run {
-            recordPendingDuckAiBackExit()
             return false
         }
 
@@ -2011,23 +1815,19 @@ class BrowserTabViewModel @Inject constructor(
         }
 
         if (!currentBrowserViewState().browserShowing) {
-            recordPendingDuckAiBackExit()
             return false
         }
 
         if (navigation.canGoBack) {
             badUrlErrorPageWideEvent.onBadUrlErrorPageExited(tabId)
-            recordPendingDuckAiBackExit()
             command.value = NavigationCommand.NavigateBack(navigation.stepsToPreviousPage)
             return true
         } else if (hasSourceTab && !isCustomTab) {
-            recordPendingDuckAiBackExit()
             viewModelScope.launch {
                 removeCurrentTabFromRepository()
             }
             return true
         } else if (!skipHome && !isCustomTab) {
-            recordPendingDuckAiBackExit()
             navigateHome()
             return true
         }
@@ -2036,20 +1836,15 @@ class BrowserTabViewModel @Inject constructor(
             logcat { "User pressed back and tab is set to skip home; need to generate WebView preview now" }
             command.value = GenerateWebViewPreviewImage
         }
-        recordPendingDuckAiBackExit()
         return false
     }
 
-    private fun recordPendingDuckAiBackExit() {
-        duckAiSessionCallback.onExitIntent(tabId, DuckAiSessionExitTrigger.BACK_OR_CLOSE)
-    }
-
     fun recordPendingNewTabOpenedExit() {
-        duckAiSessionCallback.onExitIntent(tabId, DuckAiSessionExitTrigger.NEW_TAB_OPENED)
+        // no-op
     }
 
     fun recordPendingFireTabOpenedExit() {
-        duckAiSessionCallback.onExitIntent(tabId, DuckAiSessionExitTrigger.FIRE_TAB_OPENED)
+        // no-op
     }
 
     private fun isNavigationToEmptyUrlFromParent(
@@ -2059,11 +1854,6 @@ class BrowserTabViewModel @Inject constructor(
         isLinkOpenedInNewTab && hasSourceTab && !isCustomTab && site?.url.isNullOrEmpty()
 
     private fun navigateHome() {
-        // Going home reuses this tab, so an active Duck.ai voice session would keep
-        // running with the mic open. End it here so the frontend cleans it up.
-        if (duckChat.isVoiceChatSessionActive(tabId)) {
-            duckChat.endVoiceChatSession(tabId)
-        }
         pdfDownloadJob.cancel()
         suggestRedirectJob.cancel()
         badUrlErrorPageWideEvent.onBadUrlErrorPageExited(tabId)
@@ -2150,7 +1940,6 @@ class BrowserTabViewModel @Inject constructor(
                         }
                     } else {
                         withContext(dispatchers.main()) {
-                            evaluateDuckAIPage(stateChange.url)
                             pageChanged(stateChange.url, stateChange.title)
                         }
                     }
@@ -2313,7 +2102,7 @@ class BrowserTabViewModel @Inject constructor(
                 canSharePage = domain != null,
                 showPrivacyShield = HighlightableButton.Visible(enabled = true),
                 // Duck.ai issues aren't site breakage, they go through the feedback flow instead
-                canReportSite = domain != null && !duckPlayer.isDuckPlayerUri(url) && !duckChat.isDuckChatUrl(url.toUri()),
+                canReportSite = domain != null && !duckPlayer.isDuckPlayerUri(url),
                 canChangePrivacyProtection = domain != null && !duckPlayer.isDuckPlayerUri(url),
                 isPrivacyProtectionDisabled = false,
                 canFindInPage = true,
@@ -2515,7 +2304,7 @@ class BrowserTabViewModel @Inject constructor(
     }
 
     private fun shouldShowLocationPermissionMessage(domain: String): Boolean {
-        return !duckChat.isDuckChatUrl(domain.toUri()) && !duckDuckGoUrlDetector.isDuckDuckGoUrl(domain)
+        return !duckDuckGoUrlDetector.isDuckDuckGoUrl(domain)
     }
 
     override fun onHistoryUrlChanged(url: String) {
@@ -2578,7 +2367,7 @@ class BrowserTabViewModel @Inject constructor(
         showFullUrl: Boolean,
     ): String {
         if (url == null) return ""
-        if (duckChat.isDuckChatUrl(url.toUri())) return ""
+
 
         return if (duckDuckGoUrlDetector.isDuckDuckGoQueryUrl(url)) {
             duckDuckGoUrlDetector.extractQuery(url) ?: url
@@ -2693,15 +2482,8 @@ class BrowserTabViewModel @Inject constructor(
             navigationStateChanged(webViewNavigationState)
             url?.let { prefetchFavicon(url) }
 
-            evaluateDuckAIPage(url)
             serpLogoJob += viewModelScope.launch {
                 evaluateSerpLogoState(url)
-            }
-
-            onDuckAiOnboardingPageFinishedIfApplicable()
-
-            if (androidBrowserConfig.storePageContext().isEnabled()) {
-                collectPageContext()
             }
         }
     }
@@ -2724,19 +2506,6 @@ class BrowserTabViewModel @Inject constructor(
             }
         } else {
             omnibarViewState.value = currentOmnibarViewState().copy(serpLogo = null)
-        }
-    }
-
-    private fun evaluateDuckAIPage(url: String?) {
-        url?.let {
-            if (duckChat.isDuckChatUrl(Uri.parse(it))) {
-                command.value = Command.EnableDuckAIFullScreen(currentBrowserViewState())
-                if (isActiveTab()) {
-                    duckAiSessionCallback.onDuckAiPageVisible(tabId, it)
-                }
-            } else {
-                command.value = Command.DuckAIFullScreenDisabled(url)
-            }
         }
     }
 
@@ -3470,7 +3239,6 @@ class BrowserTabViewModel @Inject constructor(
                     command.value = LaunchSubscription(requiredAction.url.toUri())
                     return true
                 }
-                duckAiSessionCallback.onExitIntent(tabId, DuckAiSessionExitTrigger.NEW_TAB_OPENED)
                 command.value = GenerateWebViewPreviewImage
                 command.value = OpenInNewTab(query = requiredAction.url, sourceTabId = tabId)
                 true
@@ -3481,7 +3249,6 @@ class BrowserTabViewModel @Inject constructor(
                     command.value = LaunchSubscription(requiredAction.url.toUri())
                     return true
                 }
-                duckAiSessionCallback.onExitIntent(tabId, DuckAiSessionExitTrigger.FIRE_TAB_OPENED)
                 command.value = GenerateWebViewPreviewImage
                 command.value = OpenInFireTab(
                     query = requiredAction.url,
@@ -3627,16 +3394,14 @@ class BrowserTabViewModel @Inject constructor(
         withContext(dispatchers.io()) {
             val addToHomeSupported = addToHomeCapabilityDetector.isAddToHomeSupported()
             val showAutofill = autofillCapabilityChecker.canAccessCredentialManagementScreen()
-            val showDuckChat = duckAiFeatureState.showPopupMenuShortcut.value
-            val showDuckChatHistory = duckChat.isChatHistoryAvailable()
 
             withContext(dispatchers.main()) {
                 browserViewState.value =
                     currentBrowserViewState().copy(
                         addToHomeVisible = addToHomeSupported,
                         showAutofill = showAutofill,
-                        showDuckChatOption = showDuckChat,
-                        showDuckChatHistoryOption = showDuckChatHistory,
+                        showDuckChatOption = false,
+                        showDuckChatHistoryOption = false,
                     )
             }
         }
@@ -3801,28 +3566,6 @@ class BrowserTabViewModel @Inject constructor(
         }
     }
 
-    private fun onDuckAiOnboardingPageFinishedIfApplicable() {
-        with(currentBrowserViewState()) {
-            if (!isOmnibarLockedForOnboarding || browserError != OMITTED) return
-        }
-
-        command.value = SetContentAllowsSwipeToRefresh(allowed = false)
-
-        if (suppressDuckAiOnboardingCta) {
-            duckAiOnboardingCtaUnblockJob?.cancel()
-            duckAiOnboardingCtaUnblockJob = viewModelScope.launch {
-                delay(2.seconds)
-                unblockDuckAiOnboardingCta()
-            }
-        }
-    }
-
-    private suspend fun unblockDuckAiOnboardingCta() {
-        if (!suppressDuckAiOnboardingCta || currentBrowserViewState().browserError != OMITTED) return
-        suppressDuckAiOnboardingCta = false
-        refreshCta()
-    }
-
     suspend fun refreshCta(): Cta? {
         if (currentGlobalLayoutState() is Browser) {
             val isBrowserShowing = currentBrowserViewState().browserShowing
@@ -3839,7 +3582,7 @@ class BrowserTabViewModel @Inject constructor(
                         isBrowserShowing && !isErrorShowing,
                         currentSite,
                         detectedRefreshPatterns,
-                        suppressDuckAiOnboardingCta,
+                        false,
                         brokenSitePromptUrl = currentNavigationUrl,
                     )
                 }
@@ -3865,8 +3608,6 @@ class BrowserTabViewModel @Inject constructor(
         isFreeTrialCopy: Boolean,
     ): Boolean = withContext(dispatchers.main()) {
         if (!canShowPromo()) return@withContext false
-        val currentUrl = url
-        if (currentUrl != null && duckChat.isDuckChatUrl(currentUrl.toUri())) return@withContext false
         if (!currentBrowserViewState().browserShowing && currentCtaViewState().cta != null) return@withContext false
         ctaViewState.value = currentCtaViewState().copy(
             cta = SubscriptionPromoModalCta(isFreeTrialCopy = isFreeTrialCopy, flow = flow),
@@ -3894,7 +3635,6 @@ class BrowserTabViewModel @Inject constructor(
 
     private fun showOrHideKeyboard(cta: Cta?, reportLandingFocus: Boolean = true) {
         val shouldHideKeyboard = cta?.shouldDropAddressBarFocusWhenShown() == true ||
-            duckAiFeatureState.showInputScreen.value ||
             currentBrowserViewState().lastQueryOrigin == QueryOrigin.FromBookmark ||
             (settingsDataStore.omnibarType == OmnibarType.SPLIT && alreadyShownKeyboard)
 
@@ -4106,25 +3846,7 @@ class BrowserTabViewModel @Inject constructor(
         command.value = OpenInNewTab(uri.toString(), tabId)
     }
 
-    override fun handleDuckChatUrlInCustomTab(uri: Uri): Boolean {
-        if (customTab == null) return false
-        if (!androidBrowserConfig.redirectDuckAiLinksFromCustomTab().isEnabled()) return false
-
-        openDuckChatForUrl(uri)
-        // Finish only the custom tab activity (not the whole task) so we don't tear down the Duck Chat
-        // host activity, which the singleTask BrowserActivity may launch into the same task.
-        command.value = FinishCustomTab
-        return true
-    }
-
-    private fun openDuckChatForUrl(uri: Uri) {
-        val queryParameter = uri.getQueryParameter(QUERY)
-        if (queryParameter != null) {
-            duckChat.openDuckChatWithPrefill(queryParameter, DuckChatEntryPoint.DIRECT_URL)
-        } else {
-            duckChat.openDuckChat(DuckChatEntryPoint.DIRECT_URL)
-        }
-    }
+    override fun handleDuckChatUrlInCustomTab(uri: Uri): Boolean = false
 
     override fun recoverFromRenderProcessGone() {
         webNavigationState?.let {
@@ -4179,10 +3901,6 @@ class BrowserTabViewModel @Inject constructor(
         fireDailyLaunchPixel()
 
         when (viewMode) {
-            is Omnibar.ViewMode.DuckAI -> {
-                pixel.fire(DuckChatPixelName.DUCK_CHAT_TAB_SWITCHER_OPENED)
-            }
-
             is Omnibar.ViewMode.NewTab -> {
                 val params = mapOf(PixelParameter.FROM_FOCUSED_NTP to hasFocus.toString()) + browserModeParams
                 pixel.fire(AppPixelName.TAB_MANAGER_OPENED_FROM_NEW_TAB, parameters = params)
@@ -4604,8 +4322,6 @@ class BrowserTabViewModel @Inject constructor(
         suggestRedirectJob.cancel()
         errorPagePendingDismissal = false
         browserViewState.value = currentBrowserViewState().copy(browserError = OMITTED, redirectSuggestion = null)
-        // Catches the race where pageFinished fired while browserError was still LOADING.
-        onDuckAiOnboardingPageFinishedIfApplicable()
     }
 
     fun refreshBrowserError() {
@@ -5156,68 +4872,12 @@ class BrowserTabViewModel @Inject constructor(
                 }
             }
 
-            DUCK_CHAT_FEATURE_NAME -> {
-                viewModelScope.launch(dispatchers.io()) {
-                    val response = duckChatJSHelper.processJsCallbackMessage(
-                        featureName,
-                        method,
-                        id,
-                        data,
-                        tabId = tabId,
-                        browserMode = browserMode,
-                    )
-                    withContext(dispatchers.main()) {
-                        response?.let {
-                            // Not command.value: this reply can be held open for minutes (the edit
-                            // screen) while the fragment is stopped, and the single-slot LiveData
-                            // would drop it if any other command is set in the meantime.
-                            _duckChatJsResponseChannel.send(it)
-                        }
-                        if (method == "responseReceived") {
-                            unblockDuckAiOnboardingCta()
-                        }
-                    }
-                    duckChatJSHelper.consumeTabContextPromptOnHandoff(method)?.let { event ->
-                        // There is a pending tab context prompt waiting to be sent
-                        withContext(dispatchers.main()) {
-                            _subscriptionEventDataChannel.send(event)
-                        }
-                    }
-                }
-            }
-
             SUBSCRIPTIONS_FEATURE_NAME -> {
                 viewModelScope.launch(dispatchers.io()) {
                     val response = subscriptionsJSHelper.processJsCallbackMessage(featureName, method, id, data, context)
                     withContext(dispatchers.main()) {
                         response?.let {
                             command.value = SendResponseToJs(it)
-                        }
-                    }
-                }
-            }
-
-            PAGE_CONTEXT_FEATURE_NAME -> {
-                viewModelScope.launch(dispatchers.io()) {
-                    val pageContext = pageContextJSHelper.processPageContext(featureName, method, data, tabId)
-                    if (pageContext != null) {
-                        val enrichedContext = duckChatJSHelper.enrichPageContextIfPossible(tabId, pageContext)
-                        withContext(dispatchers.main()) {
-                            command.value = Command.PageContextReceived(tabId, enrichedContext)
-                        }
-
-                        if (androidBrowserConfig.storePageContext().isEnabled()) {
-                            runCatching {
-                                val pageContextUrl = JSONObject(pageContext).optString("url", "")
-                                tabPageContextRepository.storePageContext(
-                                    tabId = tabId,
-                                    url = pageContextUrl,
-                                    serializedPageContext = pageContext,
-                                )
-                            }.onFailure {
-                                ensureActive()
-                                logcat(WARN) { "Failed to store page context: ${it.asLog()}" }
-                            }
                         }
                     }
                 }
@@ -5455,13 +5115,7 @@ class BrowserTabViewModel @Inject constructor(
     }
 
     private fun onOnboardingCtaOkButtonClicked(onboardingCta: OnboardingDaxDialogCta): Command? {
-        val shouldDismiss = when (onboardingCta) {
-            is DaxDuckAiFireButtonBrandDesignUpdateContextualCta -> false
-            else -> true
-        }
-        if (shouldDismiss) {
-            onUserDismissedCta(onboardingCta)
-        }
+        onUserDismissedCta(onboardingCta)
 
         return when (onboardingCta) {
             is OnboardingDaxDialogCta.DaxSerpCta,
@@ -5507,8 +5161,6 @@ class BrowserTabViewModel @Inject constructor(
             is OnboardingDaxDialogCta.DaxFireButtonCta,
             is DaxFireButtonBrandDesignUpdateContextualCta,
             -> LaunchFireDialogFromOnboardingDialog(onboardingCta)
-            is DaxDuckAiFireButtonBrandDesignUpdateContextualCta,
-            -> LaunchDuckAiOnboardingFireDialog
 
             else -> HideOnboardingDaxDialog(onboardingCta)
         }
@@ -5539,10 +5191,7 @@ class BrowserTabViewModel @Inject constructor(
                     command.value = LaunchSubscription(uri)
                 }
             }
-            is DaxBubbleCta.DaxEndCta,
-            is DaxDuckAiEndBubbleCta,
-            is DaxDuckAiEndBrandDesignUpdateBubbleCta,
-            -> {
+            is DaxBubbleCta.DaxEndCta -> {
                 refresh()
             }
             is DaxEndBrandDesignUpdateBubbleCta -> {
@@ -5567,18 +5216,10 @@ class BrowserTabViewModel @Inject constructor(
     }
 
     fun onFireMenuSelected(viewMode: Omnibar.ViewMode) {
-        if (viewMode == ViewMode.DuckAI) {
-            pixel.fire(DuckChatPixelName.DUCK_CHAT_FIRE_BUTTON_TAPPED)
-        }
         val cta = currentCtaViewState().cta
 
         if (cta != null) {
             ctaViewModel.onContextualFireButtonEngaged(cta)
-        }
-
-        // Defer cleanup (CTA dismiss, highlight removal) until the fire action actually completes.
-        if (cta is OnboardingDaxDialogCta.DaxDuckAiFireButtonCta || cta is DaxDuckAiFireButtonBrandDesignUpdateContextualCta) {
-            return
         }
 
         if (cta is OnboardingDaxDialogCta.DaxFireButtonCta || cta is DaxFireButtonBrandDesignUpdateContextualCta) {
@@ -5736,12 +5377,7 @@ class BrowserTabViewModel @Inject constructor(
     }
 
     private fun onUserTappedDuckAiPromptAutocomplete(prompt: String) {
-        openDuckAiQuery(prompt, autoPrompt = true, entryPoint = DuckChatEntryPoint.SUGGESTION_ASK_AI)
-
-        viewModelScope.launch {
-            val params = duckChat.createWasUsedBeforePixelParams()
-            pixel.fire(DuckChatPixelName.DUCK_CHAT_OPEN_AUTOCOMPLETE_LEGACY, parameters = params)
-        }
+        // no-op
     }
 
     /**
@@ -5753,19 +5389,8 @@ class BrowserTabViewModel @Inject constructor(
     fun openDuckAiQuery(
         query: String,
         autoPrompt: Boolean,
-        entryPoint: DuckChatEntryPoint,
     ) {
-        val duckAiUrl = duckChat.getDuckChatUrl(query, autoPrompt)
-        val hasPrompt = hasAutoSubmittedPrompt(duckAiUrl)
-        browserInteractionsPlugins.getPlugins().forEach { it.onInputSubmitted() }
-        if (hasPrompt) {
-            browserInteractionsPlugins.getPlugins().forEach { it.onAiPromptSubmitted(source = entryPoint.name.lowercase()) }
-        }
-        navigateToDuckAi(
-            url = duckAiUrl,
-            entryPoint = entryPoint,
-            hasPrompt = hasPrompt,
-        )
+        // no-op
     }
 
     /**
@@ -5774,8 +5399,7 @@ class BrowserTabViewModel @Inject constructor(
      * new-tab-or-stay-on-NTP rule as [openDuckAiQuery].
      */
     fun openDuckAiChatById(chatUrl: String) {
-        browserInteractionsPlugins.getPlugins().forEach { it.onChatSelected() }
-        navigateToDuckAi(chatUrl, DuckChatEntryPoint.CHAT_HISTORY_OPEN_CHAT, hasPrompt = false)
+        // no-op
     }
 
     /**
@@ -5783,103 +5407,35 @@ class BrowserTabViewModel @Inject constructor(
      * message, not the initial one that opened the chat).
      */
     fun onDuckAiChatPromptSubmitted() {
-        // onInputSubmitted() too: an in-chat follow-up is still "the bar was used" for the old
-        // post-idle-session event, which only listens for that generic signal.
-        browserInteractionsPlugins.getPlugins().forEach { it.onInputSubmitted() }
-        duckAiSessionCallback.onPromptSubmitted(tabId)
-        viewModelScope.launch(dispatchers.io()) {
-            // The chat was already open, so its entry point was recorded when it was first navigated to.
-            val source = duckAiTabSessionRepository.getEntryPointSource(tabId)
-            browserInteractionsPlugins.getPlugins().forEach { it.onAiPromptSubmitted(source = source) }
-        }
-    }
-
-    private fun navigateToDuckAi(
-        url: String,
-        entryPoint: DuckChatEntryPoint,
-        hasPrompt: Boolean,
-    ) {
-        val opensNewTab = currentBrowserViewState().browserShowing
-        duckChat.reportDuckChatEntry(entryPoint, opensNewTab = opensNewTab, hasPrompt = hasPrompt)
-        if (!opensNewTab) {
-            submitQuery(url, QueryOrigin.FromUser, QuerySubmissionSource.INTERNAL_NAVIGATION)
-        } else {
-            command.value = OpenInNewTab(query = url, sourceTabId = tabId)
-        }
+        // no-op
     }
 
     fun openNewDuckChat(viewMode: ViewMode) {
-        if (viewMode == ViewMode.DuckAI) {
-            pixel.fire(DuckChatPixelName.DUCK_CHAT_OMNIBAR_NEW_CHAT_TAPPED)
-            duckAiSessionCallback.onNewChatCreated(tabId)
-            viewModelScope.launch {
-                val subscriptionEvent = duckChatJSHelper.onNativeAction(NativeAction.NEW_CHAT)
-                _subscriptionEventDataChannel.send(subscriptionEvent)
-            }
-        } else {
-            val url = duckChat.getDuckChatUrl("", false)
-            val entryPoint = if (viewMode == ViewMode.NewTab) {
-                DuckChatEntryPoint.BROWSING_MENU_NTP
-            } else {
-                DuckChatEntryPoint.BROWSING_MENU_WEBPAGE
-            }
-            duckChat.reportDuckChatEntry(entryPoint, opensNewTab = true, hasPrompt = false)
-            command.value = OpenInNewTab(url, tabId)
-            pixel.fire(DuckChatPixelName.DUCK_CHAT_SETTINGS_NEW_CHAT_TAB_TAPPED)
-        }
+        // no-op
     }
 
     fun openDuckChatSidebar() {
-        viewModelScope.launch {
-            val subscriptionEvent = duckChatJSHelper.onNativeAction(NativeAction.SIDEBAR)
-            _subscriptionEventDataChannel.send(subscriptionEvent)
-        }
+        // no-op
     }
 
     fun onCustomizeResponsesClicked() {
-        viewModelScope.launch {
-            val subscriptionEvent = duckChatJSHelper.onNativeAction(NativeAction.CUSTOMIZE_RESPONSES)
-            _subscriptionEventDataChannel.send(subscriptionEvent)
-        }
+        // no-op
     }
 
     fun openDuckChatHistory() {
-        if (currentBrowserViewState().showDuckChatHistoryOption) {
-            command.value = Command.LaunchDuckChatHistory
-        } else {
-            viewModelScope.launch {
-                val subscriptionEvent = duckChatJSHelper.onNativeAction(NativeAction.SIDEBAR)
-                _subscriptionEventDataChannel.send(subscriptionEvent)
-            }
-        }
+        // no-op
     }
 
     private fun refreshShowDuckChatHistoryOption() {
-        viewModelScope.launch {
-            val available = duckChat.isChatHistoryAvailable()
-            withContext(dispatchers.main()) {
-                browserViewState.value = currentBrowserViewState().copy(showDuckChatHistoryOption = available)
-            }
-        }
+        // no-op
     }
 
     fun openDuckChatSettings(viewMode: ViewMode) {
-        pixel.fire(DuckChatPixelName.DUCK_CHAT_DUCK_AI_SETTINGS_TAPPED)
-        if (viewMode == ViewMode.DuckAI) {
-            viewModelScope.launch {
-                val subscriptionEvent = duckChatJSHelper.onNativeAction(NativeAction.DUCK_AI_SETTINGS)
-                _subscriptionEventDataChannel.send(subscriptionEvent)
-            }
-        } else {
-            command.value = OpenInNewTab(duckChat.getDuckChatSettingsUrl(), tabId)
-        }
+        // no-op
     }
 
     fun collectPageContext() {
-        viewModelScope.launch {
-            val subscriptionEvent = pageContextJSHelper.collectPageContext()
-            _subscriptionEventDataChannel.send(subscriptionEvent)
-        }
+        // no-op
     }
 
     fun onDuckChatOmnibarButtonClicked(
@@ -5887,60 +5443,18 @@ class BrowserTabViewModel @Inject constructor(
         hasFocus: Boolean,
         isNtp: Boolean,
     ) {
-        viewModelScope.launch {
-            command.value = HideKeyboardForChat
-        }
-
-        if (!duckAiFeatureState.showInputScreen.value) {
-            pixel.fire(DuckChatPixelName.DUCK_CHAT_EXPERIMENTAL_LEGACY_OMNIBAR_AICHAT_BUTTON_PRESSED)
-            pixel.fire(DuckChatPixelName.DUCK_CHAT_EXPERIMENTAL_LEGACY_OMNIBAR_AICHAT_BUTTON_PRESSED_DAILY, type = Daily())
-        }
-
-        when {
-            // Contextual chat is about the page you're viewing, so on a page it's only offered from
-            // the unfocused omnibar: once focused (composing), fall through to full-screen Duck.ai.
-            // The NTP omnibar is focused from the start, so there the menu hangs off an empty query
-            // instead, and only when it carries the Chats entry alongside New Chat.
-            duckAiFeatureState.showContextualMode.value &&
-                if (isNtp) query.isNullOrBlank() else !hasFocus -> {
-                command.value = Command.ShowDuckAIContextualMode(tabId, url)
-            }
-
-            else -> openDuckChatFromOmnibar(query, hasFocus, isNtp)
-        }
+        // no-op
     }
 
     /**
-     * Opens Duck.ai straight from the address bar icon. Also the fallback when the NTP menu declines
-     * to show, so that path keeps behaving exactly as it did before the menu existed.
+     * Opens Duck.ai straight from the address bar icon. Removed: Duck.ai is no longer part of the app.
      */
     fun openDuckChatFromOmnibar(
         query: String?,
         hasFocus: Boolean,
         isNtp: Boolean,
     ) {
-        val (url, submittedAiPrompt) = when {
-            hasFocus && isNtp && query.isNullOrBlank() -> duckChat.getDuckChatUrl(query ?: "", false) to false
-            hasFocus && queryUrlPredictor.isUrl(query ?: "") -> (query ?: "") to false
-            hasFocus -> duckChat.getDuckChatUrl(query ?: "", true) to !query.isNullOrBlank()
-            else -> duckChat.getDuckChatUrl(query ?: "", false) to false
-        }
-        if (duckChat.isDuckChatUrl(url.toUri())) {
-            if (submittedAiPrompt) {
-                browserInteractionsPlugins.getPlugins().forEach {
-                    it.onAiPromptSubmitted(source = DuckChatEntryPoint.ADDRESS_BAR_ICON.name.lowercase())
-                }
-            }
-            duckChat.reportDuckChatEntry(
-                DuckChatEntryPoint.ADDRESS_BAR_ICON,
-                opensNewTab = false,
-                hasPrompt = submittedAiPrompt,
-            )
-            submitQuery(url, QueryOrigin.FromUser, QuerySubmissionSource.INTERNAL_NAVIGATION)
-        } else {
-            // The typed-URL branch above: genuinely a URL submission, not a Duck.ai one.
-            onUserSubmittedQuery(url)
-        }
+        // no-op
     }
 
     fun onVpnMenuClicked() {
@@ -6030,8 +5544,7 @@ class BrowserTabViewModel @Inject constructor(
     }
 
     fun sendKeyboardFocusedPixel() {
-        pixel.fire(DuckChatPixelName.PRODUCT_TELEMETRY_SURFACE_KEYBOARD_USAGE)
-        pixel.fire(DuckChatPixelName.PRODUCT_TELEMETRY_SURFACE_KEYBOARD_USAGE_DAILY, type = Daily())
+        // no-op: Duck.ai telemetry removed
     }
 
     fun onStartTrackersAnimation() {
@@ -6042,17 +5555,7 @@ class BrowserTabViewModel @Inject constructor(
     }
 
     fun dismissDuckAiFireOnboardingCta() {
-        viewModelScope.launch {
-            // Custom AI onboarding defers dismissal to the end of the linear orchestrator
-            // run, so the CTA survives if the app is killed mid-onboarding and the flow
-            // has to re-run on next launch.
-            if (customAiOnboardingStore.isEnabled()) return@launch
-
-            val cta = ctaViewState.value?.cta ?: return@launch
-            if (cta is OnboardingDaxDialogCta.DaxDuckAiFireButtonCta || cta is DaxDuckAiFireButtonBrandDesignUpdateContextualCta) {
-                ctaViewModel.onUserDismissedCta(cta = cta)
-            }
-        }
+        // no-op
     }
 
     fun onRedirectSuggestionClicked(url: String) {
