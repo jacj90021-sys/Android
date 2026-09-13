@@ -84,15 +84,6 @@
                 app:primaryTextTruncated="false"
                 app:secondaryText="@string/settingsHeroFireAnimation" />
 
-            <!-- Clear Duck.ai Chats -->
-            <com.duckduckgo.common.ui.view.listitem.TwoLineListItem
-                android:id="@+id/clearDuckAiDataSetting"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:primaryText="@string/settingsClearAiDataTitle"
-                app:secondaryText="@string/settingsClearAiDataDeleteMessage"
-                app:showSwitch="true" />
-
             <com.duckduckgo.common.ui.view.divider.HorizontalDivider
                 android:id="@+id/fireproofSitesDivider"
                 android:layout_width="match_parent"

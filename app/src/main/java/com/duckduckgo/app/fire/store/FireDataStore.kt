@@ -56,7 +56,7 @@ interface FireDataStore {
 
     /**
      * Sets the manual clear options for manual Fire actions.
-     * @param options Set of options to clear. Can be any combination of TABS, DATA, and DUCKAI_CHATS.
+     * @param options Set of options to clear. Can be any combination of TABS and DATA.
      */
     suspend fun setManualClearOptions(options: Set<FireClearOption>)
 
@@ -87,7 +87,7 @@ interface FireDataStore {
 
     /**
      * Sets the automatic clear options.
-     * @param options Set of options to clear automatically. Can be any combination of TABS, DATA, and DUCKAI_CHATS.
+     * @param options Set of options to clear automatically. Can be any combination of TABS and DATA.
      */
     suspend fun setAutomaticClearOptions(options: Set<FireClearOption>)
 
@@ -155,9 +155,6 @@ class SharedPreferencesFireDataStore @Inject constructor(
                     add(FireClearOption.DATA)
                 }
             }
-            if (settingsDataStore.clearDuckAiData) {
-                add(FireClearOption.DUCKAI_CHATS)
-            }
         }
     }
 
@@ -179,9 +176,6 @@ class SharedPreferencesFireDataStore @Inject constructor(
     private suspend fun getDefaultManualOptions(): Set<FireClearOption> = withContext(dispatcherProvider.io()) {
         buildSet {
             addAll(DEFAULT_OPTIONS)
-            if (settingsDataStore.clearDuckAiData) {
-                add(FireClearOption.DUCKAI_CHATS)
-            }
         }
     }
 

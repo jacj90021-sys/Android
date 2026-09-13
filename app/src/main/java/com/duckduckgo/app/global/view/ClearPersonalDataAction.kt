@@ -37,7 +37,6 @@ import com.duckduckgo.common.utils.DefaultDispatcherProvider
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.extensions.toTldPlusOneOrSelf
 import com.duckduckgo.cookies.api.DuckDuckGoCookieManager
-import com.duckduckgo.duckchat.api.DuckAiHostProvider
 import com.duckduckgo.history.api.NavigationHistory
 import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.site.permissions.api.SitePermissionsManager
@@ -69,13 +68,7 @@ interface ClearDataAction {
     suspend fun clearBrowserDataOnly(shouldFireDataClearPixel: Boolean)
 
     /**
-     * Clears only DuckAi chats.
-     */
-    suspend fun clearDuckAiChatsOnly()
-
-    /**
      * Clears browsing data for specific domains via WebStorageCompat.
-     * Duck.ai domains (duckduckgo.com, duck.ai) are always excluded — their data is managed separately.
      * @param domains set of eTLD+1 domains to clear
      * @return [ClearDataResult.Success] if data was cleared, [ClearDataResult.FeatureNotSupported] if WebView doesn't support this feature,
      *         or [ClearDataResult.Error] if an exception occurred during deletion
@@ -120,7 +113,6 @@ class ClearPersonalDataAction(
     private val webTrackersBlockedRepository: WebTrackersBlockedRepository,
     private val tabVisitedSitesRepository: TabVisitedSitesRepository,
     private val webViewCapabilityChecker: WebViewCapabilityChecker,
-    duckAiHostProvider: DuckAiHostProvider,
     private val siteDataCleaner: SiteDataCleaner,
     private val sitePreferencesDataClearer: SitePreferencesDataClearer,
 ) : ClearDataAction {
@@ -160,21 +152,6 @@ class ClearPersonalDataAction(
         clearDataGranularlyAsync(shouldFireDataClearPixel)
 
         logcat(INFO) { "Finished clearing browser data" }
-    }
-
-    override suspend fun clearDuckAiChatsOnly() {
-        withContext(dispatchers.main()) {
-            dataManager.clearData(
-                webView = createWebView(),
-                webStorage = createWebStorage(),
-                shouldClearBrowserData = false,
-                shouldClearDuckAiData = true,
-            )
-
-            logcat(INFO) { "Finished clearing chats (web storage)" }
-        }
-
-        logcat(INFO) { "Finished clearing chats" }
     }
 
     override suspend fun clearDataForSpecificDomains(
@@ -268,7 +245,7 @@ class ClearPersonalDataAction(
     // clearDataForSpecificDomains receives from the visited-sites repository.
     // To protect a new domain, add its hostname here — normalisation is handled automatically.
     private val duckDuckGoDomains: Set<String> by lazy {
-        setOf("duckduckgo.com", duckAiHostProvider.getHost())
+        setOf("duckduckgo.com")
             .map { host -> "https://$host".toHttpUrlOrNull()?.topPrivateDomain() ?: host }
             .toSet()
     }

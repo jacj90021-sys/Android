@@ -54,7 +54,6 @@ import com.duckduckgo.dataclearing.api.fire.FireDialogProvider.FireDialogOrigin.
 import com.duckduckgo.di.scopes.FragmentScope
 import com.duckduckgo.downloads.api.DownloadsRepository
 import com.duckduckgo.downloads.store.DownloadStatus
-import com.duckduckgo.duckchat.api.DuckChat
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -90,7 +89,6 @@ class SingleTabFireDialogViewModel @Inject constructor(
     private val fireModeAvailability: FireModeAvailability,
     private val webViewCapabilityChecker: WebViewCapabilityChecker,
     private val downloadsRepository: DownloadsRepository,
-    private val duckChat: DuckChat,
     private val brandDesignUpdateToggles: OnboardingBrandDesignUpdateToggles,
     private val browserMode: BrowserMode,
 ) : ViewModel() {
@@ -206,7 +204,7 @@ class SingleTabFireDialogViewModel @Inject constructor(
                 val stateData = (viewState.value as? ViewState.Loaded)?.stateData
                 dataClearingWideEvent.start(
                     entryPoint = DataClearingWideEvent.EntryPoint.ALL_TABS_BURN,
-                    clearOptions = setOf(FireClearOption.TABS, FireClearOption.DATA, FireClearOption.DUCKAI_CHATS),
+                    clearOptions = setOf(FireClearOption.TABS, FireClearOption.DATA),
                     browserMode = browserMode,
                     tabType = stateData?.let { if (it.isDuckAiTab) TabType.AI else TabType.WEB },
                     tabCount = stateData?.tabCount,
@@ -250,7 +248,7 @@ class SingleTabFireDialogViewModel @Inject constructor(
             withContext(dispatcherProvider.io()) {
                 dataClearingWideEvent.start(
                     entryPoint = DataClearingWideEvent.EntryPoint.DUCKAI_CHAT_DELETION,
-                    clearOptions = setOf(FireClearOption.DUCKAI_CHATS),
+                    clearOptions = setOf(FireClearOption.TABS, FireClearOption.DATA),
                     browserMode = browserMode,
                 )
                 try {
@@ -303,16 +301,10 @@ class SingleTabFireDialogViewModel @Inject constructor(
             } else {
                 DataClearingWideEvent.EntryPoint.SINGLE_TAB_BURN
             }
-            val clearOptions = if (isContextualChatClear) {
-                setOf(FireClearOption.DUCKAI_CHATS)
-            } else {
-                // Burning a tab always takes the tab, its site data and its chat
-                setOf(
-                    FireClearOption.TABS,
-                    FireClearOption.DATA,
-                    FireClearOption.DUCKAI_CHATS,
-                )
-            }
+            val clearOptions = setOf(
+                FireClearOption.TABS,
+                FireClearOption.DATA,
+            )
 
             val result = withContext(dispatcherProvider.io()) {
                 dataClearingWideEvent.start(
@@ -385,14 +377,13 @@ class SingleTabFireDialogViewModel @Inject constructor(
         val isTabAware = dialogOrigin !is FireDialogOrigin.ChatHistory &&
             dialogOrigin !is FireDialogOrigin.ChatAutocomplete
 
-        val isDuckAiChatsSelected =
-            isTabAware && fireDataStore.isManualClearOptionSelected(FireClearOption.DUCKAI_CHATS)
+        val isDuckAiChatsSelected = false
         val isDeleteBrowsingDataSupported = isTabAware && webViewCapabilityChecker.isSupported(DeleteBrowsingData)
         val downloads = if (isTabAware) downloadsRepository.getDownloads() else emptyList()
         val targetTabUrl = if (isTabAware) resolveTargetTabUrl(dialogOrigin) else null
         val tabCount = if (isTabAware) tabRepository.getOpenTabCount() else 0
         val isDuckAiTab = dialogOrigin == DuckAiContextualChat ||
-            targetTabUrl?.let { duckChat.isDuckChatUrl(it.toUri()) } == true
+            targetTabUrl?.let { url -> url.toUri().host?.let { host -> host == "duck.ai" || host.endsWith(".duck.ai") } } == true
         val isFireAnimationUpdateEnabled = withContext(dispatcherProvider.io()) {
             brandDesignUpdateToggles.fireAnimationUpdate().isEnabled()
         }

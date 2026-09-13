@@ -26,15 +26,12 @@ import com.duckduckgo.app.fire.store.FireDataStore
 import com.duckduckgo.app.onboardingbranddesignupdate.OnboardingBrandDesignUpdateToggles
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.settings.clear.FireAnimation
-import com.duckduckgo.app.settings.clear.FireClearOption.DUCKAI_CHATS
 import com.duckduckgo.app.settings.clear.getPixelValue
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.Daily
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -53,8 +50,6 @@ class DataClearingSettingsViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
     private val fireAnimationLoader: FireAnimationLoader,
     private val pixel: Pixel,
-    private val duckChat: DuckChat,
-    private val duckAiFeatureState: DuckAiFeatureState,
     private val fireDataStore: FireDataStore,
     private val dispatcherProvider: DispatcherProvider,
     fireproofWebsiteRepository: FireproofWebsiteRepository,
@@ -64,8 +59,6 @@ class DataClearingSettingsViewModel @Inject constructor(
     data class ViewState(
         val selectedFireAnimation: FireAnimation = FireAnimation.HeroFire,
         val isFireAnimationUpdateEnabled: Boolean = false,
-        val clearDuckAiData: Boolean = false,
-        val showClearDuckAiDataSetting: Boolean = false,
         val fireproofWebsitesCount: Int = 0,
         val automaticallyClearingEnabled: Boolean = false,
     )
@@ -108,18 +101,10 @@ class DataClearingSettingsViewModel @Inject constructor(
             val initialFireAnimation = withContext(dispatcherProvider.io()) {
                 settingsDataStore.selectedFireAnimation
             }
-            val initialClearDuckAi = withContext(dispatcherProvider.io()) {
-                fireDataStore.isManualClearOptionSelected(DUCKAI_CHATS)
-            }
-            val initialShowClearDuckAi = withContext(dispatcherProvider.io()) {
-                duckChat.wasOpenedBefore() && duckAiFeatureState.showClearDuckAIChatHistory.value
-            }
             _viewState.update {
                 it.copy(
                     selectedFireAnimation = initialFireAnimation,
                     isFireAnimationUpdateEnabled = isFireAnimationUpdateEnabled,
-                    clearDuckAiData = initialClearDuckAi,
-                    showClearDuckAiDataSetting = initialShowClearDuckAi,
                 )
             }
         }
@@ -160,20 +145,6 @@ class DataClearingSettingsViewModel @Inject constructor(
 
     fun onLaunchedFromNotification(pixelName: String) {
         pixel.fire(pixelName)
-    }
-
-    fun onClearDuckAiDataToggled(isChecked: Boolean) {
-        viewModelScope.launch(dispatcherProvider.io()) {
-            _viewState.update { it.copy(clearDuckAiData = isChecked) }
-
-            if (isChecked) {
-                fireDataStore.addManualClearOption(DUCKAI_CHATS)
-                pixel.fire(AppPixelName.SETTINGS_CLEAR_DUCK_AI_DATA_TOGGLED_ON)
-            } else {
-                fireDataStore.removeManualClearOption(DUCKAI_CHATS)
-                pixel.fire(AppPixelName.SETTINGS_CLEAR_DUCK_AI_DATA_TOGGLED_OFF)
-            }
-        }
     }
 
     fun onClearDataActionClicked() {

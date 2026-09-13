@@ -37,8 +37,6 @@ import com.duckduckgo.browsermode.api.BrowserModeStateHolder
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.customtabs.api.CustomTabDetector
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckAiSessionCallback
-import com.duckduckgo.duckchat.api.DuckChat
 import com.duckduckgo.newtabpage.api.NtpAfterIdleManager
 import com.squareup.anvil.annotations.ContributesMultibinding
 import dagger.SingleInstanceIn
@@ -62,7 +60,6 @@ class FirstScreenHandlerImpl @Inject constructor(
     private val appBuildConfig: AppBuildConfig,
     private val dispatcherProvider: DispatcherProvider,
     private val duckDuckGoUrlDetector: DuckDuckGoUrlDetector,
-    private val duckChat: DuckChat,
     private val tabRepositoryProvider: BrowserModeDataProvider<TabRepository>,
     private val ntpAfterIdleManager: NtpAfterIdleManager,
     private val systemAutofillEngagement: SystemAutofillEngagement,
@@ -72,7 +69,6 @@ class FirstScreenHandlerImpl @Inject constructor(
     private val returnSessionLandingListener: ReturnSessionLandingListener,
     @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
     private val idleThresholdResolver: IdleThresholdResolver,
-    private val duckAiSessionCallback: DuckAiSessionCallback,
 ) : BrowserLifecycleObserver {
 
     // Launch boundary: process-lifecycle callback, no activity graph exists to provide a frozen mode.
@@ -114,9 +110,6 @@ class FirstScreenHandlerImpl @Inject constructor(
             ensureNewUserDefault()
             val resolvedLanding = handleFirstScreen(isFreshLaunch, preAppliedFreshNtpTreatment)
             returnSessionLandingListener.onReturnLandingResolved(resolvedLanding)
-            // Report a duck.ai tab launch to the Ai session wide event.
-            val duckAiTab = tabRepository.getSelectedTab().takeIf { resolvedLanding.landing == ReturnSessionLanding.DUCK_AI }
-            duckAiSessionCallback.onLaunchLandingResolved(duckAiTab?.tabId, duckAiTab?.url)
         }
     }
 
@@ -150,7 +143,7 @@ class FirstScreenHandlerImpl @Inject constructor(
             val lastBackgrounded = settingsDataStore.lastSessionBackgroundTimestamp
             val wasIdle = computeWasIdle()
             if (lastBackgrounded == 0L || wasIdle) {
-                if (isVoiceSessionActiveOnCurrentTab() || isActiveTabCustomTab()) {
+                if (isActiveTabCustomTab()) {
                     return resolveCurrentLanding(currentMode)
                 }
                 val result = showOnAppLaunchOptionHandler.handleAfterInactivityOption(wasIdle = wasIdle, currentMode = currentMode)
@@ -162,9 +155,6 @@ class FirstScreenHandlerImpl @Inject constructor(
                 )
             }
         } else if (isFreshLaunch && showOnAppLaunchFeature.self().isEnabled()) {
-            if (isVoiceSessionActiveOnCurrentTab()) {
-                return resolveCurrentLanding(currentMode)
-            }
             return resolveReturnLanding(showOnAppLaunchOptionHandler.handleAppLaunchOption(currentMode))
         }
         return resolveCurrentLanding(currentMode)
@@ -187,18 +177,10 @@ class FirstScreenHandlerImpl @Inject constructor(
         val afterIdle = (result.treatment ?: fallbackTreatment) != null
         val landing = when {
             result.destinationUrl.isNullOrBlank() -> if (afterIdle) ReturnSessionLanding.NTP else ReturnSessionLanding.NTP_USER_INITIATED
-            duckChat.isDuckChatUrl(result.destinationUrl.toUri()) -> ReturnSessionLanding.DUCK_AI
             duckDuckGoUrlDetector.isDuckDuckGoQueryUrl(result.destinationUrl) -> ReturnSessionLanding.SERP
             else -> ReturnSessionLanding.WEB
         }
         return ReturnSessionLandingResult(afterIdle = afterIdle, landing = landing)
-    }
-
-    private suspend fun isVoiceSessionActiveOnCurrentTab(): Boolean = withContext(dispatcherProvider.io()) {
-        val selectedTab = tabRepository.getSelectedTab()
-        return@withContext selectedTab?.tabId?.let {
-            duckChat.isVoiceChatSessionActive(it)
-        } == true
     }
 
     private suspend fun isActiveTabCustomTab(): Boolean = withContext(dispatcherProvider.io()) {

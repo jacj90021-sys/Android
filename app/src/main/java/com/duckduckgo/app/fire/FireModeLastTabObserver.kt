@@ -123,7 +123,6 @@ class FireModeLastTabObserver @Inject constructor(
             clearOptions = setOf(
                 FireClearOption.TABS,
                 FireClearOption.DATA,
-                FireClearOption.DUCKAI_CHATS,
             ),
             browserMode = BrowserMode.FIRE,
         )

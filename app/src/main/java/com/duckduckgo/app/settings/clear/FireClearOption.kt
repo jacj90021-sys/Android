@@ -23,5 +23,4 @@ package com.duckduckgo.app.settings.clear
 enum class FireClearOption {
     TABS,
     DATA,
-    DUCKAI_CHATS,
 }

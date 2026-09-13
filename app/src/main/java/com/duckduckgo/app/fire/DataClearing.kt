@@ -38,9 +38,6 @@ import com.duckduckgo.browsermode.api.FireModeAvailability
 import com.duckduckgo.dataclearing.api.plugin.ClearableData
 import com.duckduckgo.dataclearing.api.plugin.DataClearingTrigger
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.impl.store.DuckChatContextualDataStore
 import com.duckduckgo.history.api.NavigationHistory
 import com.squareup.anvil.annotations.ContributesBinding
 import dagger.SingleInstanceIn
@@ -68,32 +65,17 @@ class DataClearing @Inject constructor(
     private val unsentForgetAllPixelStore: UnsentForgetAllPixelStore,
     private val settingsDataStore: SettingsDataStore,
     private val dataClearerTimeKeeper: BackgroundTimeKeeper,
-    private val duckAiFeatureState: DuckAiFeatureState,
     private val dataClearingWideEvent: DataClearingWideEvent,
     private val tabVisitedSitesRepository: TabVisitedSitesRepository,
     private val navigationHistory: NavigationHistory,
     private val tabRepositoryProvider: BrowserModeDataProvider<TabRepository>,
     private val fireModeAvailability: FireModeAvailability,
-    private val duckChat: DuckChat,
-    private val contextualDataStore: DuckChatContextualDataStore,
     private val showOnAppLaunchOptionDataStore: ShowOnAppLaunchOptionDataStore,
     private val dataClearingTrigger: DataClearingTrigger,
     private val fireModeDataClearingState: FireModeDataClearingState,
 ) : ManualDataClearing, AutomaticDataClearing {
 
     override suspend fun clearSingleTabData(tabId: String, replaceCurrentTab: Boolean, browserMode: BrowserMode): ClearDataResult {
-        suspend fun clearContextualChatDataIfNeeded(tabId: String) {
-            val isDuckAiChatHistoryClearingEnabled = fireDataStore.getManualClearOptions()
-                .contains(FireClearOption.DUCKAI_CHATS)
-
-            if (isDuckAiChatHistoryClearingEnabled) {
-                val contextualTabChatUrl = contextualDataStore.getTabChatUrl(tabId)
-                clearDuckAiChatIfNeeded(contextualTabChatUrl, browserMode)
-
-                contextualDataStore.clearTabChatUrl(tabId)
-            }
-        }
-
         logcat { "Performing single tab clear for tab: $tabId in mode: $browserMode" }
 
         val tabRepository = tabRepositoryProvider.forMode(browserMode)
@@ -112,9 +94,6 @@ class DataClearing @Inject constructor(
         }
         val tabUrl = tabRepository.getTab(tabId)?.url
 
-        // Reset this tab's URL before dispatching the chat clear: the tabs-cleanup plugin matches
-        // tabs by chatID, and we don't want this tab caught by that match — it stays open with a
-        // new chat URL. Other tabs at the same chatID (duplicates) do get closed, which is desired.
         if (replaceCurrentTab) {
             val url = getNewTabUrl(tabUrl)
             (tabRepository as TabAtomicOperations).replaceTabWithNewTab(tabId, url)
@@ -122,42 +101,28 @@ class DataClearing @Inject constructor(
             tabRepository.deleteTabs(listOf(tabId))
         }
 
-        clearDuckAiChatIfNeeded(tabUrl, browserMode)
-        clearContextualChatDataIfNeeded(tabId)
         navigationHistory.removeHistoryForTab(tabId)
 
         logcat { "Single tab clear completed for tab: $tabId" }
         return clearDataResult
     }
 
+    override suspend fun clearSelectedDuckAiChats(chatUrls: Set<String>, browserMode: BrowserMode) {
+        if (chatUrls.isEmpty()) return
+        dataClearingTrigger.clearData(setOf(ClearableData.DuckChats.SelectedForMode(chatUrls, browserMode)))
+    }
+
     override suspend fun clearTabContextualChat(tabId: String, browserMode: BrowserMode): ClearDataResult {
-        suspend fun deleteContextualChat(tabId: String) {
-            val contextualTabChatUrl = contextualDataStore.getTabChatUrl(tabId)
-            clearDuckAiChatIfNeeded(contextualTabChatUrl, browserMode)
-        }
-
-        logcat { "Performing contextual sheet clear for tab: $tabId" }
-
-        deleteContextualChat(tabId)
-
-        logcat { "Contextual sheet clear completed for tab: $tabId" }
+        logcat { "Contextual chat clear requested for tab: $tabId" }
         return ClearDataResult.Success
     }
 
     private suspend fun getNewTabUrl(tabUrl: String?): String? {
         val option = showOnAppLaunchOptionDataStore.optionFlow.firstOrNull()
-        val isDuckChat = tabUrl?.toUri()?.let { duckChat.isDuckChatUrl(it) } == true
         return when {
-            isDuckChat -> duckChat.getDuckChatUrl("", autoPrompt = false)
             option is ShowOnAppLaunchOption.SpecificPage -> option.url
             else -> null
         }
-    }
-
-    private suspend fun clearDuckAiChatIfNeeded(tabUrl: String?, browserMode: BrowserMode) {
-        logcat { "clearDuckAiChatIfNeeded url=$tabUrl mode=$browserMode" }
-        if (tabUrl == null) return
-        dataClearingTrigger.clearData(setOf(ClearableData.DuckChats.SelectedForMode(setOf(tabUrl), browserMode)))
     }
 
     override suspend fun clearDataUsingManualFireOptions(
@@ -193,9 +158,7 @@ class DataClearing @Inject constructor(
             shouldFireDataClearPixel = true,
         )
 
-        val wasDuckAiChatsCleared = options.contains(FireClearOption.DUCKAI_CHATS) &&
-            duckAiFeatureState.showClearDuckAIChatHistory.value
-        val wasDataCleared = options.contains(FireClearOption.DATA) || wasDuckAiChatsCleared
+        val wasDataCleared = options.contains(FireClearOption.DATA)
         if (shouldRestartIfRequired && wasDataCleared) {
             dataClearingWideEvent.finishSuccess() // If there is an open wide event, complete it before killing the process.
             clearDataAction.killAndRestartProcess(notifyDataCleared = false)
@@ -212,9 +175,7 @@ class DataClearing @Inject constructor(
 
         clearDataAction.setAppUsedSinceLastClearFlag(!killProcessIfNeeded)
 
-        val wasDuckAiChatsCleared = options.contains(FireClearOption.DUCKAI_CHATS) &&
-            duckAiFeatureState.showClearDuckAIChatHistory.value
-        val wasDataCleared = options.contains(FireClearOption.DATA) || wasDuckAiChatsCleared
+        val wasDataCleared = options.contains(FireClearOption.DATA)
         if (killProcessIfNeeded && wasDataCleared) {
             dataClearingWideEvent.finishSuccess()
             clearDataAction.killProcess()
@@ -278,12 +239,6 @@ class DataClearing @Inject constructor(
         return fireDataStore.getAutomaticClearOptions().isNotEmpty()
     }
 
-    override suspend fun clearSelectedDuckAiChats(chatUrls: Set<String>, browserMode: BrowserMode) {
-        if (chatUrls.isEmpty()) return
-        if (!duckAiFeatureState.showClearDuckAIChatHistory.value) return
-        dataClearingTrigger.clearData(setOf(ClearableData.DuckChats.SelectedForMode(chatUrls, browserMode)))
-    }
-
     /**
      * Performs granular data clearing based on the provided options.
      *
@@ -297,15 +252,9 @@ class DataClearing @Inject constructor(
 
         val shouldClearTabs = FireClearOption.TABS in options
         val shouldClearData = FireClearOption.DATA in options
-        val shouldClearDuckAiChats = FireClearOption.DUCKAI_CHATS in options &&
-            duckAiFeatureState.showClearDuckAIChatHistory.value
 
         if (shouldClearTabs) clearDataAction.clearTabsOnly()
         if (shouldClearData) clearDataAction.clearBrowserDataOnly(shouldFireDataClearPixel)
-        if (shouldClearDuckAiChats) {
-            clearDataAction.clearDuckAiChatsOnly()
-            dataClearingTrigger.clearData(setOf(ClearableData.DuckChats.AllForMode(BrowserMode.REGULAR)))
-        }
 
         logcat { "Granular clear completed" }
     }
@@ -327,7 +276,6 @@ class DataClearing @Inject constructor(
                 setOf(
                     ClearableData.Tabs.AllForMode(BrowserMode.FIRE),
                     ClearableData.BrowserData.AllForMode(BrowserMode.FIRE),
-                    ClearableData.DuckChats.AllForMode(BrowserMode.FIRE),
                 ),
             )
         }

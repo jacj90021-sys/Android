@@ -29,8 +29,6 @@ import com.duckduckgo.app.statistics.pixels.Pixel.PixelParameter.DATA_CLEAR_TYPE
 import com.duckduckgo.app.statistics.pixels.Pixel.PixelParameter.DATA_CLEAR_TYPE_TABS
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.ActivityScope
-import com.duckduckgo.duckchat.api.DuckAiFeatureState
-import com.duckduckgo.duckchat.api.DuckChat
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -45,8 +43,6 @@ import javax.inject.Inject
 @ContributesViewModel(ActivityScope::class)
 class AutomaticDataClearingSettingsViewModel @Inject constructor(
     private val fireDataStore: FireDataStore,
-    private val duckChat: DuckChat,
-    duckAiFeatureState: DuckAiFeatureState,
     private val dispatcherProvider: DispatcherProvider,
     private val pixel: Pixel,
 ) : ViewModel() {
@@ -55,8 +51,6 @@ class AutomaticDataClearingSettingsViewModel @Inject constructor(
         val automaticClearingEnabled: Boolean = false,
         val clearTabs: Boolean = false,
         val clearData: Boolean = false,
-        val clearDuckAiChats: Boolean = false,
-        val showDuckAiChatsOption: Boolean = false,
         val clearWhenOption: ClearWhenOption = ClearWhenOption.APP_EXIT_ONLY,
     )
 
@@ -65,28 +59,16 @@ class AutomaticDataClearingSettingsViewModel @Inject constructor(
     }
 
     private val _commands = Channel<Command>(1, BufferOverflow.DROP_OLDEST)
-    private var duckChatWasOpenedBefore = MutableStateFlow(false)
     private var initialOptions: Set<FireClearOption>? = null
 
     val viewState: Flow<ViewState> = combine(
         fireDataStore.getAutomaticClearOptionsFlow(),
         fireDataStore.getAutomaticallyClearWhenOptionFlow(),
-        duckAiFeatureState.showClearDuckAIChatHistory,
-        duckChatWasOpenedBefore,
-    ) { options, clearWhenOption, showClearDuckAiChatHistory, wasOpenedBefore ->
-        val isDuckChatClearingAvailable = wasOpenedBefore && showClearDuckAiChatHistory
-        val clearingOptions = if (!isDuckChatClearingAvailable) {
-            options - FireClearOption.DUCKAI_CHATS
-        } else {
-            options
-        }
-
+    ) { options, clearWhenOption ->
         ViewState(
-            automaticClearingEnabled = clearingOptions.isNotEmpty(),
-            clearTabs = FireClearOption.TABS in clearingOptions,
-            clearData = FireClearOption.DATA in clearingOptions,
-            clearDuckAiChats = FireClearOption.DUCKAI_CHATS in clearingOptions,
-            showDuckAiChatsOption = isDuckChatClearingAvailable,
+            automaticClearingEnabled = options.isNotEmpty(),
+            clearTabs = FireClearOption.TABS in options,
+            clearData = FireClearOption.DATA in options,
             clearWhenOption = clearWhenOption,
         )
     }.flowOn(dispatcherProvider.io())
@@ -94,14 +76,7 @@ class AutomaticDataClearingSettingsViewModel @Inject constructor(
     val commands: Flow<Command> = _commands.receiveAsFlow()
 
     init {
-        loadDuckChatState()
         loadInitialOptions()
-    }
-
-    private fun loadDuckChatState() {
-        viewModelScope.launch(dispatcherProvider.io()) {
-            duckChatWasOpenedBefore.value = duckChat.wasOpenedBefore()
-        }
     }
 
     private fun loadInitialOptions() {
@@ -162,7 +137,6 @@ class AutomaticDataClearingSettingsViewModel @Inject constructor(
                     mapOf(
                         DATA_CLEAR_TYPE_TABS to (FireClearOption.TABS in options).toString(),
                         DATA_CLEAR_TYPE_DATA to (FireClearOption.DATA in options).toString(),
-                        DATA_CLEAR_TYPE_CHATS to (FireClearOption.DUCKAI_CHATS in options).toString(),
                     ),
                 )
                 initialOptions = options

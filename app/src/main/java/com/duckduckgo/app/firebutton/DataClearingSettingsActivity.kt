@@ -63,11 +63,6 @@ class DataClearingSettingsActivity : DuckDuckGoActivity() {
     private val viewModel: DataClearingSettingsViewModel by bindViewModel()
     private val binding: ActivityDataClearingSettingsBinding by viewBinding()
 
-    private val clearDuckAiDataToggleListener =
-        CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            viewModel.onClearDuckAiDataToggled(isChecked)
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -102,7 +97,6 @@ class DataClearingSettingsActivity : DuckDuckGoActivity() {
             fireproofWebsites.setClickListener { viewModel.onFireproofWebsitesClicked() }
             automaticDataClearingSetting.setClickListener { viewModel.onAutomaticDataClearingClicked() }
             selectedFireAnimationSetting.setClickListener { viewModel.userRequestedToChangeFireAnimation() }
-            clearDuckAiDataSetting.setOnCheckedChangeListener(clearDuckAiDataToggleListener)
             clearDataAction.setClickListener { viewModel.onClearDataActionClicked() }
         }
     }
@@ -114,7 +108,6 @@ class DataClearingSettingsActivity : DuckDuckGoActivity() {
                 viewState.let {
                     updateAutomaticClearingStatus(it.automaticallyClearingEnabled)
                     updateSelectedFireAnimation(it.selectedFireAnimation, it.isFireAnimationUpdateEnabled)
-                    updateClearDuckAiDataSetting(it.clearDuckAiData, it.showClearDuckAiDataSetting)
                     updateFireproofWebsitesCount(it.fireproofWebsitesCount)
                 }
             }.launchIn(lifecycleScope)
@@ -139,14 +132,6 @@ class DataClearingSettingsActivity : DuckDuckGoActivity() {
         isFireAnimationUpdateEnabled: Boolean,
     ) {
         binding.selectedFireAnimationSetting.setSecondaryText(getString(fireAnimation.displayLabelResId(isFireAnimationUpdateEnabled)))
-    }
-
-    private fun updateClearDuckAiDataSetting(
-        enabled: Boolean,
-        isVisible: Boolean,
-    ) {
-        binding.clearDuckAiDataSetting.quietlySetIsChecked(enabled, clearDuckAiDataToggleListener)
-        binding.clearDuckAiDataSetting.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
     private fun updateFireproofWebsitesCount(count: Int) {

@@ -20,14 +20,11 @@ import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_EMAIL_PROTECTION_PRESSED
 import com.duckduckgo.app.pixels.AppPixelName.SETTINGS_SYNC_PRESSED
-import com.duckduckgo.app.pixels.duckchat.createWasUsedBeforePixelParams
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.autofill.api.email.EmailManager
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.extensions.toBinaryString
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.impl.pixel.DuckChatPixelName.DUCK_CHAT_SETTINGS_PRESSED
 import com.duckduckgo.subscriptions.api.SubscriptionStatus.UNKNOWN
 import com.duckduckgo.subscriptions.api.Subscriptions
 import com.duckduckgo.sync.api.SyncState.OFF
@@ -44,7 +41,6 @@ import javax.inject.Inject
  */
 interface SettingsPixelDispatcher {
     fun fireSyncPressed()
-    fun fireDuckChatPressed()
     fun fireEmailPressed()
     fun fireSettingsOpenedWithSubscriptionPurchaseAvailable()
 }
@@ -55,7 +51,6 @@ class SettingsPixelDispatcherImpl @Inject constructor(
     @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
     private val pixel: Pixel,
     private val syncStateMonitor: SyncStateMonitor,
-    private val duckChat: DuckChat,
     private val emailManager: EmailManager,
     private val subscriptions: Subscriptions,
     private val dispatcherProvider: DispatcherProvider,
@@ -70,16 +65,6 @@ class SettingsPixelDispatcherImpl @Inject constructor(
                 parameters = mapOf(
                     PARAM_SYNC_IS_ENABLED to isEnabled.toBinaryString(),
                 ),
-            )
-        }
-    }
-
-    override fun fireDuckChatPressed() {
-        appCoroutineScope.launch {
-            val params = duckChat.createWasUsedBeforePixelParams()
-            pixel.fire(
-                pixel = DUCK_CHAT_SETTINGS_PRESSED,
-                parameters = params,
             )
         }
     }

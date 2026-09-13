@@ -220,7 +220,6 @@ class DataClearingWideEventImpl @Inject constructor(
             when (option) {
                 FireClearOption.TABS -> "tabs"
                 FireClearOption.DATA -> "data"
-                FireClearOption.DUCKAI_CHATS -> "duckai_chats"
             }
         }
     }

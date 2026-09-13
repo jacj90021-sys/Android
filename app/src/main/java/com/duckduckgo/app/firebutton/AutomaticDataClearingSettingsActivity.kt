@@ -121,11 +121,6 @@ class AutomaticDataClearingSettingsActivity : DuckDuckGoActivity() {
             clearDataSetting.quietlySetIsChecked(viewState.clearData) { _, isChecked ->
                 viewModel.onOptionToggled(FireClearOption.DATA, isChecked)
             }
-            clearDuckAiChatsSetting.quietlySetIsChecked(viewState.clearDuckAiChats) { _, isChecked ->
-                viewModel.onOptionToggled(FireClearOption.DUCKAI_CHATS, isChecked)
-            }
-            clearDuckAiChatsSetting.isVisible = viewState.showDuckAiChatsOption
-
             clearWhenSetting.setSecondaryText(getString(viewState.clearWhenOption.nameStringResourceId()))
         }
     }

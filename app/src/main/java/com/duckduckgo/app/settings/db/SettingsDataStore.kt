@@ -107,7 +107,6 @@ interface SettingsDataStore {
      * When false, the preference may be updated if business rules change (via feature flags).
      */
     var urlPreferenceSetByUser: Boolean
-    var clearDuckAiData: Boolean
     var showTrackersCountInAddressBar: Boolean
     var singleTabFireDialogShownCount: Int
     var getDesktopBrowserSettingDismissed: Boolean
@@ -290,10 +289,6 @@ class SettingsSharedPreferences @Inject constructor(
         get() = preferences.getBoolean(URL_PREFERENCE_SET_BY_USER, false)
         set(value) = preferences.edit { putBoolean(URL_PREFERENCE_SET_BY_USER, value) }
 
-    override var clearDuckAiData: Boolean
-        get() = preferences.getBoolean(KEY_CLEAR_DUCK_AI_DATA, false)
-        set(enabled) = preferences.edit { putBoolean(KEY_CLEAR_DUCK_AI_DATA, enabled) }
-
     override var showTrackersCountInAddressBar: Boolean
         get() = preferences.getBoolean(KEY_SHOW_TRACKERS_COUNT_IN_ADDRESS_BAR, true)
         set(enabled) = preferences.edit { putBoolean(KEY_SHOW_TRACKERS_COUNT_IN_ADDRESS_BAR, enabled) }
@@ -405,7 +400,6 @@ class SettingsSharedPreferences @Inject constructor(
         const val KEY_IS_FULL_URL_ENABLED = "KEY_IS_FULL_URL_ENABLED"
         const val URL_PREFERENCE_MIGRATED = "URL_PREFERENCE_MIGRATED"
         const val URL_PREFERENCE_SET_BY_USER = "URL_PREFERENCE_SET_BY_USER"
-        const val KEY_CLEAR_DUCK_AI_DATA = "KEY_CLEAR_DUCK_AI_DATA"
         const val KEY_SHOW_TRACKERS_COUNT_IN_ADDRESS_BAR = "KEY_SHOW_TRACKERS_COUNT_IN_ADDRESS_BAR"
         const val KEY_SINGLE_TAB_FIRE_DIALOG_SHOWN_COUNT = "KEY_SINGLE_TAB_FIRE_DIALOG_SHOWN_COUNT"
         const val KEY_GET_DESKTOP_BROWSER_SETTING_DISMISSED = "KEY_GET_DESKTOP_BROWSER_SETTING_DISMISSED"

@@ -28,7 +28,6 @@ import com.duckduckgo.common.utils.extensions.toTldPlusOne
 import com.duckduckgo.dataclearing.api.plugin.ClearableData
 import com.duckduckgo.dataclearing.api.plugin.DataClearingPlugin
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.duckchat.api.DuckAiHostProvider
 import com.squareup.anvil.annotations.ContributesMultibinding
 import kotlinx.coroutines.withContext
 import logcat.logcat
@@ -45,7 +44,6 @@ class WebStorageDataClearingPlugin @Inject constructor(
     private val siteDataCleaner: SiteDataCleaner,
     private val webViewCapabilityChecker: WebViewCapabilityChecker,
     private val fireproofWebsiteRepository: FireproofWebsiteRepository,
-    private val duckAiHostProvider: DuckAiHostProvider,
     private val dispatchers: DispatcherProvider,
 ) : DataClearingPlugin {
 
@@ -81,7 +79,7 @@ class WebStorageDataClearingPlugin @Inject constructor(
     }
 
     private val duckDuckGoDomains: Set<String> by lazy {
-        setOf("duckduckgo.com", duckAiHostProvider.getHost())
+        setOf("duckduckgo.com")
             .map { host -> "https://$host".toHttpUrlOrNull()?.topPrivateDomain() ?: host }
             .toSet()
     }
