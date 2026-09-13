@@ -22,7 +22,6 @@ import com.duckduckgo.anvil.annotations.ContributesViewModel
 import com.duckduckgo.app.cta.db.DismissedCtaDao
 import com.duckduckgo.app.cta.model.CtaId
 import com.duckduckgo.app.cta.model.DismissedCta
-import com.duckduckgo.app.onboarding.DuckAiOnboardingDemo
 import com.duckduckgo.app.onboarding.orchestrator.NewUserOnboardingEvent
 import com.duckduckgo.app.onboarding.store.AppStage
 import com.duckduckgo.app.onboarding.store.UserStageStore
@@ -50,7 +49,6 @@ class OnboardingViewModel @Inject constructor(
     private val dismissedCtaDao: DismissedCtaDao,
     private val onboardingBrandDesignUpdateToggles: OnboardingBrandDesignUpdateToggles,
     private val linearOnboardingOrchestrator: LinearOnboardingOrchestrator,
-    private val duckAiOnboardingDemo: DuckAiOnboardingDemo,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(ViewState())
@@ -95,9 +93,7 @@ class OnboardingViewModel @Inject constructor(
                 }
 
                 DUCK_AI_FOCUSED -> {
-                    // Arm the in-browser Duck.ai demo (sets the flow + silences the standard DAX CTAs).
-                    // Shared with the linear-onboarding duck_ai_demo step so both paths arm identically.
-                    duckAiOnboardingDemo.arm()
+                    // no-op
                 }
 
                 DEFAULT_WITHOUT_INTRO_CTA -> {

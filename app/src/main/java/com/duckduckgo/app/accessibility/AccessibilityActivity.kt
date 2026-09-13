@@ -103,33 +103,7 @@ class AccessibilityActivity : DuckDuckGoActivity() {
     }
 
     private fun scrollToHighlightedItem() {
-        intent.getActivityParams(HighlightedItem::class.java)?.let { params ->
-            if (params.highlightedItem == VOICE_SEARCH) {
-                binding.voiceSearchToggle.post {
-                    scrollToVoiceSearchToggle()
-                    highlightVoiceSearchToggle()
-                }
-            }
-        }
-    }
-
-    private fun scrollToVoiceSearchToggle() {
-        val scrollTo = binding.voiceSearchToggle.top
-        binding.scrollView.smoothScrollTo(0, scrollTo)
-    }
-
-    private fun highlightVoiceSearchToggle() {
-        val highlightColor = getColorFromAttr(com.duckduckgo.mobile.android.R.attr.daxColorContainer)
-        val transparentColor = ContextCompat.getColor(applicationContext, android.R.color.transparent)
-
-        val totalAnimationDuration = FADE_DURATION * TRANSITIONS
-
-        val colorAnimator = ValueAnimator.ofArgb(transparentColor, highlightColor, transparentColor, highlightColor, transparentColor, highlightColor)
-        colorAnimator.duration = totalAnimationDuration
-        colorAnimator.addUpdateListener { animator ->
-            binding.voiceSearchToggle.setBackgroundColor(animator.animatedValue as Int)
-        }
-        colorAnimator.start()
+        // No highlightable items remain in accessibility settings.
     }
 
     override fun onStart() {

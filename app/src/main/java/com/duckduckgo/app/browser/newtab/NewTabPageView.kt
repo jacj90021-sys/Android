@@ -64,10 +64,6 @@ import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.di.scopes.ViewScope
-import com.duckduckgo.duckchat.api.DuckChat
-import com.duckduckgo.duckchat.api.DuckChatInputModeState
-import com.duckduckgo.duckchat.api.InputMode
-import com.duckduckgo.duckchat.api.nativeinput.NativeInputState
 import com.duckduckgo.mobile.android.app.tracking.ui.AppTrackingProtectionScreens.AppTrackerOnboardingActivityWithEmptyParamsParams
 import com.duckduckgo.navigation.api.GlobalActivityStarter
 import com.duckduckgo.navigation.api.GlobalActivityStarter.DeeplinkActivityParams
@@ -119,12 +115,6 @@ class NewTabPageView @JvmOverloads constructor(
     lateinit var androidBrowserConfig: AndroidBrowserConfigFeature
 
     @Inject
-    lateinit var duckChat: DuckChat
-
-    @Inject
-    lateinit var inputModeState: DuckChatInputModeState
-
-    @Inject
     lateinit var sharePromoLinkIntentFactory: SharePromoLinkIntentFactory
 
     @Inject
@@ -147,11 +137,6 @@ class NewTabPageView @JvmOverloads constructor(
 
     private val conflatedStateJob = ConflatedJob()
     private val conflatedCommandJob = ConflatedJob()
-    private val conflatedNativeInputJob = ConflatedJob()
-    private val conflatedChatModeJob = ConflatedJob()
-
-    private var lastSelectedMode: InputMode? = null
-    private var logoAnimator: ValueAnimator? = null
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         if (ev.actionMasked == MotionEvent.ACTION_DOWN && ntpEngagementTracker.shouldReportEngagement()) {
@@ -166,29 +151,12 @@ class NewTabPageView @JvmOverloads constructor(
 
         findViewTreeLifecycleOwner()?.lifecycle?.addObserver(viewModel)
 
-        configureLogoAnimation()
-
         conflatedStateJob += viewModel.viewState
             .onEach { render(it) }
             .launchIn(findViewTreeLifecycleOwner()?.lifecycleScope!!)
 
         conflatedCommandJob += viewModel.commands()
             .onEach { processCommands(it) }
-            .launchIn(findViewTreeLifecycleOwner()?.lifecycleScope!!)
-
-        conflatedNativeInputJob += combine(
-            duckChat.observeNativeInputFieldUserSettingEnabled(),
-            inputModeState.inputModeCapability,
-        ) { enabled, capability ->
-            // Search-only still has the native-input field setting on, but the browser uses the
-            // legacy omnibar — drop the UTI chrome margin so the logo isn't left too low.
-            enabled && capability != NativeInputState.InputMode.SEARCH_ONLY
-        }
-            .onEach { updateLogoMargin(it) }
-            .launchIn(findViewTreeLifecycleOwner()?.lifecycleScope!!)
-
-        conflatedChatModeJob += inputModeState.displayedMode
-            .onEach { mode -> updateLogoForMode(mode) }
             .launchIn(findViewTreeLifecycleOwner()?.lifecycleScope!!)
 
         disableViewStateSaving()
@@ -200,48 +168,6 @@ class NewTabPageView @JvmOverloads constructor(
         findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(viewModel)
         conflatedStateJob.cancel()
         conflatedCommandJob.cancel()
-        conflatedNativeInputJob.cancel()
-        conflatedChatModeJob.cancel()
-        logoAnimator?.cancel()
-        logoAnimator = null
-        lastSelectedMode = null
-    }
-
-    private fun configureLogoAnimation() {
-        with(binding.ddgLogo) {
-            setMinAndMaxFrame(0, LOGO_MAX_FRAME)
-            setAnimation(
-                if (appTheme.isLightModeEnabled()) {
-                    com.duckduckgo.duckchat.impl.R.raw.duckduckgo_ai_transition_light
-                } else {
-                    com.duckduckgo.duckchat.impl.R.raw.duckduckgo_ai_transition_dark
-                },
-            )
-        }
-    }
-
-    private fun updateLogoForMode(mode: InputMode) {
-        val previous = lastSelectedMode
-        if (previous == mode) return
-
-        val targetProgress = if (mode == InputMode.DUCK_AI) 1f else 0f
-
-        if (previous == null) {
-            binding.ddgLogo.progress = targetProgress
-        } else {
-            logoAnimator?.cancel()
-            logoAnimator = ValueAnimator.ofFloat(binding.ddgLogo.progress, targetProgress).apply {
-                duration = LOGO_ANIMATION_DURATION_MS
-                addUpdateListener { binding.ddgLogo.progress = it.animatedValue as Float }
-                start()
-            }
-        }
-        lastSelectedMode = mode
-    }
-
-    private companion object {
-        private const val LOGO_ANIMATION_DURATION_MS = 350L
-        private const val LOGO_MAX_FRAME = 15
     }
 
     private fun disableViewStateSaving() {
@@ -252,15 +178,6 @@ class NewTabPageView @JvmOverloads constructor(
             if (disableViewStateSaving) {
                 binding.messageCta.disableStateSaving()
             }
-        }
-    }
-
-    private fun updateLogoMargin(nativeInputEnabled: Boolean) {
-        val baseMargin = resources.getDimensionPixelSize(com.duckduckgo.mobile.android.R.dimen.homeTabDdgLogoTopMargin)
-        val extraMargin = if (nativeInputEnabled) 48.toPx() else 0
-        (binding.ddgLogo.layoutParams as? MarginLayoutParams)?.let {
-            it.topMargin = baseMargin + extraMargin
-            binding.ddgLogo.requestLayout()
         }
     }
 
