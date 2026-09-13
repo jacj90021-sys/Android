@@ -56,7 +56,6 @@ dependencies {
     implementation project(':statistics-api')
     implementation project(':content-scope-scripts-api')
     implementation project(':js-messaging-api')
-    implementation project(':duckchat-api')
     implementation project(':persistent-storage-api')
     implementation project(':browser-mode-api')
 

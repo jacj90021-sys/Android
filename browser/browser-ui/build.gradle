@@ -53,7 +53,6 @@ dependencies {
     implementation project(':browser-api')
     implementation project(':browser-mode-api')
     implementation project(':navigation-api')
-    implementation project(':duckchat-api')
     implementation project(':new-tab-page-api')
     implementation project(':statistics-api')
     implementation project(':design-system')
