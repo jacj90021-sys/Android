@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources recovered from the removed duckchat/voice-search modules. -->
+<resources>
+    <string name="duck_chat_title">Duck.ai</string>
+    <string name="duckChatPlusButtonContentDescription">Отваряне на менюто на Duck.ai</string>
+    <string name="duckChatBrowserMenuContentDescription">Още опции</string>
+    <string name="duckChatFireButtonContentDescription">Изчистване на данни</string>
+    <string name="input_screen_search_hint">Търсене или въвеждане на адрес</string>
+    <string name="input_screen_user_pref_with_ai">Търсене и Duck.ai</string>
+    <string name="input_screen_user_pref_without_ai">Само търсене</string>
+    <string name="autocompleteDuckAiPrompt">Попитай Duck.ai</string>
+    <string name="voiceSearchTitle">Гласово търсене</string>
+    <dimen name="inputScreenUserPrefToggleSpacing">160dp</dimen>
+</resources>
