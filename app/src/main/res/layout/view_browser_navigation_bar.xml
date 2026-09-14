@@ -153,6 +153,24 @@
                 android:src="@drawable/ic_fire_24" />
         </FrameLayout>
 
+        <!-- Custom-mode home button: takes the fire slot -->
+        <FrameLayout
+            android:id="@+id/homeButton"
+            android:layout_width="@dimen/toolbarIcon"
+            android:layout_height="@dimen/toolbarIcon"
+            android:background="@drawable/selectable_item_rounded_corner_background"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/homeButtonImageView"
+                android:layout_width="@dimen/bottomNavIcon"
+                android:layout_height="@dimen/bottomNavIcon"
+                android:layout_gravity="center"
+                android:contentDescription="@string/fireMenu"
+                android:scaleType="center"
+                android:src="@drawable/ic_home_24" />
+        </FrameLayout>
+
         <Space
             android:layout_width="0dp"
             android:layout_height="match_parent"

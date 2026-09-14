@@ -120,6 +120,12 @@ class OmnibarLayoutViewModel @Inject constructor(
 
     private val isSplitOmnibarEnabled =
         settingsDataStore.omnibarType == OmnibarType.SPLIT || settingsDataStore.omnibarType == OmnibarType.CUSTOM
+    // Custom mode keeps ONLY the fire button in the top omnibar (tabs/menu moved to the
+    // bottom bar), so the address field gets all their width back.
+    private val isCustomOmnibar = settingsDataStore.omnibarType == OmnibarType.CUSTOM
+    private val showTopFireIcon = !isSplitOmnibarEnabled || isCustomOmnibar
+    private val showTopTabsMenu = !isSplitOmnibarEnabled
+    private val showTopBrowserMenu = !isSplitOmnibarEnabled
     private val isProgressBarUpgradeEnabled = progressBarUpgradeFeature.behaviourUpdate().isEnabled()
     private val isProgressBarIndeterminateEnabled =
         isProgressBarUpgradeEnabled && progressBarUpgradeFeature.indeterminateFallback().isEnabled()
@@ -133,9 +139,9 @@ class OmnibarLayoutViewModel @Inject constructor(
     private val _viewState = MutableStateFlow(
         ViewState(
             showChatMenu = false,
-            showFireIcon = !isSplitOmnibarEnabled,
-            showTabsMenu = !isSplitOmnibarEnabled,
-            showBrowserMenu = !isSplitOmnibarEnabled,
+            showFireIcon = showTopFireIcon,
+            showTabsMenu = showTopTabsMenu,
+            showBrowserMenu = showTopBrowserMenu,
             isProgressBarUpgradeEnabled = isProgressBarUpgradeEnabled,
             isProgressBarIndeterminateEnabled = isProgressBarIndeterminateEnabled,
             isAddressBarRebrandEnabled = addressBarRebrandToggle.isEnabled(),
@@ -373,7 +379,7 @@ class OmnibarLayoutViewModel @Inject constructor(
     ) {
         logcat { "Omnibar: onOmnibarFocusChanged hasFocus $hasFocus" }
         val showClearButton = hasFocus && inputFieldText.isNotBlank()
-        val showControls = inputFieldText.isBlank() && !isSplitOmnibarEnabled
+        val showControls = inputFieldText.isBlank() && showTopTabsMenu
 
         if (hasFocus) {
             viewModelScope.launch {
@@ -403,7 +409,7 @@ class OmnibarLayoutViewModel @Inject constructor(
                     highlightPrivacyShield = HighlightableButton.Gone,
                     showClearButton = showClearButton,
                     showTabsMenu = showControls,
-                    showFireIcon = showControls,
+                    showFireIcon = showControls || isCustomOmnibar,
                     showBrowserMenu = showControls,
                     showVoiceSearch = shouldShowVoiceSearch(
                         viewMode = _viewState.value.viewMode,
@@ -467,9 +473,9 @@ class OmnibarLayoutViewModel @Inject constructor(
                     highlightFireButton = HighlightableButton.Visible(highlighted = false),
                     enabledState = enabledStateFor(locked, fireButtonHighlighted = false),
                     showClearButton = false,
-                    showTabsMenu = !isSplitOmnibarEnabled,
-                    showFireIcon = !isSplitOmnibarEnabled,
-                    showBrowserMenu = !isSplitOmnibarEnabled,
+                    showTabsMenu = showTopTabsMenu,
+                    showFireIcon = showTopFireIcon,
+                    showBrowserMenu = showTopBrowserMenu,
                     showVoiceSearch = shouldShowVoiceSearch(
                         viewMode = _viewState.value.viewMode,
                         hasFocus = false,
@@ -685,9 +691,9 @@ class OmnibarLayoutViewModel @Inject constructor(
                 updateOmnibarText = true,
                 expanded = true,
                 showClearButton = false,
-                showBrowserMenu = !isSplitOmnibarEnabled,
-                showTabsMenu = !isSplitOmnibarEnabled,
-                showFireIcon = !isSplitOmnibarEnabled,
+                showBrowserMenu = showTopBrowserMenu,
+                showTabsMenu = showTopTabsMenu,
+                showFireIcon = showTopFireIcon,
             )
         }
     }
@@ -743,7 +749,7 @@ class OmnibarLayoutViewModel @Inject constructor(
         deleteLastCharacter: Boolean,
     ) {
         val showClearButton = hasFocus && query.isNotBlank()
-        val showControls = (!hasFocus || query.isBlank()) && !isSplitOmnibarEnabled
+        val showControls = (!hasFocus || query.isBlank()) && showTopTabsMenu
 
         logcat { "Omnibar: onInputStateChanged query $query hasFocus $hasFocus clearQuery $clearQuery deleteLastCharacter $deleteLastCharacter" }
 
@@ -770,7 +776,7 @@ class OmnibarLayoutViewModel @Inject constructor(
                 hasFocus = hasFocus,
                 showBrowserMenu = showControls,
                 showTabsMenu = showControls,
-                showFireIcon = showControls,
+                showFireIcon = showControls || isCustomOmnibar,
                 showClearButton = showClearButton,
                 showVoiceSearch = shouldShowVoiceSearch(
                     viewMode = _viewState.value.viewMode,

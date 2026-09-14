@@ -1853,6 +1853,11 @@ class BrowserTabViewModel @Inject constructor(
     ): Boolean =
         isLinkOpenedInNewTab && hasSourceTab && !isCustomTab && site?.url.isNullOrEmpty()
 
+    /** Home button on the Custom-mode bottom bar: returns to the New Tab Page. */
+    fun onNavigationBarHomeButtonClicked() {
+        navigateHome()
+    }
+
     private fun navigateHome() {
         pdfDownloadJob.cancel()
         suggestRedirectJob.cancel()

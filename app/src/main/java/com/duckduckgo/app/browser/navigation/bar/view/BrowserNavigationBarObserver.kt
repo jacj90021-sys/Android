@@ -54,4 +54,8 @@ interface BrowserNavigationBarObserver {
     @EmptySuper
     fun onForwardButtonClicked() {
     }
+
+    @EmptySuper
+    fun onHomeButtonClicked() {
+    }
 }

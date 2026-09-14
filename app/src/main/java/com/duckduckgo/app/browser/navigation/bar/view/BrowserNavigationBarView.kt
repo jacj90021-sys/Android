@@ -152,6 +152,7 @@ class BrowserNavigationBarView @JvmOverloads constructor(
         binding.newTabButtonImageView.isSaveEnabled = false
         binding.backButtonImageView.isSaveEnabled = false
         binding.forwardButtonImageView.isSaveEnabled = false
+        binding.homeButtonImageView.isSaveEnabled = false
     }
 
     override fun onAttachedToWindow() {
@@ -184,6 +185,10 @@ class BrowserNavigationBarView @JvmOverloads constructor(
 
         binding.forwardButton.setOnClickListener {
             viewModel.onForwardButtonClicked()
+        }
+
+        binding.homeButton.setOnClickListener {
+            viewModel.onHomeButtonClicked()
         }
 
         binding.bookmarksButton.setOnClickListener {
@@ -225,6 +230,8 @@ class BrowserNavigationBarView @JvmOverloads constructor(
         binding.autofillButton.isVisible = viewState.autofillButtonVisible
         binding.backButton.isVisible = viewState.backButtonVisible
         binding.forwardButton.isVisible = viewState.forwardButtonVisible
+        binding.homeButton.isVisible = viewState.homeButtonVisible
+        binding.fireButton.isVisible = viewState.fireButtonVisible && !viewState.homeButtonVisible
         binding.bookmarksButton.isVisible = viewState.bookmarksButtonVisible
         binding.fireButton.isVisible = viewState.fireButtonVisible
         binding.tabsButton.isVisible = viewState.tabsButtonVisible
@@ -250,6 +257,7 @@ class BrowserNavigationBarView @JvmOverloads constructor(
         // Custom-mode back/forward: gated by both the lock state and navigation availability
         applyEnabled(binding.backButton, enabled && state.canGoBack)
         applyEnabled(binding.forwardButton, enabled && state.canGoForward)
+        applyEnabled(binding.homeButton, enabled)
     }
 
     private fun applyEnabled(view: View, enabled: Boolean) {
@@ -268,6 +276,7 @@ class BrowserNavigationBarView @JvmOverloads constructor(
             NotifyAutofillButtonClicked -> browserNavigationBarObserver?.onAutofillButtonClicked()
             NotifyBackButtonClicked -> browserNavigationBarObserver?.onBackButtonClicked()
             NotifyForwardButtonClicked -> browserNavigationBarObserver?.onForwardButtonClicked()
+            NotifyHomeButtonClicked -> browserNavigationBarObserver?.onHomeButtonClicked()
         }
     }
 

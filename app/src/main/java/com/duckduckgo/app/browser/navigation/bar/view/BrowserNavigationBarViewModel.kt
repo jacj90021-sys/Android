@@ -147,6 +147,10 @@ class BrowserNavigationBarViewModel @Inject constructor(
         _commands.trySend(NotifyForwardButtonClicked)
     }
 
+    fun onHomeButtonClicked() {
+        _commands.trySend(NotifyHomeButtonClicked)
+    }
+
     fun onNavigationStateChanged(canGoBack: Boolean, canGoForward: Boolean) {
         _viewState.update {
             it.copy(canGoBack = canGoBack, canGoForward = canGoForward)
@@ -168,6 +172,8 @@ class BrowserNavigationBarViewModel @Inject constructor(
                         backButtonVisible = false,
                         forwardButtonVisible = false,
                         bookmarksButtonVisible = true,
+                        fireButtonVisible = true,
+                        homeButtonVisible = false,
                         viewMode = viewMode,
                     )
                 }
@@ -182,6 +188,8 @@ class BrowserNavigationBarViewModel @Inject constructor(
                             bookmarksButtonVisible = false,
                             backButtonVisible = true,
                             forwardButtonVisible = true,
+                            fireButtonVisible = false,
+                            homeButtonVisible = true,
                             viewMode = viewMode,
                         )
                     } else {
@@ -202,6 +210,8 @@ class BrowserNavigationBarViewModel @Inject constructor(
                         backButtonVisible = false,
                         forwardButtonVisible = false,
                         bookmarksButtonVisible = true,
+                        fireButtonVisible = true,
+                        homeButtonVisible = false,
                         viewMode = viewMode,
                     )
                 }
@@ -216,6 +226,8 @@ class BrowserNavigationBarViewModel @Inject constructor(
                         bookmarksButtonVisible = false,
                         backButtonVisible = false,
                         forwardButtonVisible = false,
+                        fireButtonVisible = true,
+                        homeButtonVisible = false,
                         showShadow = false,
                         viewMode = viewMode,
                     )
@@ -264,6 +276,7 @@ class BrowserNavigationBarViewModel @Inject constructor(
         data object NotifyBookmarksButtonClicked : Command()
         data object NotifyBackButtonClicked : Command()
         data object NotifyForwardButtonClicked : Command()
+        data object NotifyHomeButtonClicked : Command()
     }
 
     /**
@@ -280,6 +293,7 @@ class BrowserNavigationBarViewModel @Inject constructor(
         val autofillButtonVisible: Boolean = false,
         val backButtonVisible: Boolean = false,
         val forwardButtonVisible: Boolean = false,
+        val homeButtonVisible: Boolean = false,
         val canGoBack: Boolean = false,
         val canGoForward: Boolean = false,
         val bookmarksButtonVisible: Boolean = true,

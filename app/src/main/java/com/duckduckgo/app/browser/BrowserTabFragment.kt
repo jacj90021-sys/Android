@@ -1413,6 +1413,10 @@ class BrowserTabFragment :
                 override fun onForwardButtonClicked() {
                     viewModel.onUserPressedForward()
                 }
+
+                override fun onHomeButtonClicked() {
+                    viewModel.onNavigationBarHomeButtonClicked()
+                }
             }
 
         browserNavigationBarIntegration = BrowserNavigationBarViewIntegration(
