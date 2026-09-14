@@ -167,6 +167,14 @@ class AppearanceActivity : DuckDuckGoActivity() {
                 ),
             )
 
+            // Visual chooser always shows. Split card stays flag-gated (its omnibar mode
+            // belongs to the removed AI input experiment) — hide just that card when off.
+            if (!viewState.isSplitOmnibarAvailable) {
+                binding.splitOmnibarContainer.gone()
+            } else {
+                binding.splitOmnibarContainer.show()
+            }
+
             binding.omnibarTypeSettingsTitle.show()
             binding.omnibarTypeToggleContainer.show()
             binding.showFullUrlSettingDivider.show()

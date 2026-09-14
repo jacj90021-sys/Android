@@ -76,6 +76,7 @@ class AppearanceViewModel @Inject constructor(
         val isAddressBarTrackersAnimationEnabled: Boolean = true,
         val shouldShowAddressBarTrackersAnimationItem: Boolean = false,
         val shouldShowSplitOmnibarSettings: Boolean = false,
+        val isSplitOmnibarAvailable: Boolean = false,
         val showAppIconSettingFirst: Boolean = false,
     )
 
@@ -101,7 +102,9 @@ class AppearanceViewModel @Inject constructor(
             canForceDarkMode = canForceDarkMode(),
             supportsForceDarkMode = WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING),
             omnibarType = settingsDataStore.omnibarType,
-            shouldShowSplitOmnibarSettings = omnibarRepository.isSplitOmnibarAvailable,
+            // Always show the visual Top/Bottom chooser — not gated on a remote flag anymore.
+            shouldShowSplitOmnibarSettings = true,
+            isSplitOmnibarAvailable = omnibarRepository.isSplitOmnibarAvailable,
             isAddressBarTrackersAnimationEnabled = settingsDataStore.showTrackersCountInAddressBar,
         ),
     )
