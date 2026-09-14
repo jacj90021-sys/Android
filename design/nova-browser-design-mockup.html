@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA — invented browser design (DDG × Firefox × Chromium mix)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   NOVA — an invented design language
+   Mixed DNA: Chromium (structure ideas) + Firefox (soft focus)
+   + DDG (playful instant-clear) → fused into something new:
+   "Cut-corner" shape language, hex action core, ion gradient.
+   ========================================================== */
+:root{
+  /* palette — deliberately not DDG orange, FF purple, or Chrome blue */
+  --ink-950:#0B0F13;
+  --ink-900:#10161C;
+  --ink-800:#182129;
+  --ink-700:#243140;
+  --ink-600:#33465A;
+  --ink-400:#6E8399;
+  --ink-300:#9FB4C4;
+  --paper:#F6F4EE;      /* warm off-white — not Chrome's pure white */
+  --paper-2:#FFFFFF;
+  --amber:#FFB020;      /* "Signal Amber" — DDG warmth, pushed yellow */
+  --teal:#10B5A0;       /* "Ion Teal" — safety/protection color      */
+  --violet:#7C5CFF;     /* "Nova Violet" — FF gradient echo, used sparingly */
+  --grad:linear-gradient(135deg,var(--teal) 0%,var(--violet) 52%,var(--amber) 100%);
+  --grad-soft:linear-gradient(135deg,rgba(16,181,160,.18),rgba(124,92,255,.18) 52%,rgba(255,176,32,.22) 100%);
+  --r-pill:999px;
+  --r-card:18px;
+  --cut:14px;           /* signature chamfer size */
+  --shadow:0 10px 30px rgba(11,15,19,.18);
+  --shadow-sm:0 4px 14px rgba(11,15,19,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(1200px 600px at 15% -10%,rgba(124,92,255,.10),transparent 60%),
+    radial-gradient(1000px 500px at 90% 0%,rgba(16,181,160,.10),transparent 60%),
+    var(--ink-950);
+  color:#E8EEF3;
+  min-height:100vh;
+  padding:48px 24px 80px;
+}
+h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif}
+.wrap{max-width:1240px;margin:0 auto}
+
+/* ---------- header ---------- */
+.kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--teal);font-weight:600;
+}
+.kicker::before{content:"";width:22px;height:2px;background:var(--grad);border-radius:2px}
+.head{margin-bottom:36px}
+.head h1{font-size:clamp(30px,4.5vw,46px);line-height:1.05;margin:10px 0 12px}
+.head h1 em{
+  font-style:normal;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.head p{color:var(--ink-300);max-width:640px;line-height:1.6;font-size:14px}
+
+/* ---------- screens row ---------- */
+.screens{display:flex;gap:34px;justify-content:center;flex-wrap:wrap;margin:44px 0 70px}
+.stage{display:flex;flex-direction:column;align-items:center;gap:16px}
+.stage-label{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-400);font-weight:600}
+
+/* phone frame */
+.phone{
+  width:300px;height:632px;border-radius:42px;position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 30px 60px rgba(0,0,0,.55),0 0 0 8px #05070a;
+  display:flex;flex-direction:column;
+}
+/* status bar */
+.status{
+  height:30px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;font-size:10.5px;font-weight:600;color:inherit;flex:none;
+}
+.status .sig{display:flex;gap:4px;align-items:center}
+
+/* ====== signature cut-corner shape ====== */
+.cut{
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%);
+}
+
+/* callout dots */
+.dot{
+  position:absolute;width:18px;height:18px;border-radius:50%;
+  background:#0B0F13;color:#fff;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;z-index:30;
+  border:1.5px solid var(--amber);box-shadow:0 0 0 3px rgba(255,176,32,.25);
+}
+
+/* ==========================================================
+   SCREEN 1 — browser view (light)
+   ========================================================== */
+.s1{background:var(--paper);color:var(--ink-900)}
+.omnibar-wrap{padding:8px 12px 6px;flex:none}
+.omnibar{
+  height:42px;background:var(--paper-2);border-radius:var(--r-pill);
+  display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;
+  box-shadow:var(--shadow-sm);border:1px solid rgba(11,15,19,.06);
+}
+.shield{
+  width:24px;height:24px;border-radius:8px;background:rgba(16,181,160,.14);
+  display:flex;align-items:center;justify-content:center;flex:none;
+}
+.shield svg{width:13px;height:13px;fill:var(--teal)}
+.omnibar .url{
+  flex:1;font-size:12.5px;color:var(--ink-600);font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.omnibar .url b{color:var(--ink-900);font-weight:600}
+.omni-btn{
+  width:28px;height:28px;border-radius:50%;flex:none;
+  display:flex;align-items:center;justify-content:center;
+}
+.omni-btn svg{width:15px;height:15px;fill:var(--ink-600)}
+.omni-btn.go{background:var(--ink-900)}
+.omni-btn.go svg{fill:#fff}
+
+/* fake page content */
+.page{flex:1;overflow:hidden;padding:6px 16px 0}
+.page .hero{
+  height:118px;border-radius:var(--r-card);
+  background:var(--grad-soft);position:relative;overflow:hidden;
+}
+.page .hero::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 55%,rgba(11,15,19,.35));
+}
+.page .hero span{
+  position:absolute;left:14px;bottom:10px;color:#fff;font-family:'Space Grotesk';
+  font-weight:600;font-size:13px;z-index:2;
+}
+.page h3{font-size:15px;margin:14px 2px 8px;letter-spacing:-.01em}
+.page p{font-size:11.5px;line-height:1.65;color:var(--ink-600)}
+.page p + p{margin-top:8px}
+.page .readbar{height:5px;border-radius:3px;background:rgba(11,15,19,.08);margin:14px 0 4px;position:relative}
+.page .readbar i{position:absolute;left:0;top:0;bottom:0;width:64%;border-radius:3px;background:var(--grad)}
+
+/* floating bottom toolbar — Chromium idea, NOVA form */
+.toolbar-dock{flex:none;padding:0 14px 16px;position:relative}
+.toolbar{
+  height:56px;background:var(--ink-900);border-radius:var(--r-pill);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;box-shadow:var(--shadow);
+}
+.tb-btn{display:flex;flex-direction:column;align-items:center;gap:3px}
+.tb-btn svg{width:17px;height:17px;fill:var(--ink-300)}
+.tb-btn small{font-size:8px;letter-spacing:.06em;color:var(--ink-400);font-weight:600}
+.tb-btn .count{
+  position:absolute;top:-4px;right:-8px;background:var(--violet);color:#fff;
+  font-size:8.5px;font-weight:700;width:15px;height:15px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+/* hex fire core — DDG fire idea, invented hexagon form */
+.hex{
+  position:absolute;left:50%;top:-16px;transform:translateX(-50%);
+  width:62px;height:66px;display:flex;align-items:center;justify-content:center;
+  background:var(--grad);
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  box-shadow:0 8px 22px rgba(124,92,255,.4);
+  animation:breathe 3.2s ease-in-out infinite;
+}
+.hex svg{width:24px;height:24px;fill:#fff}
+@keyframes breathe{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.07)}}
+.homebar{width:100px;height:4px;border-radius:2px;background:rgba(11,15,19,.22);margin:6px auto 0}
+
+/* ==========================================================
+   SCREEN 2 — new tab (dark)
+   ========================================================== */
+.s2{background:var(--ink-900);color:#E8EEF3}
+.orb-zone{
+  flex:none;padding:10px 20px 20px;position:relative;overflow:hidden;
+}
+.orb-zone::before{
+  content:"";position:absolute;top:-70px;left:50%;transform:translateX(-50%);
+  width:320px;height:200px;background:var(--grad);opacity:.32;filter:blur(52px);
+  border-radius:50%;
+}
+.greet{font-family:'Space Grotesk';font-size:21px;font-weight:600;letter-spacing:-.01em}
+.greet small{display:block;font-family:'Inter';font-size:11px;color:var(--ink-300);font-weight:500;margin-top:4px;letter-spacing:0}
+.search2{
+  margin-top:16px;height:46px;background:var(--ink-800);border-radius:var(--r-pill);
+  display:flex;align-items:center;gap:10px;padding:0 16px;border:1px solid rgba(255,255,255,.06);
+}
+.search2 svg{width:16px;height:16px;fill:var(--teal)}
+.search2 span{font-size:12.5px;color:var(--ink-400)}
+.search2 .kbd{
+  margin-left:auto;font-size:9px;color:var(--ink-300);border:1px solid rgba(255,255,255,.14);
+  padding:2px 7px;border-radius:6px;font-weight:600;
+}
+.dials{padding:6px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dial{
+  background:var(--ink-800);border-radius:var(--r-card);padding:12px;height:74px;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:2px;position:relative;
+  border:1px solid rgba(255,255,255,.05);
+}
+.dial .fav{
+  position:absolute;top:10px;left:12px;width:22px;height:22px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+}
+.dial b{font-size:11.5px;font-weight:600}
+.dial small{font-size:9px;color:var(--ink-400)}
+.dial.t1 .fav{background:rgba(16,181,160,.18);color:var(--teal)}
+.dial.t2 .fav{background:rgba(124,92,255,.18);color:#A88FFF}
+.dial.t3 .fav{background:rgba(255,176,32,.18);color:var(--amber)}
+.dial.t4 .fav{background:rgba(232,238,243,.12);color:var(--ink-300)}
+.section-h{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px 10px;
+}
+.section-h h4{font-family:'Space Grotesk';font-size:13px;font-weight:600;letter-spacing:.01em}
+.section-h a{font-size:10px;color:var(--teal);text-decoration:none;font-weight:600}
+.feed{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.fcard{background:var(--ink-800);border-radius:var(--r-card);padding:12px;display:flex;gap:11px;align-items:center;border:1px solid rgba(255,255,255,.05)}
+.fcard .thumb{width:52px;height:44px;border-radius:10px;flex:none}
+.fcard .thumb.g1{background:linear-gradient(135deg,var(--teal),#0d8f7f)}
+.fcard .thumb.g2{background:linear-gradient(135deg,var(--violet),#5a3fd6)}
+.fcard .thumb.g3{background:linear-gradient(135deg,var(--amber),#e08900)}
+.fcard b{font-size:11px;font-weight:600;display:block;line-height:1.35}
+.fcard small{font-size:9px;color:var(--ink-400);display:block;margin-top:3px}
+
+/* ==========================================================
+   SCREEN 3 — tab switcher (deep gradient dark)
+   ========================================================== */
+.s3{background:linear-gradient(180deg,#0E1B22 0%,var(--ink-950) 60%);color:#E8EEF3}
+.switch-head{padding:10px 18px 12px;display:flex;align-items:center;gap:10px}
+.switch-head .pill{
+  flex:1;height:38px;background:rgba(255,255,255,.07);border-radius:var(--r-pill);
+  display:flex;align-items:center;gap:8px;padding:0 14px;font-size:11.5px;color:var(--ink-400);
+}
+.switch-head .pill svg{width:14px;height:14px;fill:var(--ink-400)}
+.switch-head .avatar{
+  width:32px;height:32px;border-radius:50%;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;
+}
+.tabgrid{padding:2px 16px;display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.tabcard{
+  background:var(--ink-800);border-radius:var(--r-card);overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);position:relative;
+}
+.tabcard.active{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+.tabcard .shot{height:96px;position:relative}
+.tabcard .shot.g1{background:linear-gradient(160deg,#153B3F,#0E1B22)}
+.tabcard .shot.g2{background:linear-gradient(160deg,#241B45,#0E1B22)}
+.tabcard .shot.g3{background:linear-gradient(160deg,#3B2E12,#0E1B22)}
+.tabcard .shot.g4{background:linear-gradient(160deg,#12303C,#0E1B22)}
+.tabcard .shot::after{
+  content:"";position:absolute;left:10px;right:26px;top:12px;height:5px;border-radius:3px;background:rgba(255,255,255,.22);
+  box-shadow:0 11px 0 rgba(255,255,255,.13),0 22px 0 rgba(255,255,255,.08);
+}
+.tabcard .x{
+  position:absolute;top:7px;right:7px;width:18px;height:18px;border-radius:50%;
+  background:rgba(11,15,19,.55);display:flex;align-items:center;justify-content:center;
+}
+.tabcard .x::before,.tabcard .x::after{
+  content:"";position:absolute;width:8px;height:1.5px;background:#fff;border-radius:2px;
+}
+.tabcard .x::before{transform:rotate(45deg)}.tabcard .x::after{transform:rotate(-45deg)}
+.tabcard .meta{padding:8px 10px 9px;display:flex;align-items:center;gap:7px}
+.tabcard .meta .f{width:14px;height:14px;border-radius:4px;flex:none}
+.tabcard .meta .f.a{background:var(--teal)}.tabcard .meta .f.b{background:var(--violet)}
+.tabcard .meta .f.c{background:var(--amber)}.tabcard .meta .f.d{background:var(--ink-600)}
+.tabcard .meta small{font-size:9.5px;color:var(--ink-300);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabbar{
+  margin-top:auto;padding:12px 18px 14px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.05);
+}
+.tabbar .num{
+  width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+}
+.tabbar .new{
+  width:52px;height:40px;border-radius:var(--r-pill);background:var(--grad);
+  display:flex;align-items:center;justify-content:center;
+}
+.tabbar .new svg{width:18px;height:18px;fill:#fff}
+.tabbar .menu svg{width:18px;height:18px;fill:var(--ink-300)}
+.tabbar>div{display:flex;align-items:center;gap:16px}
+
+/* ---------- legends ---------- */
+.legend{margin-top:14px;display:flex;flex-direction:column;gap:7px;max-width:300px}
+.legend div{display:flex;gap:8px;font-size:11px;color:var(--ink-300);line-height:1.45}
+.legend b{color:#E8EEF3;font-weight:600}
+.chip{
+  font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:6px;
+  flex:none;margin-top:1px;height:fit-content;
+}
+.chip.d{background:rgba(255,176,32,.15);color:var(--amber)}
+.chip.f{background:rgba(124,92,255,.15);color:#A88FFF}
+.chip.c{background:rgba(159,180,196,.15);color:var(--ink-300)}
+.chip.n{background:rgba(16,181,160,.15);color:var(--teal)}
+
+/* ---------- tokens section ---------- */
+.tokens{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-bottom:60px}
+.tok{
+  background:var(--ink-900);border:1px solid rgba(255,255,255,.06);
+  border-radius:20px;padding:22px;
+}
+.tok h3{font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.tok h3::before{content:"";width:8px;height:8px;background:var(--grad);border-radius:2px}
+.swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sw{height:56px;border-radius:12px;position:relative;overflow:hidden}
+.sw i{position:absolute;left:0;right:0;bottom:0;font-size:7.5px;text-align:center;font-style:normal;padding:3px 0;background:rgba(0,0,0,.35);color:#fff;font-weight:600}
+.type-row{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
+.type-row .display{color:#E8EEF3}
+.type-row small{color:var(--ink-400);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.shapes{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.shape-demo{display:flex;flex-direction:column;gap:6px;align-items:center;font-size:9px;color:var(--ink-400)}
+.pill-demo{width:90px;height:34px;border-radius:var(--r-pill);background:var(--ink-700)}
+.card-demo{width:90px;height:56px;border-radius:var(--r-card);background:var(--ink-700);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
+.hex-demo{width:52px;height:56px;background:var(--grad);clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
+.dna{display:flex;flex-direction:column;gap:11px}
+.dna-row{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--ink-300)}
+.dna-row b{color:#E8EEF3}
+
+/* ---------- DNA strip ---------- */
+.dna-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  margin-top:8px;
+}
+@media(max-width:900px){.dna-strip{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.dna-strip{grid-template-columns:1fr}.screens{gap:44px}}
+.dna-col{
+  border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px;
+  background:linear-gradient(180deg,rgba(255,255,255,.03),transparent);
+}
+.dna-col h4{font-family:'Space Grotesk';font-size:14px;margin-bottom:4px}
+.dna-col .src{font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+.dna-col ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.dna-col li{font-size:12px;color:var(--ink-300);line-height:1.5;padding-left:16px;position:relative}
+.dna-col li::before{content:"—";position:absolute;left:0;color:var(--ink-600)}
+.dna-col.inv{border-color:rgba(16,181,160,.35);background:linear-gradient(180deg,rgba(16,181,160,.07),transparent)}
+.dna-col.inv .src{color:var(--teal)}
+.foot{margin-top:50px;text-align:center;color:var(--ink-600);font-size:11.5px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= HEADER ================= -->
+  <div class="head">
+    <span class="kicker">Design exploration · v1</span>
+    <h1>NOVA — a browser design that<br><em>belongs to none of them</em></h1>
+    <p>
+      Structure ideas borrowed from Chromium, soft-focus calm from Firefox, the instant-clear
+      gesture from DuckDuckGo — then pushed through a new shape language
+      (<b>cut corners</b>), a hexagonal action core, and a teal → violet → amber gradient
+      none of the three use. This is the skin; the engine underneath is untouched.
+    </p>
+  </div>
+
+  <!-- ================= 3 PHONE MOCKUPS ================= -->
+  <div class="screens">
+
+    <!-- ===== SCREEN 1: browser view ===== -->
+    <div class="stage">
+      <span class="stage-label">01 · Browser view · light</span>
+      <div class="phone s1">
+        <div class="status"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
+
+        <div class="omnibar-wrap">
+          <div class="omnibar">
+            <div class="shield"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3z"/></svg></div>
+            <div class="url"><b>nova</b>.startpage.com/search</div>
+            <div class="omni-btn"><svg viewBox="0 0 24 24"><path d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/></svg></div>
+            <div class="omni-btn go"><svg viewBox="0 0 24 24"><path d="M4 10l8-6 8 6v10a1 1 0 01-1 1h-5v-6h-4v6H5a1 1 0 01-1-1V10z"/></svg></div>
+          </div>
+        </div>
+
+        <div class="page">
+          <div class="hero"><span>Ion Teal marks protected pages</span></div>
+          <h3>The cut-corner design language</h3>
+          <p>Every card in NOVA carries one chamfered corner — a small cut that no
+             major browser uses. It becomes your signature: once you've seen it,
+             any screenshot of the app reads as NOVA instantly.</p>
+          <p>Warm off-white paper replaces pure white, so the UI feels calmer
+             in daylight mode while dark mode goes near-black blue.</p>
+          <div class="readbar"><i></i></div>
+        </div>
+
+        <div class="toolbar-dock">
+          <div class="hex"><svg viewBox="0 0 24 24"><path d="M13.5 1s.8 2.6-1.2 5.6C10.4 9.4 8 10.4 8 14a4 4 0 008 0c0-1.5-.6-2.6-1.3-3.5.3 1.6-.4 2.5-1.2 2.7.8-2.4-.4-5.4-2-6.9.6 2.1-.3 3.4-1.5 5C8.7 13.2 8 14.6 8 16a6 6 0 1012 0c0-6.5-6.5-8.5-6.5-15z" transform="scale(.85) translate(2 2)"/></svg></div>
+          <div class="toolbar">
+            <div class="tb-btn"><svg viewBox="0 0 24 24"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20v-2z"/></svg><small>BACK</small></div>
+            <div class="tb-btn"><svg viewBox="0 0 24 24"><path d="M14 4l-1.4 1.4L18.2 11H4v2h14.2l-5.6 5.6L14 20l8-8-8-8z"/></svg><small>FWD</small></div>
+            <div class="tb-btn"><svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 00-2 .8l-7-4a3 3 0 000-1.6l7-4A3 3 0 1015 5l-7 4a3 3 0 100 6l7 4c.5.6 1.2 1 2 1a3 3 0 100-6z" transform="scale(.9) translate(1.3 1.3)"/></svg><small>SHARE</small></div>
+            <div class="tb-btn" style="position:relative"><svg viewBox="0 0 24 24"><path d="M4 5h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/></svg><small>MENU</small></div>
+            <div class="tb-btn" style="position:relative"><svg viewBox="0 0 24 24"><path d="M4 8h4V4h2v4h4v2h-4v4H8v-4H4V8zm12-2h4v2h-4V6zm0 5h4v2h-4v-2zm0 5h4v2h-4v-2zM8 13h2v2H8v-2zm0 5h2v2H8v-2z"/></svg><span class="count">3</span><small>TABS</small></div>
+          </div>
+          <div class="homebar" style="background:rgba(11,15,19,.0)"></div>
+        </div>
+        <div class="dot" style="top:64px;left:14px">1</div>
+        <div class="dot" style="top:490px;left:136px">2</div>
+        <div class="dot" style="top:200px;right:16px">3</div>
+      </div>
+      <div class="legend">
+        <div><span class="chip d">DDG</span><span><b>1</b> — shield chip in the omnibar: instant "you're protected" signal</span></div>
+        <div><span class="chip n">NEW</span><span><b>2</b> — hexagonal fire core replaces DDG's round fire button; breathes on a slow loop</span></div>
+        <div><span class="chip n">NEW</span><span><b>3</b> — cut-corner cards; the chamfer is NOVA's signature</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 2: new tab ===== -->
+    <div class="stage">
+      <span class="stage-label">02 · New tab · dark</span>
+      <div class="phone s2">
+        <div class="status" style="color:var(--ink-300)"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
+
+        <div class="orb-zone">
+          <div class="greet">Good evening.
+            <small>The ion gradient glow is NOVA's welcome — FF's gradient idea, re-colored and blurred into an aura.</small>
+          </div>
+          <div class="search2">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 10-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"/></svg>
+            <span>Search or type address</span>
+            <span class="kbd">⌘K</span>
+          </div>
+        </div>
+
+        <div class="dials">
+          <div class="dial t1 cut"><span class="fav">◈</span><b>Daily Read</b><small>nova.startpage.com</small></div>
+          <div class="dial t2 cut"><span class="fav">◉</span><b>Stream Hub</b><small>play.example.io</small></div>
+          <div class="dial t3 cut"><span class="fav">✦</span><b>Dev Board</b><small>code.example.dev</small></div>
+          <div class="dial t4 cut"><span class="fav">＋</span><b>Add shortcut</b><small>pin any site</small></div>
+        </div>
+
+        <div class="section-h"><h4>Continue reading</h4><a>See all</a></div>
+        <div class="feed">
+          <div class="fcard cut"><div class="thumb g1"></div><div><b>Why bottom toolbars won mobile browsers</b><small>4 min left · saved yesterday</small></div></div>
+          <div class="fcard cut"><div class="thumb g2"></div><div>A field guide to chamfered UI shapes</div></div>
+        </div>
+
+        <div class="dot" style="top:60px;right:22px">4</div>
+        <div class="dot" style="top:250px;left:14px">5</div>
+      </div>
+      <div class="legend">
+        <div><span class="chip f">FF</span><span><b>4</b> — aura glow: Firefox's gradient mood, rebuilt as a blurred ion orb</span></div>
+        <div><span class="chip n">NEW</span><span><b>5</b> — speed dials as cut-corner tiles with colored favicon plates</span></div>
+        <div><span class="chip c">CHROME</span><span><b>·</b> — "continue reading" strip is a Chrome-style resume surface, restyled</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SCREEN 3: tab switcher ===== -->
+    <div class="stage">
+      <span class="stage-label">03 · Tab switcher · deep dark</span>
+      <div class="phone s3">
+        <div class="status" style="color:var(--ink-300)"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
+
+        <div class="switch-head">
+          <div class="pill">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 10-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"/></svg>
+            Search tabs
+          </div>
+          <div class="avatar">J</div>
+        </div>
+
+        <div class="tabgrid">
+          <div class="tabcard cut active"><div class="shot g1"></div><div class="x"></div><div class="meta"><span class="f a"></span><small>nova.startpage.com</small></div></div>
+          <div class="tabcard cut"><div class="shot g2"></div><div class="x"></div><div class="meta"><span class="f b"></span><small>stream hub · playing</small></div></div>
+          <div class="tabcard cut"><div class="shot g3"></div><div class="x"></div><div class="meta"><span class="f c"></span><small>dev board sprint 12</small></div></div>
+          <div class="tabcard cut"><div class="shot g4"></div><div class="x"></div><div class="meta"><span class="f d"></span><small>reading list</small></div></div>
+        </div>
+
+        <div class="tabbar">
+          <div class="num">4</div>
+          <div>
+            <div class="new"><svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"/></svg></div>
+            <div class="menu"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></div>
+          </div>
+        </div>
+
+        <div class="dot" style="top:96px;left:20px">6</div>
+        <div class="dot" style="bottom:78px;left:44px">7</div>
+      </div>
+      <div class="legend">
+        <div><span class="chip c">CHROME</span><span><b>6</b> — card grid with live previews: Chromium's grid, cut-corner edition</span></div>
+        <div><span class="chip n">NEW</span><span><b>7</b> — gradient "+" pill and circular counter instead of Chrome's square ⧉</span></div>
+        <div><span class="chip d">DDG</span><span><b>·</b> — active-tab highlight reuses the protection teal, tying privacy to navigation</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DESIGN TOKENS ================= -->
+  <div class="tokens">
+    <div class="tok">
+      <h3>Palette</h3>
+      <div class="swatches">
+        <div class="sw" style="background:#0B0F13"><i>Ink 950</i></div>
+        <div class="sw" style="background:#F6F4EE;border:1px solid rgba(255,255,255,.1)"><i>Paper</i></div>
+        <div class="sw" style="background:#10B5A0"><i>Ion Teal</i></div>
+        <div class="sw" style="background:#7C5CFF"><i>Nova Violet</i></div>
+        <div class="sw" style="background:#FFB020"><i>Signal Amber</i></div>
+      </div>
+      <p style="margin-top:14px;font-size:12px;color:var(--ink-400);line-height:1.6">
+        No DDG orange, no Firefox purple, no Chrome blue. Teal = protection states,
+        violet = identity/tabs, amber = attention & fire.
+      </p>
+    </div>
+    <div class="tok">
+      <h3>Typography</h3>
+      <div class="type-row"><span class="display" style="font-size:34px;font-weight:700">Aa</span><small>Display · Space Grotesk 700</small></div>
+      <div class="type-row"><span style="font-size:18px;font-weight:600">Address bars & titles</span><small>Inter 600</small></div>
+      <div class="type-row"><span style="font-size:13px;color:var(--ink-300)">Body copy reads calm and neutral</span><small>Inter 400</small></div>
+      <p style="margin-top:10px;font-size:12px;color:var(--ink-400);line-height:1.6">
+        None of the three browsers ship this pairing — it instantly changes the "voice" of the UI.
+      </p>
+    </div>
+    <div class="tok">
+      <h3>Shape language</h3>
+      <div class="shapes">
+        <div class="shape-demo"><div class="pill-demo"></div>pills · omnibar</div>
+        <div class="shape-demo"><div class="card-demo"></div>cut card · signature</div>
+        <div class="shape-demo"><div class="hex-demo"></div>hex core · fire</div>
+      </div>
+      <p style="margin-top:14px;font-size:12px;color:var(--ink-400);line-height:1.6">
+        One chamfered corner per card. Rounded where you touch, cut where you look.
+      </p>
+    </div>
+    <div class="tok">
+      <h3>What we kept from the engine</h3>
+      <div class="dna">
+        <div class="dna-row"><b>Tracking protection</b><span>— logic untouched, now flagged in Ion Teal</span></div>
+        <div class="dna-row"><b>Fire / data clear</b><span>— same instant wipe, new hex ritual</span></div>
+        <div class="dna-row"><b>Fireproof, autofill, sync</b><span>— all survive the reskin</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DNA STRIP ================= -->
+  <div class="dna-strip">
+    <div class="dna-col">
+      <div class="src" style="color:var(--ink-400)">From Chromium</div>
+      <h4>Structure bones</h4>
+      <ul>
+        <li>Bottom floating toolbar</li>
+        <li>Tab grid with live card previews</li>
+        <li>"Continue reading" resume surfaces</li>
+        <li>Grouped, searchable tabs</li>
+      </ul>
+    </div>
+    <div class="dna-col">
+      <div class="src" style="color:#A88FFF">From Firefox</div>
+      <h4>Soft focus</h4>
+      <ul>
+        <li>Gradient mood & warm dark mode</li>
+        <li>Single calm address bar</li>
+        <li>Gentle motion, no hard edges</li>
+        <li>Content-first new tab</li>
+      </ul>
+    </div>
+    <div class="dna-col">
+      <div class="src" style="color:var(--amber)">From DuckDuckGo</div>
+      <h4>Instant clean</h4>
+      <ul>
+        <li>One-tap fire gesture</li>
+        <li>Protection signal in the address bar</li>
+        <li>Privacy as a visible state, not a setting</li>
+      </ul>
+    </div>
+    <div class="dna-col inv">
+      <div class="src">Invented · NOVA</div>
+      <h4>The new part</h4>
+      <ul>
+        <li>Cut-corner shape language</li>
+        <li>Hexagonal action core that breathes</li>
+        <li>Teal→violet→amber ion gradient</li>
+        <li>Warm paper light mode + ink blue dark mode</li>
+        <li>Space Grotesk × Inter type pairing</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    NOVA design exploration · mockup only — no app code changed yet.<br>
+    Ideas are free to mix; every asset here (colors, shapes, type, icons) is original to this design.
+  </div>
+</div>
+</body>
+</html>
