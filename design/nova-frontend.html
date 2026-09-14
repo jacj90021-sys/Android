@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang='en'><head><meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>NOVA v2 — fused design (researched from Chromium + Firefox repos)</title>
+<link rel='preconnect' href='https://fonts.googleapis.com'>
+<link href='https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap' rel='stylesheet'>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;font-family:'Space Grotesk',Inter,Roboto,system-ui,sans-serif;
+ min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:26px 14px 50px}
+.switcher{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;justify-content:center}
+.switcher input{display:none}
+.switcher label{color:#aebacf;font-size:12.5px;font-weight:600;padding:8px 18px;border-radius:999px;
+ background:#1b2129;cursor:pointer;border:1px solid #2a3240;user-select:none}
+#nb1:checked~.switcher label[for=nb1],#nb2:checked~.switcher label[for=nb2],
+#nb3:checked~.switcher label[for=nb3],#nb4:checked~.switcher label[for=nb4],
+#nb5:checked~.switcher label[for=nb5]{background:#0B57D0;color:#fff;border-color:#0B57D0}
+.app{position:relative;width:375px;height:748px;border-radius:42px;overflow:hidden;
+ box-shadow:0 0 0 10px #000,0 30px 70px rgba(0,0,0,.65);background:#F0F4F9}
+.scr{display:none;position:absolute;inset:0;flex-direction:column;background:#F0F4F9}
+#nb1:checked~.app .scr1{display:flex}#nb2:checked~.app .scr2{display:flex}
+#nb3:checked~.app .scr3{display:flex}#nb4:checked~.app .scr4{display:flex}
+#nb5:checked~.app .scr5{display:flex}
+.status{height:32px;display:flex;align-items:center;justify-content:space-between;
+ padding:0 22px;font-size:12px;font-weight:600;color:#1F1F1F;flex:none}
+/* omnibar */
+.obar{display:flex;align-items:center;gap:9px;padding:6px 14px 6px;flex:none}
+.obadge{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#592ACB,#AB71FF);flex:none;
+ display:flex;align-items:center;justify-content:center;
+ filter:drop-shadow(0 2px 6px rgba(89,42,203,.35))}
+.ofield{flex:1;display:flex;align-items:center;gap:9px;height:42px;background:#FFFFFF;
+ padding:0 12px;box-shadow:0 1px 4px rgba(31,63,89,.08)}
+.otx{flex:1;font-size:13.5px;color:#1F1F1F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pulse{width:9px;height:9px;border-radius:50%;background:#1EA446;flex:none;
+ animation:pulse 2.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(30,164,70,.4)}55%{box-shadow:0 0 0 7px rgba(30,164,70,0)}}
+/* action row */
+.arow{display:flex;align-items:center;gap:2px;padding:2px 10px;flex:none}
+.arow svg{width:38px;height:36px;padding:8px 9px;background:none;border-radius:10px}
+.asp{flex:1}
+/* bottom bar */
+.bottom{display:flex;align-items:center;justify-content:space-between;
+ padding:8px 16px 6px;flex:none;background:#FFFFFF;border-top:1px solid #DDE3EA}
+.bottom>svg{width:44px;height:44px;padding:11px;border-radius:50%}
+.bstar,.btabs{position:relative;display:flex}
+.btabs svg{width:44px;height:44px;padding:11px;background:#D3E3FD;border-radius:50%}
+.bcnt{position:absolute;top:2px;right:0;font-style:normal;font-size:9.5px;font-weight:800;
+ min-width:16px;height:16px;border-radius:9px;background:#0B57D0;color:#fff;
+ display:flex;align-items:center;justify-content:center;padding:0 3px}
+.hex{width:52px;height:56px;display:flex;align-items:center;justify-content:center;
+ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+ background:linear-gradient(135deg,#592ACB,#AB71FF);animation:breathe 3.4s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.hb{width:110px;height:4px;border-radius:2px;background:rgba(31,63,89,.3);margin:2px auto 7px;flex:none;
+ position:relative;z-index:2}
+/* page */
+.page{flex:1;padding:10px 14px 8px;display:flex;flex-direction:column;gap:10px;overflow:hidden;position:relative}
+.pcard{flex:1;background:#FFFFFF;padding:16px;display:flex;flex-direction:column;gap:10px;
+ box-shadow:0 2px 10px rgba(31,63,89,.07)}
+.pgrad{height:96px;border-radius:10px;opacity:.92}
+.ph{font-size:16px;font-weight:700;letter-spacing:-.01em;color:#1F1F1F}
+.pline{height:10px;border-radius:5px;background:#E9EEF6}
+.pnodew{text-align:center;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#8E918F}
+/* home */
+.homewrap{flex:1;position:relative;overflow:hidden;display:flex;flex-direction:column;background:#F0F4F9}
+.aura{position:absolute;top:-90px;left:50%;transform:translateX(-50%);width:330px;height:210px;
+ border-radius:50%;filter:blur(60px);opacity:.26}
+.greet{font-size:19px;font-weight:700;letter-spacing:-.01em;color:#1F1F1F;
+ padding:26px 22px 0;position:relative}
+.greet span{font-size:12px;font-weight:500;color:#444746;display:block;margin-top:5px}
+.dials{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 8px;padding:22px 18px 0;position:relative}
+.dial{display:flex;flex-direction:column;align-items:center;gap:6px}
+.dtile{width:52px;height:52px;background:#FFFFFF;display:flex;align-items:center;
+ justify-content:center;font-size:17px;font-weight:700;
+ box-shadow:0 1px 5px rgba(31,63,89,.1)}
+.dial small{font-size:10px;color:#444746;max-width:64px;white-space:nowrap;
+ overflow:hidden;text-overflow:ellipsis}
+.burncard{margin:auto 16px 14px;background:#FFFFFF;padding:13px 14px;display:flex;
+ align-items:center;gap:11px;box-shadow:0 2px 10px rgba(31,63,89,.08)}
+.bic{display:flex}
+.bcm{flex:1}
+.bcm b{font-size:12.5px;display:block;color:#1F1F1F}
+.bcm small{font-size:10.5px;display:block;margin-top:2px;color:#444746}
+.bpill{display:flex;width:30px;height:30px;border-radius:50%;background:#D3E3FD;
+ align-items:center;justify-content:center}
+/* tabs */
+.thead{display:flex;align-items:center;gap:14px;padding:16px 18px 10px;
+ font-size:17px;font-weight:700;color:#1F1F1F}
+.thead b{flex:1}
+.tgrid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:8px 14px;
+ align-content:start;overflow:hidden}
+.tcard{background:#FFFFFF;padding:7px;display:flex;flex-direction:column;gap:7px;
+ box-shadow:0 2px 8px rgba(31,63,89,.09)}
+.tcshot{height:118px;border-radius:8px}
+.tcmeta{display:flex;align-items:center;gap:6px}
+.tcdom{flex:1;font-size:10.5px;font-weight:600;color:#1F1F1F;white-space:nowrap;
+ overflow:hidden;text-overflow:ellipsis}
+.tcx{display:flex;opacity:.7}
+.tfoot{display:flex;align-items:center;justify-content:space-between;
+ padding:8px 18px 4px;flex:none;background:#FFFFFF;border-top:1px solid #DDE3EA}
+.tnum{font-size:13px;font-weight:800;color:#0B57D0;width:40px;text-align:center;
+ background:#D3E3FD;border-radius:12px;padding:6px 0}
+.tnew{width:56px;height:38px;display:flex;align-items:center;justify-content:center;
+ border-radius:999px;box-shadow:0 5px 16px rgba(89,42,203,.4)}
+.tmenu{display:flex;width:40px;justify-content:center}
+/* settings */
+.shead{font-size:21px;font-weight:700;padding:18px 20px 12px;color:#1F1F1F;letter-spacing:-.01em}
+.slist{flex:1;border-top:1px solid #DDE3EA}
+.setrow{display:flex;align-items:center;gap:13px;padding:15px 20px;
+ border-bottom:1px solid #DDE3EA;background:#FFFFFF}
+.sic{display:flex;width:26px;justify-content:center}
+.stx{flex:1}
+.stx b{display:block;font-size:14px;font-weight:600;color:#1F1F1F}
+.stx small{display:block;font-size:11px;color:#444746;margin-top:2px}
+.sarr{display:flex}
+.tgl{width:40px;height:23px;border-radius:12px;background:#C7C7C7;position:relative;flex:none}
+.tgl.on{background:#0B57D0}
+.tgl::after{content:'';position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;
+ background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.tgl.on::after{left:19px}
+.sfoot{text-align:center;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+ color:#8E918F;padding:10px}
+/* fire dialog — the ONLY dark: modal scrim, uniform over everything */
+.scrim{position:absolute;inset:0;background:rgba(15,17,20,.66);z-index:4;
+ display:flex;align-items:center;justify-content:center;padding:24px}
+.fcard{background:#1E1F20;padding:26px 22px 20px;width:100%;text-align:center;
+ border:1px solid #333537}
+.fhexwrap{display:flex;justify-content:center;margin-bottom:14px}
+.ft{font-size:17px;font-weight:700;color:#E3E3E3;letter-spacing:-.01em}
+.fs{font-size:12.5px;line-height:1.6;margin:8px 0 20px;color:#C4C7C5}
+.fb{display:flex;gap:10px}
+.fb-ghost,.fb-fire{flex:1;height:44px;display:flex;align-items:center;justify-content:center;
+ font-size:13.5px;font-weight:700;border-radius:999px}
+.fb-ghost{color:#C4C7C5;border:1px solid #333537}
+.fb-fire{background:linear-gradient(135deg,#592ACB,#AB71FF);color:#fff}
+.cap{color:#7d8698;font-size:10.5px;margin-top:16px;text-align:center;line-height:1.7;max-width:680px}
+.cap b{color:#aebacf}
+.cap code{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#9db1cc}
+</style></head><body>
+<input type='radio' name='n' id='nb1' checked><input type='radio' name='n' id='nb2'><input type='radio' name='n' id='nb3'><input type='radio' name='n' id='nb4'><input type='radio' name='n' id='nb5'>
+<div class='switcher'><label for='nb1'>Browser</label><label for='nb2'>Home</label><label for='nb3'>Tabs</label><label for='nb4'>Settings</label><label for='nb5'>Fire</label></div>
+<div class='app'>
+<div class='scr scr1'><div class='status'><span>9:41</span><span>◂ ▬ ▸</span></div><div class='obar'><span class='obadge'><svg width='14' height='14' viewBox='0 0 24 24'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z' fill='#fff'/></svg></span><div class='ofield' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'><svg width='18' height='18' viewBox='0 0 24 24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z' fill='#444746'/></svg><span class='otx'>nova.example.com</span><i class='pulse'></i></div></div><div class='arow'><svg width='20' height='20' viewBox='0 0 24 24'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z' fill='#1F1F1F'/></svg><svg width='20' height='20' viewBox='0 0 24 24'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' fill='#1F1F1F'/></svg><svg width='19' height='19' viewBox='0 0 24 24'><path d='M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z' fill='#1F1F1F'/></svg><span class='asp'></span><svg width='20' height='20' viewBox='0 0 24 24'><path d='M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z' fill='#1F1F1F'/></svg><svg width='19' height='19' viewBox='0 0 24 24'><path d='M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z' fill='#1F1F1F'/></svg></div><div class='page'><div class='pcard' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'><div class='pgrad' style='background:linear-gradient(135deg,#592ACB,#AB71FF)'></div><div class='ph'>Reading, protected</div><div class='pline' style='width:88%'></div><div class='pline' style='width:72%'></div><div class='pline' style='width:81%'></div><div class='pline' style='width:46%'></div></div><div class='pnodew'>tracking protection · on</div></div><div class='bottom'><svg width='22' height='22' viewBox='0 0 24 24'><path d='M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' fill='#1F1F1F'/></svg><span class='bstar'><svg width='22' height='22' viewBox='0 0 24 24'><path d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='#1F1F1F'/></svg></span><span class='hex' style='filter:drop-shadow(0 4px 14px rgba(89,42,203,.45));'><svg width='31' height='31' viewBox='0 0 24 24'><path d='M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z' fill='#fff'/></svg></span><span class='btabs'><svg width='22' height='22' viewBox='0 0 24 24'><path d='M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z' fill='#0B57D0'/></svg><i class='bcnt'>4</i></span><svg width='22' height='22' viewBox='0 0 24 24'><path d='M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z' fill='#1F1F1F'/></svg></div><div class='hb'></div></div>
+<div class='scr scr2'><div class='status'><span>9:41</span><span>◂ ▬ ▸</span></div><div class='obar'><span class='obadge'><svg width='14' height='14' viewBox='0 0 24 24'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z' fill='#fff'/></svg></span><div class='ofield' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'><svg width='18' height='18' viewBox='0 0 24 24'><path d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' fill='#444746'/></svg><span class='otx'>Search or type a address</span><i class='pulse'></i></div></div><div class='homewrap' style='background:#F0F4F9'><div class='aura' style='background:linear-gradient(135deg,#592ACB,#AB71FF)'></div><div class='greet'>Good evening.<span>12 trackers burned today</span></div><div class='dials'><div class='dial'><div class='dtile' style='color:#0B57D0;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'>N</div><small>News</small></div><div class='dial'><div class='dtile' style='color:#592ACB;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'>G</div><small>Dev</small></div><div class='dial'><div class='dtile' style='color:#146C2E;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'>P</div><small>Play</small></div><div class='dial'><div class='dtile' style='color:#AB71FF;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'>F</div><small>Feed</small></div><div class='dial'><div class='dtile' style='color:#0B57D0;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'>M</div><small>Mail</small></div><div class='dial'><div class='dtile' style='color:#592ACB;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'>D</div><small>Docs</small></div><div class='dial'><div class='dtile' style='color:#146C2E;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'>S</div><small>Shop</small></div><div class='dial'><div class='dtile' style='color:#8E918F;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'>+</div><small>Add</small></div></div><div class='burncard' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'><span class='bic'><span class='hex' style=''><svg width='21' height='21' viewBox='0 0 24 24'><path d='M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z' fill='#fff'/></svg></span></span><div class='bcm'><b>Fire history</b><small>3,241 traces cleared this week</small></div><span class='bpill'><svg width='14' height='14' viewBox='0 0 24 24'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' fill='#0B57D0'/></svg></span></div></div><div class='bottom'><svg width='22' height='22' viewBox='0 0 24 24'><path d='M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' fill='#1F1F1F'/></svg><span class='bstar'><svg width='22' height='22' viewBox='0 0 24 24'><path d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='#1F1F1F'/></svg></span><span class='hex' style='filter:drop-shadow(0 4px 14px rgba(89,42,203,.45));'><svg width='31' height='31' viewBox='0 0 24 24'><path d='M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z' fill='#fff'/></svg></span><span class='btabs'><svg width='22' height='22' viewBox='0 0 24 24'><path d='M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z' fill='#0B57D0'/></svg></span><svg width='22' height='22' viewBox='0 0 24 24'><path d='M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z' fill='#1F1F1F'/></svg></div><div class='hb'></div></div>
+<div class='scr scr3'><div class='status'><span>9:41</span><span>◂ ▬ ▸</span></div><div class='thead'><b>4 tabs</b><svg width='19' height='19' viewBox='0 0 24 24'><path d='M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z' fill='#444746'/></svg><svg width='19' height='19' viewBox='0 0 24 24'><path d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z' fill='#444746'/></svg></div><div class='tgrid' style='background:#F0F4F9'><div class='tcard' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);outline:2px solid #0B57D0;'><div class='tcshot' style='background:linear-gradient(150deg,#D3E3FD,#ECF3FE)'></div><div class='tcmeta'><span class='tcdom'>nova.example.com</span><span class='tcx'><svg width='14' height='14' viewBox='0 0 24 24'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z' fill='#444746'/></svg></span></div></div><div class='tcard' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);'><div class='tcshot' style='background:linear-gradient(150deg,#E9DFF7,#F4EDFC)'></div><div class='tcmeta'><span class='tcdom'>aurora.dev</span><span class='tcx'><svg width='14' height='14' viewBox='0 0 24 24'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z' fill='#444746'/></svg></span></div></div><div class='tcard' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);'><div class='tcshot' style='background:linear-gradient(150deg,#D8EADD,#EFF7F1)'></div><div class='tcmeta'><span class='tcdom'>ember.fm</span><span class='tcx'><svg width='14' height='14' viewBox='0 0 24 24'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z' fill='#444746'/></svg></span></div></div><div class='tcard' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);'><div class='tcshot' style='background:linear-gradient(150deg,#F7E3DE,#FBF0ED)'></div><div class='tcmeta'><span class='tcdom'>pulse.news</span><span class='tcx'><svg width='14' height='14' viewBox='0 0 24 24'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z' fill='#444746'/></svg></span></div></div></div><div class='tfoot'><span class='tnum'>4</span><span class='tnew' style='background:linear-gradient(135deg,#592ACB,#AB71FF)'><svg width='20' height='20' viewBox='0 0 24 24'><path d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z' fill='#fff'/></svg></span><span class='tmenu'><svg width='20' height='20' viewBox='0 0 24 24'><path d='M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z' fill='#1F1F1F'/></svg></span></div><div class='hb'></div></div>
+<div class='scr scr4'><div class='status'><span>9:41</span><span>◂ ▬ ▸</span></div><div class='shead'>Settings</div><div class='slist'><div class='setrow'><span class='sic'><svg width='20' height='20' viewBox='0 0 24 24'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z' fill='#444746'/></svg></span><div class='stx'><b>Protection</b><small>Enhanced</small></div><i class='tgl on'></i></div><div class='setrow'><span class='sic'><svg width='20' height='20' viewBox='0 0 24 24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z' fill='#444746'/></svg></span><div class='stx'><b>Passwords</b></div><span class='sarr'><svg width='16' height='16' viewBox='0 0 24 24'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' fill='#8E918F'/></svg></span></div><div class='setrow'><span class='sic'><svg width='20' height='20' viewBox='0 0 24 24'><path d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' fill='#444746'/></svg></span><div class='stx'><b>Bookmarks</b></div><span class='sarr'><svg width='16' height='16' viewBox='0 0 24 24'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' fill='#8E918F'/></svg></span></div><div class='setrow'><span class='sic'><svg width='20' height='20' viewBox='0 0 24 24'><path d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z' fill='#444746'/></svg></span><div class='stx'><b>Clear browsing data</b></div><span class='sarr'><svg width='16' height='16' viewBox='0 0 24 24'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' fill='#8E918F'/></svg></span></div><div class='setrow'><span class='sic'><svg width='20' height='20' viewBox='0 0 24 24'><path d='M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z' fill='#444746'/></svg></span><div class='stx'><b>General</b></div><span class='sarr'><svg width='16' height='16' viewBox='0 0 24 24'><path d='M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z' fill='#8E918F'/></svg></span></div></div><div class='sfoot'>NOVA 1.0</div><div class='hb'></div></div>
+<div class='scr scr5'><div class='status'><span>9:41</span><span>◂ ▬ ▸</span></div><div class='obar'><span class='obadge'><svg width='14' height='14' viewBox='0 0 24 24'><path d='M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z' fill='#fff'/></svg></span><div class='ofield' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'><svg width='18' height='18' viewBox='0 0 24 24'><path d='M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z' fill='#444746'/></svg><span class='otx'>nova.example.com</span><i class='pulse'></i></div></div><div class='page'><div class='pcard' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);opacity:.4'><div class='pgrad' style='background:#E9EEF6'></div><div class='ph'>.</div></div></div><div class='scrim'><div class='fcard' style='clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)'><div class='fhexwrap'><span class='hex' style='filter:drop-shadow(0 4px 14px rgba(89,42,203,.45));'><svg width='39' height='39' viewBox='0 0 24 24'><path d='M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z' fill='#fff'/></svg></span></div><div class='ft'>Burn all tabs &amp; data?</div><div class='fs'>4 tabs · 12 trackers · all history. One tap and it is gone — nothing is kept.</div><div class='fb'><span class='fb-ghost'>Cancel</span><span class='fb-fire'>Burn</span></div></div></div><div class='hb' style='position:absolute;bottom:7px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.4);z-index:5'></div></div>
+</div>
+<div class='cap'><b>NOVA v2 — built from real repo research:</b><br>
+Chromium <code>color_palette.xml</code>: action blue <code>#0B57D0</code>, containers
+<code>#F0F4F9</code>, text <code>#1F1F1F/#444746</code>, hairlines <code>#DDE3EA</code> ·
+Firefox <code>fenix colors.xml</code>: identity gradient Violet70→40 <code>#592ACB→#AB71FF</code> ·
+DDG: only the one-tap fire <i>idea</i>, kept as the violet hex ritual — zero DDG assets.<br>
+Icons are standard Material Symbols (universally readable). One consistent light color
+world across all screens — dark appears only under the fire-dialog scrim.</div>
+</body></html>
