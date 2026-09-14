@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skin 1/3 — DuckDuckGo exact design (colors & structure from the real app source)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   SKIN 1/3 — DUCKDUCKGO
+   Every hex below is lifted directly from the app's real source:
+   android-design-system/design-system/src/main/res/values/design-system-colors.xml
+   (values/ = light, *_dark tokens = dark). Structure matches DDG Android:
+   top omnibar pill, shield tracker-count, orange fire, favorites grid,
+   list-style tab switcher, grouped settings.
+   Font note: DDG ships proprietary "Duck Sans"; Inter is the closest free match.
+   ===================================================================== */
+:root{
+  /* ---- exact DDG tokens ---- */
+  --ddg-orange:#DE5833;         /* red50 — brand & fire */
+  --ddg-orange-pressed:#BC4726; /* red60 */
+  --ddg-orange-soft:#2EDE5833;
+  --ddg-blue:#3969EF;           /* blue50 — primary buttons */
+  --ddg-blue-pressed:#2B55CA;   /* blue60 */
+  --ddg-green:#4CBA3C;          /* green50 — protection good */
+  --ddg-yellow:#FFCC33;         /* yellow50 */
+  /* light */
+  --l-window:#FFFFFF;
+  --l-bg:#F2F2F2;
+  --l-surface:#F9F9F9;
+  --l-text:#1F1F1F;
+  --l-text-2:rgba(28,31,33,.72);
+  --l-text-3:rgba(31,31,31,.4);
+  --l-icon:rgba(31,31,31,.84);
+  --l-line:rgba(31,31,31,.09);
+  --l-ctrl:rgba(31,31,31,.09);
+  /* dark */
+  --d-window:#3D3D3D;
+  --d-bg:#282828;
+  --d-surface:#373737;
+  --d-canvas:#1F1F1F;
+  --d-text:#E6FFFFFF;
+  --d-text-2:#99FFFFFF;
+  --d-text-3:#66FFFFFF;
+  --d-icon:#C7FFFFFF;
+  --d-line:rgba(249,249,249,.12);
+  --d-ctrl:rgba(249,249,249,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',sans-serif;
+  background:#EDEBE6;
+  background-image:radial-gradient(900px 500px at 80% -10%,rgba(222,88,51,.08),transparent 60%);
+  color:#1F1F1F;min-height:100vh;padding:44px 24px 80px;
+}
+.wrap{max-width:1200px;margin:0 auto}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ddg-orange);font-weight:700}
+.kicker::before{content:"";width:20px;height:20px;border-radius:6px;background:var(--ddg-orange);-webkit-mask:none}
+.head h1{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.02em;margin:12px 0 10px}
+.head p{color:var(--l-text-2);max-width:680px;line-height:1.65;font-size:14px}
+.head p b{color:var(--l-text)}
+
+/* ---------- screens ---------- */
+.screens{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin:42px 0 64px}
+.stage{display:flex;flex-direction:column;align-items:center;gap:14px}
+.stage-label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--l-text-2);font-weight:700}
+.phone{width:300px;height:630px;border-radius:38px;overflow:hidden;position:relative;display:flex;flex-direction:column;border:1px solid rgba(0,0,0,.12);box-shadow:0 24px 50px rgba(0,0,0,.22),0 0 0 8px #111}
+.status{height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:10.5px;font-weight:600;flex:none}
+.status .sig{display:flex;gap:4px}
+.dot{position:absolute;width:18px;height:18px;border-radius:50%;background:#111;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:30;border:1.5px solid var(--ddg-orange);box-shadow:0 0 0 3px rgba(222,88,51,.25)}
+
+/* =========================================================
+   SCREEN 1 — Browser view (light)
+   ========================================================= */
+.s1{background:var(--l-bg);color:var(--l-text)}
+.omnibar-zone{padding:8px 12px 8px;flex:none;background:var(--l-window);border-bottom:1px solid var(--l-line)}
+.omnibar{
+  height:44px;background:var(--l-surface);border:1px solid var(--l-line);
+  border-radius:22px;display:flex;align-items:center;gap:8px;padding:0 6px 0 6px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+.shield-count{
+  display:flex;align-items:center;gap:4px;height:30px;padding:0 8px 0 6px;border-radius:15px;flex:none;
+}
+.shield-count svg{width:16px;height:16px;fill:var(--ddg-green)}
+.shield-count b{font-size:11.5px;color:var(--ddg-green);font-weight:700}
+.omnibar .url{flex:1;font-size:13px;color:var(--l-text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.omnibar .url span{color:var(--l-text-3)}
+.fire-btn{
+  width:34px;height:34px;border-radius:50%;background:var(--ddg-orange);
+  display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 2px 6px rgba(222,88,51,.35);
+}
+.fire-btn svg{width:16px;height:16px;fill:#fff}
+.page{flex:1;overflow:hidden;padding:14px 16px 0}
+.serp{background:var(--l-window);border:1px solid var(--l-line);border-radius:12px;padding:14px}
+.serp .site{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.serp .site .fav{width:22px;height:22px;border-radius:6px;background:var(--ddg-orange);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.serp .site b{font-size:12px}
+.serp .site small{display:block;font-size:9.5px;color:var(--ddg-green);font-weight:600}
+.serp h3{font-size:15px;line-height:1.35;color:var(--ddg-blue);font-weight:600;margin-bottom:6px}
+.serp p{font-size:11px;line-height:1.6;color:var(--l-text-2)}
+.badge{
+  display:inline-flex;align-items:center;gap:5px;margin-top:10px;
+  background:rgba(76,186,60,.12);color:var(--ddg-green);
+  font-size:9.5px;font-weight:700;padding:4px 9px;border-radius:999px;
+}
+.badge svg{width:10px;height:10px;fill:var(--ddg-green)}
+/* bottom nav — DDG Android's minimal bottom bar */
+.botnav{
+  flex:none;margin:0 12px 10px;background:var(--l-window);border:1px solid var(--l-line);
+  border-radius:16px;display:flex;align-items:center;justify-content:space-around;
+  padding:8px 6px;box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.bn{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--l-text-2)}
+.bn svg{width:18px;height:18px;fill:var(--l-icon)}
+.bn small{font-size:8px;font-weight:700;letter-spacing:.05em}
+.bn.tabs{position:relative}
+.bn .cnt{position:absolute;top:-5px;right:-2px;background:var(--ddg-blue);color:#fff;font-size:8.5px;font-weight:700;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+.homebar{width:100px;height:4px;border-radius:2px;background:rgba(0,0,0,.2);margin:0 auto 6px}
+
+/* =========================================================
+   SCREEN 2 — New tab / Home (light)
+   ========================================================= */
+.s2{background:var(--l-bg);color:var(--l-text)}
+.ntp-top{padding:16px 20px 6px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:8px}
+.logo .mark{width:30px;height:30px;border-radius:9px;background:var(--ddg-orange);display:flex;align-items:center;justify-content:center}
+.logo .mark svg{width:18px;height:18px;fill:#fff}
+.logo b{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.ntp-search{
+  margin:12px 16px;height:46px;background:var(--l-window);border:1px solid var(--l-line);
+  border-radius:23px;display:flex;align-items:center;gap:10px;padding:0 16px;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+.ntp-search svg{width:16px;height:16px;fill:var(--l-text-3)}
+.ntp-search span{font-size:13px;color:var(--l-text-3)}
+.fav-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 10px}
+.fav-head h4{font-size:13px;font-weight:700}
+.fav-head a{font-size:10.5px;color:var(--ddg-blue);font-weight:700;text-decoration:none}
+.favgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 16px}
+.fav{display:flex;flex-direction:column;align-items:center;gap:6px}
+.fav .tile{
+  width:52px;height:52px;border-radius:14px;background:var(--l-window);
+  border:1px solid var(--l-line);display:flex;align-items:center;justify-content:center;
+  font-size:17px;font-weight:800;box-shadow:0 2px 5px rgba(0,0,0,.04);
+}
+.fav .tile.c1{color:var(--ddg-orange)}
+.fav .tile.c2{color:var(--ddg-blue)}
+.fav .tile.c3{color:var(--ddg-green)}
+.fav .tile.c4{color:#7A4BDC}
+.fav small{font-size:9.5px;color:var(--l-text-2);font-weight:600;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.privacy-card{
+  margin:18px 16px 0;background:var(--l-window);border:1px solid var(--l-line);border-radius:14px;
+  padding:14px;display:flex;gap:12px;align-items:center;
+}
+.privacy-card .ic{width:38px;height:38px;border-radius:12px;background:rgba(76,186,60,.12);display:flex;align-items:center;justify-content:center;flex:none}
+.privacy-card .ic svg{width:19px;height:19px;fill:var(--ddg-green)}
+.privacy-card b{font-size:12px;display:block}
+.privacy-card small{font-size:10px;color:var(--l-text-2);line-height:1.45;display:block;margin-top:2px}
+.privacy-card .link{margin-left:auto;font-size:10px;color:var(--ddg-blue);font-weight:700;flex:none}
+.footer-note{margin-top:auto;text-align:center;padding:14px;font-size:9.5px;color:var(--l-text-3);font-weight:600}
+
+/* =========================================================
+   SCREEN 3 — Tab switcher (dark)
+   ========================================================= */
+.s3{background:var(--d-bg);color:var(--d-text)}
+.sw-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex:none}
+.sw-head .ttl{font-size:15px;font-weight:800}
+.sw-head .actions{display:flex;gap:8px}
+.sw-head .icbtn{width:34px;height:34px;border-radius:50%;background:var(--d-ctrl);display:flex;align-items:center;justify-content:center}
+.sw-head .icbtn svg{width:16px;height:16px;fill:var(--d-icon)}
+.tablist{padding:2px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.trow{background:var(--d-surface);border:1px solid var(--d-line);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:11px}
+.trow.active{border-color:var(--ddg-orange);background:var(--d-surface)}
+.trow .thumb{width:44px;height:36px;border-radius:9px;flex:none;position:relative;overflow:hidden}
+.trow .thumb.g1{background:linear-gradient(150deg,#4a2c22,#282828)}
+.trow .thumb.g2{background:linear-gradient(150deg,#22334a,#282828)}
+.trow .thumb.g3{background:linear-gradient(150deg,#2f4a2c,#282828)}
+.trow .thumb.g4{background:linear-gradient(150deg,#3d2f52,#282828)}
+.trow .thumb::after{content:"";position:absolute;left:7px;top:7px;right:14px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);box-shadow:0 9px 0 rgba(255,255,255,.14),0 18px 0 rgba(255,255,255,.08)}
+.trow .info{flex:1;min-width:0}
+.trow .info b{font-size:11.5px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow .info small{font-size:9.5px;color:var(--d-text-2);display:block;margin-top:2px}
+.trow .x{width:24px;height:24px;border-radius:50%;background:var(--d-ctrl);display:flex;align-items:center;justify-content:center;flex:none}
+.trow .x::before,.trow .x::after{content:"";position:absolute;width:9px;height:1.5px;background:var(--d-icon);border-radius:2px}
+.trow .x{position:relative}
+.trow .x::before{transform:rotate(45deg)}
+.trow .x::after{transform:rotate(-45deg)}
+/* DDG's bottom fire row */
+.firebar{
+  margin-top:auto;padding:12px 18px 12px;display:flex;align-items:center;justify-content:space-between;
+  background:var(--d-window);border-top:1px solid var(--d-line);
+}
+.firebar .grp{display:flex;align-items:center;gap:14px}
+.firebar .fb{display:flex;flex-direction:column;align-items:center;gap:3px}
+.firebar .fb svg{width:18px;height:18px;fill:var(--d-icon)}
+.firebar .fb small{font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--d-text-2)}
+.firebar .fire-big{
+  width:54px;height:54px;border-radius:50%;background:var(--ddg-orange);
+  display:flex;align-items:center;justify-content:center;margin-top:-22px;
+  box-shadow:0 6px 16px rgba(222,88,51,.45);border:4px solid var(--d-window);
+}
+.firebar .fire-big svg{width:22px;height:22px;fill:#fff}
+.firebar .plus{width:44px;height:44px;border-radius:50%;background:var(--ddg-blue);display:flex;align-items:center;justify-content:center}
+.firebar .plus svg{width:20px;height:20px;fill:#fff}
+.firebar .tcount{
+  min-width:36px;height:36px;border-radius:18px;background:var(--d-ctrl);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--d-text);padding:0 10px;
+}
+
+/* ---------- legend ---------- */
+.legend{margin-top:12px;display:flex;flex-direction:column;gap:7px;max-width:300px}
+.legend div{display:flex;gap:8px;font-size:11px;color:#5b5b5b;line-height:1.45}
+.legend b{color:#1F1F1F;font-weight:700}
+.chip{font-size:9px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:6px;flex:none;margin-top:1px}
+.chip.o{background:var(--ddg-orange-soft);color:var(--ddg-orange-pressed)}
+.chip.b{background:rgba(57,105,239,.12);color:var(--ddg-blue-pressed)}
+.chip.g{background:rgba(76,186,60,.14);color:#288419}
+
+/* ---------- token sheet ---------- */
+.tokens{background:#fff;border:1px solid var(--l-line);border-radius:20px;padding:26px;max-width:1200px;margin:0 auto 56px}
+.tokens h2{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
+.tokens .sub{font-size:12px;color:var(--l-text-2);margin-bottom:20px;line-height:1.6}
+.swrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:8px}
+.sw{border:1px solid var(--l-line);border-radius:12px;overflow:hidden}
+.sw .c{height:52px}
+.sw .m{padding:8px 10px;background:#fff}
+.sw .m b{font-size:10.5px;display:block}
+.sw .m code{font-size:9.5px;color:var(--l-text-2);font-family:ui-monospace,Menlo,monospace}
+.sec{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--l-text-2);margin:20px 0 10px}
+.struct{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.struct div{background:var(--l-surface);border:1px solid var(--l-line);border-radius:12px;padding:13px 15px;font-size:12px;line-height:1.55;color:var(--l-text-2)}
+.struct b{color:var(--l-text);display:block;margin-bottom:3px;font-size:12px}
+.foot{margin-top:46px;text-align:center;color:#8a8a8a;font-size:11.5px;line-height:1.7}
+.foot b{color:#1F1F1F}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <span class="kicker">Skin 1 of 3 · DuckDuckGo</span>
+    <h1>DDG skin — exact colors &amp; structure from the app source</h1>
+    <p>
+      Not inspired-by: every hex below is copied from the app's real
+      <code>design-system-colors.xml</code> — <b>#DE5833</b> orange, <b>#3969EF</b> blue,
+      <b>#F2F2F2 / #FFFFFF</b> light stack, <b>#282828 / #373737 / #3D3D3D</b> dark stack,
+      <b>#4CBA3C</b> protection green. Structure is DDG Android: top omnibar pill with
+      tracker-shield count, orange fire button, favorites grid, list-style tab switcher with
+      the raised fire button. Your AI can port these tokens 1:1 into the app theme.
+    </p>
+  </div>
+
+  <div class="screens">
+
+    <!-- ============ 1. BROWSER VIEW (LIGHT) ============ -->
+    <div class="stage">
+      <span class="stage-label">01 · Browser view · light</span>
+      <div class="phone s1">
+        <div class="status" style="color:#1F1F1F"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
+
+        <div class="omnibar-zone">
+          <div class="omnibar">
+            <div class="shield-count">
+              <svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3z"/></svg>
+              <b>12</b>
+            </div>
+            <div class="url">example.com<span>/article</span></div>
+            <div class="fire-btn"><svg viewBox="0 0 24 24"><path d="M13.5 1s.9 3-1.2 6C10.5 9.5 8 10.6 8 14a4 4 0 008 0c0-1.4-.5-2.5-1.2-3.4.2 1.5-.5 2.4-1.2 2.6.7-2.3-.5-5.2-2.1-6.7.6 2-.3 3.3-1.5 4.9C8.8 12.6 8 14.1 8 16a6 6 0 1012 0c0-6.7-6.5-8.6-6.5-15z" transform="scale(.9) translate(1.3 1.3)"/></svg></div>
+          </div>
+        </div>
+
+        <div class="page">
+          <div class="serp">
+            <div class="site">
+              <div class="fav">E</div>
+              <div><b>example.com</b><small>Connection secured · trackers blocked</small></div>
+            </div>
+            <h3>How the DDG omnibar shows protection state</h3>
+            <p>The shield sits left of the address with a live count of blocked trackers.
+               Green means the page is protected; tapping it opens the privacy dashboard.</p>
+            <div class="badge"><svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2 20 8.2l-1.4-1.4z"/></svg>12 trackers blocked on this page</div>
+          </div>
+        </div>
+
+        <div class="botnav">
+          <div class="bn"><svg viewBox="0 0 24 24"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20v-2z"/></svg><small>BACK</small></div>
+          <div class="bn"><svg viewBox="0 0 24 24"><path d="M4 5h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/></svg><small>MENU</small></div>
+          <div class="bn tabs"><svg viewBox="0 0 24 24"><path d="M3 5h12v10H3V5zm2 2v6h8V7H5zm12-2h4v12h-4v-2h2V7h-2V5z" transform="scale(.92) translate(1 1.2)"/></svg><span class="cnt">4</span><small>TABS</small></div>
+          <div class="bn"><svg viewBox="0 0 24 24"><path d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/></svg><small>BOOKMARKS</small></div>
+        </div>
+        <div class="homebar"></div>
+
+        <div class="dot" style="top:64px;left:16px">1</div>
+        <div class="dot" style="top:64px;right:18px">2</div>
+        <div class="dot" style="bottom:86px;left:150px">3</div>
+      </div>
+      <div class="legend">
+        <div><span class="chip g">SHIELD</span><span><b>1</b> — tracker count in protection green #4CBA3C, left of URL</span></div>
+        <div><span class="chip o">FIRE</span><span><b>2</b> — fire button #DE5833 inside the omnibar, right side</span></div>
+        <div><span class="chip b">BLUE</span><span><b>3</b> — tab counter badge #3969EF (DDG's primary blue)</span></div>
+      </div>
+    </div>
+
+    <!-- ============ 2. NEW TAB / HOME (LIGHT) ============ -->
+    <div class="stage">
+      <span class="stage-label">02 · New tab · light</span>
+      <div class="phone s2">
+        <div class="status" style="color:#1F1F1F"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
+
+        <div class="ntp-top">
+          <div class="logo">
+            <div class="mark"><svg viewBox="0 0 24 24"><path d="M21 5h-9.3C7 5 3.9 7.9 3.9 11.7c0 1.9.8 3.6 2 4.8-.3 1-.9 2.3-1.9 3.5 2 0 3.7-.8 4.9-1.7.9.3 1.8.4 2.8.4 4.7 0 8.5-3 8.5-6.9 0-.7-.1-1.4-.4-2H21V5z" transform="scale(.92) translate(1 1)"/></svg></div>
+            <b>Private Search</b>
+          </div>
+        </div>
+
+        <div class="ntp-search">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 10-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"/></svg>
+          <span>Search privately</span>
+        </div>
+
+        <div class="fav-head"><h4>Favorites</h4><a>Edit</a></div>
+        <div class="favgrid">
+          <div class="fav"><div class="tile c1">N</div><small>News</small></div>
+          <div class="fav"><div class="tile c2">V</div><small>Videos</small></div>
+          <div class="fav"><div class="tile c3">M</div><small>Mail</small></div>
+          <div class="fav"><div class="tile c4">S</div><small>Shop</small></div>
+          <div class="fav"><div class="tile c2">D</div><small>Docs</small></div>
+          <div class="fav"><div class="tile c3">P</div><small>Play</small></div>
+          <div class="fav"><div class="tile c1">R</div><small>Read</small></div>
+          <div class="fav"><div class="tile" style="color:#ABABAB">＋</div><small>Add</small></div>
+        </div>
+
+        <div class="privacy-card">
+          <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3z"/></svg></div>
+          <div>
+            <b>3,241 trackers blocked</b>
+            <small>Across 187 sites since you installed</small>
+          </div>
+          <span class="link">View</span>
+        </div>
+
+        <div class="footer-note">Fire button clears tabs &amp; data instantly · nothing is saved</div>
+
+        <div class="dot" style="top:60px;left:16px">4</div>
+        <div class="dot" style="top:432px;left:14px">5</div>
+      </div>
+      <div class="legend">
+        <div><span class="chip o">BRAND</span><span><b>4</b> — orange logo mark #DE5833, white glyph on rounded square</span></div>
+        <div><span class="chip g">STATS</span><span><b>5</b> — privacy stats card: green icon plate, white surface #F9F9F9 on #F2F2F2</span></div>
+        <div><span class="chip b">TILES</span><span><b>·</b> — favorites use white tiles with letter favicons in brand colors</span></div>
+      </div>
+    </div>
+
+    <!-- ============ 3. TAB SWITCHER (DARK) ============ -->
+    <div class="stage">
+      <span class="stage-label">03 · Tab switcher · dark</span>
+      <div class="phone s3">
+        <div class="status" style="color:#99FFFFFF"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
+
+        <div class="sw-head">
+          <span class="ttl">4 open tabs</span>
+          <div class="actions">
+            <div class="icbtn"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 10-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"/></svg></div>
+            <div class="icbtn"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></div>
+          </div>
+        </div>
+
+        <div class="tablist">
+          <div class="trow active"><div class="thumb g1"></div><div class="info"><b>example.com/article</b><small>active now</small></div><div class="x"></div></div>
+          <div class="trow"><div class="thumb g2"></div><div class="info"><b>news-site.com</b><small>2 min ago</small></div><div class="x"></div></div>
+          <div class="trow"><div class="thumb g3"></div><div class="info"><b>shop.example.io</b><small>yesterday</small></div><div class="x"></div></div>
+          <div class="trow"><div class="thumb g4"></div><div class="info"><b>docs.example.dev</b><small>tuesday</small></div><div class="x"></div></div>
+        </div>
+
+        <div class="firebar">
+          <div class="grp">
+            <div class="fb"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg><small>MENU</small></div>
+            <div class="fb"><svg viewBox="0 0 24 24"><path d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/></svg><small>BOOKMARKS</small></div>
+          </div>
+          <div class="fire-big"><svg viewBox="0 0 24 24"><path d="M13.5 1s.9 3-1.2 6C10.5 9.5 8 10.6 8 14a4 4 0 008 0c0-1.4-.5-2.5-1.2-3.4.2 1.5-.5 2.4-1.2 2.6.7-2.3-.5-5.2-2.1-6.7.6 2-.3 3.3-1.5 4.9C8.8 12.6 8 14.1 8 16a6 6 0 1012 0c0-6.7-6.5-8.6-6.5-15z" transform="scale(.92) translate(1 1)"/></svg></div>
+          <div class="grp">
+            <div class="tcount">4</div>
+            <div class="plus"><svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"/></svg></div>
+          </div>
+        </div>
+
+        <div class="dot" style="top:98px;left:20px">6</div>
+        <div class="dot" style="bottom:60px;left:150px">7</div>
+      </div>
+      <div class="legend">
+        <div><span class="chip o">ACTIVE</span><span><b>6</b> — active tab outlined in fire orange; cards are #373737 on #282828</span></div>
+        <div><span class="chip o">FIRE</span><span><b>7</b> — raised orange fire button, DDG's signature tab-switcher move</span></div>
+        <div><span class="chip b">PLUS</span><span><b>·</b> — new tab is a blue #3969EF circle; count chip uses dark fill</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TOKEN SHEET ============ -->
+  <div class="tokens">
+    <h2>Exact token sheet — hand this to your AI</h2>
+    <div class="sub">Source: <code>android-design-system/design-system/src/main/res/values/design-system-colors.xml</code> (light) and <code>*_dark</code> tokens (dark). Values are verbatim, not approximations.</div>
+
+    <div class="sec">Core brand</div>
+    <div class="swrow">
+      <div class="sw"><div class="c" style="background:#DE5833"></div><div class="m"><b>Fire / Brand (red50)</b><code>#DE5833 · pressed #BC4726</code></div></div>
+      <div class="sw"><div class="c" style="background:#3969EF"></div><div class="m"><b>Primary blue (blue50)</b><code>#3969EF · pressed #2B55CA</code></div></div>
+      <div class="sw"><div class="c" style="background:#4CBA3C"></div><div class="m"><b>Protection green (green50)</b><code>#4CBA3C · deep #288419</code></div></div>
+      <div class="sw"><div class="c" style="background:#FFCC33"></div><div class="m"><b>Accent yellow (yellow50)</b><code>#FFCC33</code></div></div>
+    </div>
+
+    <div class="sec">Light mode</div>
+    <div class="swrow">
+      <div class="sw"><div class="c" style="background:#FFFFFF;border-bottom:1px solid #eee"></div><div class="m"><b>Window</b><code>#FFFFFF</code></div></div>
+      <div class="sw"><div class="c" style="background:#F2F2F2"></div><div class="m"><b>Background</b><code>#F2F2F2</code></div></div>
+      <div class="sw"><div class="c" style="background:#F9F9F9;border-bottom:1px solid #eee"></div><div class="m"><b>Surface</b><code>#F9F9F9</code></div></div>
+      <div class="sw"><div class="c" style="background:#1F1F1F"></div><div class="m"><b>Text primary</b><code>#1F1F1F</code></div></div>
+      <div class="sw"><div class="c" style="background:rgba(28,31,33,.72)"></div><div class="m"><b>Text secondary</b><code>rgba(28,31,33,.72)</code></div></div>
+      <div class="sw"><div class="c" style="background:rgba(31,31,31,.09)"></div><div class="m"><b>Lines / controls</b><code>rgba(31,31,31,.09)</code></div></div>
+    </div>
+
+    <div class="sec">Dark mode</div>
+    <div class="swrow">
+      <div class="sw"><div class="c" style="background:#3D3D3D"></div><div class="m"><b>Window</b><code>#3D3D3D</code></div></div>
+      <div class="sw"><div class="c" style="background:#282828"></div><div class="m"><b>Background</b><code>#282828</code></div></div>
+      <div class="sw"><div class="c" style="background:#373737"></div><div class="m"><b>Surface</b><code>#373737</code></div></div>
+      <div class="sw"><div class="c" style="background:#1F1F1F"></div><div class="m"><b>Canvas</b><code>#1F1F1F</code></div></div>
+      <div class="sw"><div class="c" style="background:#E6FFFFFF"></div><div class="m"><b>Text primary</b><code>#E6FFFFFF</code></div></div>
+      <div class="sw"><div class="c" style="background:rgba(249,249,249,.12)"></div><div class="m"><b>Lines / controls</b><code>rgba(249,249,249,.12)</code></div></div>
+    </div>
+
+    <div class="sec">Structure rules (what makes it read as DDG)</div>
+    <div class="struct">
+      <div><b>Omnibar</b>Top pill: fully rounded (r=22), surface #F9F9F9 on white zone, 1px hairline border, shield-count left + orange fire right.</div>
+      <div><b>Buttons</b>Fully rounded pills. Primary = blue #3969EF; destructive/fire = orange #DE5833; secondary = transparent with hairline.</div>
+      <div><b>Cards</b>Radius 12–14, white (light) / #373737 (dark), hairline border, tiny shadow — no big elevation.</div>
+      <div><b>Favorites</b>4-column grid, white letter tiles r=14, favicon letters tinted brand colors.</div>
+      <div><b>Tab switcher</b>Vertical list rows, not grid; raised orange fire button overlapping the bottom bar.</div>
+      <div><b>Type</b>Duck Sans (proprietary) → closest free match Inter. Titles 700, body 400–500, tight letter-spacing on headers.</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Skin <b>1 / 3</b> — DuckDuckGo · colors copied 100% from app source, structure mirrors DDG Android.<br>
+    Next skins: <b>2 = Firefox (Fenix)</b>, <b>3 = Chromium</b> — then we mix all three into your invented design.
+  </div>
+</div>
+</body>
+</html>
