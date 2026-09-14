@@ -165,6 +165,10 @@ class AppearanceActivity : DuckDuckGoActivity() {
                     isActive = viewState.omnibarType == OmnibarType.SPLIT,
                     isLightMode = appTheme.isLightModeEnabled(),
                 ),
+                custom = InputScreenToggleButton.Custom(
+                    isActive = false,
+                    isLightMode = appTheme.isLightModeEnabled(),
+                ),
             )
 
             // Visual chooser always shows. Split card stays flag-gated (its omnibar mode
@@ -195,6 +199,7 @@ class AppearanceActivity : DuckDuckGoActivity() {
         binding.topOmnibarContainer.setOnClickListener { viewModel.onOmnibarTypeSelected(OmnibarType.SINGLE_TOP) }
         binding.bottomOmnibarContainer.setOnClickListener { viewModel.onOmnibarTypeSelected(OmnibarType.SINGLE_BOTTOM) }
         binding.splitOmnibarContainer.setOnClickListener { viewModel.onOmnibarTypeSelected(OmnibarType.SPLIT) }
+        binding.customOmnibarContainer.setOnClickListener { viewModel.onCustomOmnibarSelected() }
     }
 
     private fun observeViewModel() {
@@ -364,6 +369,7 @@ class AppearanceActivity : DuckDuckGoActivity() {
         top: InputScreenToggleButton,
         bottom: InputScreenToggleButton,
         split: InputScreenToggleButton,
+        custom: InputScreenToggleButton,
     ) = with(binding) {
         val context = this@AppearanceActivity
         topOmnibarToggleImage.setImageDrawable(ContextCompat.getDrawable(context, top.imageRes))
@@ -374,6 +380,9 @@ class AppearanceActivity : DuckDuckGoActivity() {
 
         splitOmnibarToggleImage.setImageDrawable(ContextCompat.getDrawable(context, split.imageRes))
         splitOmnibarToggleCheck.setImageDrawable(ContextCompat.getDrawable(context, split.checkRes))
+
+        customOmnibarToggleImage.setImageDrawable(ContextCompat.getDrawable(context, custom.imageRes))
+        customOmnibarToggleCheck.setImageDrawable(ContextCompat.getDrawable(context, custom.checkRes))
     }
 
     private sealed class InputScreenToggleButton(
@@ -424,6 +433,20 @@ class AppearanceActivity : DuckDuckGoActivity() {
                     isActive && !isLightMode -> R.drawable.mobile_toolbar_split_selected_dark
                     !isActive && isLightMode -> R.drawable.mobile_toolbar_split_unselected_light
                     else -> R.drawable.mobile_toolbar_split_unselected_dark
+                }
+        }
+
+        /** Placeholder card — scaffold for a future Custom address bar mode. */
+        class Custom(
+            isActive: Boolean,
+            isLightMode: Boolean,
+        ) : InputScreenToggleButton(isActive) {
+            override val imageRes: Int =
+                when {
+                    isActive && isLightMode -> R.drawable.mobile_toolbar_custom_selected_light
+                    isActive && !isLightMode -> R.drawable.mobile_toolbar_custom_selected_dark
+                    !isActive && isLightMode -> R.drawable.mobile_toolbar_custom_unselected_light
+                    else -> R.drawable.mobile_toolbar_custom_unselected_dark
                 }
         }
     }

@@ -820,6 +820,7 @@
     <string name="settingsAddressBarPositionTop">Top</string>
     <string name="settingsAddressBarPositionBottom">Bottom</string>
     <string name="settingsAddressBarPositionSplit">Split</string>
+    <string name="settingsAddressBarPositionCustom">Custom</string>
 
     <!-- Show on App Launch Option -->
     <string name="showOnAppLaunchOptionTitle">Show on App Launch</string>

@@ -174,6 +174,12 @@ class AppearanceViewModel @Inject constructor(
         pixel.fire(pixelName)
     }
 
+    /** Placeholder hook for the Custom card — user's future own omnibar mode. */
+    fun onCustomOmnibarSelected() {
+        // Intentionally a no-op for now: the card exists so a Custom mode can be
+        // built on it later. Keep the current selection unchanged.
+    }
+
     fun onOmnibarTypeSelected(type: OmnibarType) {
         viewModelScope.launch(dispatcherProvider.io()) {
             settingsDataStore.omnibarType = type
