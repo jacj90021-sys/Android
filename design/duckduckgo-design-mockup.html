@@ -1,451 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Skin 1/3 — DuckDuckGo exact design (colors & structure from the real app source)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<html lang='en'><head><meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>DuckDuckGo skin — 100% copied from the app's real source</title>
 <style>
-/* =====================================================================
-   SKIN 1/3 — DUCKDUCKGO
-   Every hex below is lifted directly from the app's real source:
-   android-design-system/design-system/src/main/res/values/design-system-colors.xml
-   (values/ = light, *_dark tokens = dark). Structure matches DDG Android:
-   top omnibar pill, shield tracker-count, orange fire, favorites grid,
-   list-style tab switcher, grouped settings.
-   Font note: DDG ships proprietary "Duck Sans"; Inter is the closest free match.
-   ===================================================================== */
-:root{
-  /* ---- exact DDG tokens ---- */
-  --ddg-orange:#DE5833;         /* red50 — brand & fire */
-  --ddg-orange-pressed:#BC4726; /* red60 */
-  --ddg-orange-soft:#2EDE5833;
-  --ddg-blue:#3969EF;           /* blue50 — primary buttons */
-  --ddg-blue-pressed:#2B55CA;   /* blue60 */
-  --ddg-green:#4CBA3C;          /* green50 — protection good */
-  --ddg-yellow:#FFCC33;         /* yellow50 */
-  /* light */
-  --l-window:#FFFFFF;
-  --l-bg:#F2F2F2;
-  --l-surface:#F9F9F9;
-  --l-text:#1F1F1F;
-  --l-text-2:rgba(28,31,33,.72);
-  --l-text-3:rgba(31,31,31,.4);
-  --l-icon:rgba(31,31,31,.84);
-  --l-line:rgba(31,31,31,.09);
-  --l-ctrl:rgba(31,31,31,.09);
-  /* dark */
-  --d-window:#3D3D3D;
-  --d-bg:#282828;
-  --d-surface:#373737;
-  --d-canvas:#1F1F1F;
-  --d-text:#E6FFFFFF;
-  --d-text-2:#99FFFFFF;
-  --d-text-3:#66FFFFFF;
-  --d-icon:#C7FFFFFF;
-  --d-line:rgba(249,249,249,.12);
-  --d-ctrl:rgba(249,249,249,.12);
-}
+:root{--or:#DE5833;--bl:#3969EF;--gr:#4CBA3C}
 *{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:'Inter',sans-serif;
-  background:#EDEBE6;
-  background-image:radial-gradient(900px 500px at 80% -10%,rgba(222,88,51,.08),transparent 60%);
-  color:#1F1F1F;min-height:100vh;padding:44px 24px 80px;
-}
-.wrap{max-width:1200px;margin:0 auto}
-.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ddg-orange);font-weight:700}
-.kicker::before{content:"";width:20px;height:20px;border-radius:6px;background:var(--ddg-orange);-webkit-mask:none}
-.head h1{font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-.02em;margin:12px 0 10px}
-.head p{color:var(--l-text-2);max-width:680px;line-height:1.65;font-size:14px}
-.head p b{color:var(--l-text)}
-
-/* ---------- screens ---------- */
-.screens{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin:42px 0 64px}
-.stage{display:flex;flex-direction:column;align-items:center;gap:14px}
-.stage-label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--l-text-2);font-weight:700}
-.phone{width:300px;height:630px;border-radius:38px;overflow:hidden;position:relative;display:flex;flex-direction:column;border:1px solid rgba(0,0,0,.12);box-shadow:0 24px 50px rgba(0,0,0,.22),0 0 0 8px #111}
-.status{height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:10.5px;font-weight:600;flex:none}
-.status .sig{display:flex;gap:4px}
-.dot{position:absolute;width:18px;height:18px;border-radius:50%;background:#111;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:30;border:1.5px solid var(--ddg-orange);box-shadow:0 0 0 3px rgba(222,88,51,.25)}
-
-/* =========================================================
-   SCREEN 1 — Browser view (light)
-   ========================================================= */
-.s1{background:var(--l-bg);color:var(--l-text)}
-.omnibar-zone{padding:8px 12px 8px;flex:none;background:var(--l-window);border-bottom:1px solid var(--l-line)}
-.omnibar{
-  height:44px;background:var(--l-surface);border:1px solid var(--l-line);
-  border-radius:22px;display:flex;align-items:center;gap:8px;padding:0 6px 0 6px;
-  box-shadow:0 1px 4px rgba(0,0,0,.06);
-}
-.shield-count{
-  display:flex;align-items:center;gap:4px;height:30px;padding:0 8px 0 6px;border-radius:15px;flex:none;
-}
-.shield-count svg{width:16px;height:16px;fill:var(--ddg-green)}
-.shield-count b{font-size:11.5px;color:var(--ddg-green);font-weight:700}
-.omnibar .url{flex:1;font-size:13px;color:var(--l-text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.omnibar .url span{color:var(--l-text-3)}
-.fire-btn{
-  width:34px;height:34px;border-radius:50%;background:var(--ddg-orange);
-  display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 2px 6px rgba(222,88,51,.35);
-}
-.fire-btn svg{width:16px;height:16px;fill:#fff}
-.page{flex:1;overflow:hidden;padding:14px 16px 0}
-.serp{background:var(--l-window);border:1px solid var(--l-line);border-radius:12px;padding:14px}
-.serp .site{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.serp .site .fav{width:22px;height:22px;border-radius:6px;background:var(--ddg-orange);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
-.serp .site b{font-size:12px}
-.serp .site small{display:block;font-size:9.5px;color:var(--ddg-green);font-weight:600}
-.serp h3{font-size:15px;line-height:1.35;color:var(--ddg-blue);font-weight:600;margin-bottom:6px}
-.serp p{font-size:11px;line-height:1.6;color:var(--l-text-2)}
-.badge{
-  display:inline-flex;align-items:center;gap:5px;margin-top:10px;
-  background:rgba(76,186,60,.12);color:var(--ddg-green);
-  font-size:9.5px;font-weight:700;padding:4px 9px;border-radius:999px;
-}
-.badge svg{width:10px;height:10px;fill:var(--ddg-green)}
-/* bottom nav — DDG Android's minimal bottom bar */
-.botnav{
-  flex:none;margin:0 12px 10px;background:var(--l-window);border:1px solid var(--l-line);
-  border-radius:16px;display:flex;align-items:center;justify-content:space-around;
-  padding:8px 6px;box-shadow:0 2px 8px rgba(0,0,0,.05);
-}
-.bn{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--l-text-2)}
-.bn svg{width:18px;height:18px;fill:var(--l-icon)}
-.bn small{font-size:8px;font-weight:700;letter-spacing:.05em}
-.bn.tabs{position:relative}
-.bn .cnt{position:absolute;top:-5px;right:-2px;background:var(--ddg-blue);color:#fff;font-size:8.5px;font-weight:700;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px}
-.homebar{width:100px;height:4px;border-radius:2px;background:rgba(0,0,0,.2);margin:0 auto 6px}
-
-/* =========================================================
-   SCREEN 2 — New tab / Home (light)
-   ========================================================= */
-.s2{background:var(--l-bg);color:var(--l-text)}
-.ntp-top{padding:16px 20px 6px;display:flex;align-items:center;justify-content:space-between}
-.logo{display:flex;align-items:center;gap:8px}
-.logo .mark{width:30px;height:30px;border-radius:9px;background:var(--ddg-orange);display:flex;align-items:center;justify-content:center}
-.logo .mark svg{width:18px;height:18px;fill:#fff}
-.logo b{font-size:15px;font-weight:800;letter-spacing:-.01em}
-.ntp-search{
-  margin:12px 16px;height:46px;background:var(--l-window);border:1px solid var(--l-line);
-  border-radius:23px;display:flex;align-items:center;gap:10px;padding:0 16px;
-  box-shadow:0 2px 6px rgba(0,0,0,.05);
-}
-.ntp-search svg{width:16px;height:16px;fill:var(--l-text-3)}
-.ntp-search span{font-size:13px;color:var(--l-text-3)}
-.fav-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 10px}
-.fav-head h4{font-size:13px;font-weight:700}
-.fav-head a{font-size:10.5px;color:var(--ddg-blue);font-weight:700;text-decoration:none}
-.favgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 16px}
-.fav{display:flex;flex-direction:column;align-items:center;gap:6px}
-.fav .tile{
-  width:52px;height:52px;border-radius:14px;background:var(--l-window);
-  border:1px solid var(--l-line);display:flex;align-items:center;justify-content:center;
-  font-size:17px;font-weight:800;box-shadow:0 2px 5px rgba(0,0,0,.04);
-}
-.fav .tile.c1{color:var(--ddg-orange)}
-.fav .tile.c2{color:var(--ddg-blue)}
-.fav .tile.c3{color:var(--ddg-green)}
-.fav .tile.c4{color:#7A4BDC}
-.fav small{font-size:9.5px;color:var(--l-text-2);font-weight:600;max-width:64px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.privacy-card{
-  margin:18px 16px 0;background:var(--l-window);border:1px solid var(--l-line);border-radius:14px;
-  padding:14px;display:flex;gap:12px;align-items:center;
-}
-.privacy-card .ic{width:38px;height:38px;border-radius:12px;background:rgba(76,186,60,.12);display:flex;align-items:center;justify-content:center;flex:none}
-.privacy-card .ic svg{width:19px;height:19px;fill:var(--ddg-green)}
-.privacy-card b{font-size:12px;display:block}
-.privacy-card small{font-size:10px;color:var(--l-text-2);line-height:1.45;display:block;margin-top:2px}
-.privacy-card .link{margin-left:auto;font-size:10px;color:var(--ddg-blue);font-weight:700;flex:none}
-.footer-note{margin-top:auto;text-align:center;padding:14px;font-size:9.5px;color:var(--l-text-3);font-weight:600}
-
-/* =========================================================
-   SCREEN 3 — Tab switcher (dark)
-   ========================================================= */
-.s3{background:var(--d-bg);color:var(--d-text)}
-.sw-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex:none}
-.sw-head .ttl{font-size:15px;font-weight:800}
-.sw-head .actions{display:flex;gap:8px}
-.sw-head .icbtn{width:34px;height:34px;border-radius:50%;background:var(--d-ctrl);display:flex;align-items:center;justify-content:center}
-.sw-head .icbtn svg{width:16px;height:16px;fill:var(--d-icon)}
-.tablist{padding:2px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden}
-.trow{background:var(--d-surface);border:1px solid var(--d-line);border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:11px}
-.trow.active{border-color:var(--ddg-orange);background:var(--d-surface)}
-.trow .thumb{width:44px;height:36px;border-radius:9px;flex:none;position:relative;overflow:hidden}
-.trow .thumb.g1{background:linear-gradient(150deg,#4a2c22,#282828)}
-.trow .thumb.g2{background:linear-gradient(150deg,#22334a,#282828)}
-.trow .thumb.g3{background:linear-gradient(150deg,#2f4a2c,#282828)}
-.trow .thumb.g4{background:linear-gradient(150deg,#3d2f52,#282828)}
-.trow .thumb::after{content:"";position:absolute;left:7px;top:7px;right:14px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);box-shadow:0 9px 0 rgba(255,255,255,.14),0 18px 0 rgba(255,255,255,.08)}
-.trow .info{flex:1;min-width:0}
-.trow .info b{font-size:11.5px;font-weight:600;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.trow .info small{font-size:9.5px;color:var(--d-text-2);display:block;margin-top:2px}
-.trow .x{width:24px;height:24px;border-radius:50%;background:var(--d-ctrl);display:flex;align-items:center;justify-content:center;flex:none}
-.trow .x::before,.trow .x::after{content:"";position:absolute;width:9px;height:1.5px;background:var(--d-icon);border-radius:2px}
-.trow .x{position:relative}
-.trow .x::before{transform:rotate(45deg)}
-.trow .x::after{transform:rotate(-45deg)}
-/* DDG's bottom fire row */
-.firebar{
-  margin-top:auto;padding:12px 18px 12px;display:flex;align-items:center;justify-content:space-between;
-  background:var(--d-window);border-top:1px solid var(--d-line);
-}
-.firebar .grp{display:flex;align-items:center;gap:14px}
-.firebar .fb{display:flex;flex-direction:column;align-items:center;gap:3px}
-.firebar .fb svg{width:18px;height:18px;fill:var(--d-icon)}
-.firebar .fb small{font-size:8px;font-weight:700;letter-spacing:.06em;color:var(--d-text-2)}
-.firebar .fire-big{
-  width:54px;height:54px;border-radius:50%;background:var(--ddg-orange);
-  display:flex;align-items:center;justify-content:center;margin-top:-22px;
-  box-shadow:0 6px 16px rgba(222,88,51,.45);border:4px solid var(--d-window);
-}
-.firebar .fire-big svg{width:22px;height:22px;fill:#fff}
-.firebar .plus{width:44px;height:44px;border-radius:50%;background:var(--ddg-blue);display:flex;align-items:center;justify-content:center}
-.firebar .plus svg{width:20px;height:20px;fill:#fff}
-.firebar .tcount{
-  min-width:36px;height:36px;border-radius:18px;background:var(--d-ctrl);
-  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--d-text);padding:0 10px;
-}
-
-/* ---------- legend ---------- */
-.legend{margin-top:12px;display:flex;flex-direction:column;gap:7px;max-width:300px}
-.legend div{display:flex;gap:8px;font-size:11px;color:#5b5b5b;line-height:1.45}
-.legend b{color:#1F1F1F;font-weight:700}
-.chip{font-size:9px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:6px;flex:none;margin-top:1px}
-.chip.o{background:var(--ddg-orange-soft);color:var(--ddg-orange-pressed)}
-.chip.b{background:rgba(57,105,239,.12);color:var(--ddg-blue-pressed)}
-.chip.g{background:rgba(76,186,60,.14);color:#288419}
-
-/* ---------- token sheet ---------- */
-.tokens{background:#fff;border:1px solid var(--l-line);border-radius:20px;padding:26px;max-width:1200px;margin:0 auto 56px}
-.tokens h2{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
-.tokens .sub{font-size:12px;color:var(--l-text-2);margin-bottom:20px;line-height:1.6}
-.swrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:8px}
-.sw{border:1px solid var(--l-line);border-radius:12px;overflow:hidden}
-.sw .c{height:52px}
-.sw .m{padding:8px 10px;background:#fff}
+body{font-family:Roboto,system-ui,-apple-system,'Segoe UI',sans-serif;background:#EDEBE6;
+  color:#1F1F1F;padding:40px 20px 70px}
+.wrap{max-width:1240px;margin:0 auto}
+.kick{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--or)}
+h1{font-size:clamp(24px,3.6vw,36px);letter-spacing:-.02em;margin:10px 0 8px}
+.sub{color:rgba(28,31,33,.72);font-size:13.5px;line-height:1.65;max-width:760px}
+.screens{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;margin:40px 0 60px}
+.stage{display:flex;flex-direction:column;align-items:center;gap:12px}
+.slabel{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6b6b6b}
+.phone{width:300px;height:626px;border-radius:36px;overflow:hidden;position:relative;
+  display:flex;flex-direction:column;border:1px solid rgba(0,0,0,.15);
+  box-shadow:0 22px 44px rgba(0,0,0,.22),0 0 0 8px #111}
+.status{height:28px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;font-size:10px;font-weight:600;flex:none}
+/* -- omnibar toolbar (include_omnibar_toolbar_mockup.xml) -- */
+.tbar{display:flex;align-items:center;gap:6px;padding:8px 12px 12px 16px;flex:none}
+.pill{flex:1;display:flex;align-items:center;gap:6px;height:36px;border-radius:16px;
+  padding:0 8px 0 10px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 0 0 1px rgba(31,31,31,.05)}
+.pill-ic{display:flex;align-items:center}
+.pill-ic svg{width:20px;height:20px}
+.pill-txt{font-size:12.5px;color:rgba(28,31,33,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tic{width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none}
+.tic svg{width:24px;height:24px}
+.tabsbtn{width:40px;height:40px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:1px;flex:none;position:relative}
+.tabsbtn svg{width:21px;height:21px}
+.cnt{font-style:normal;font-size:9px;font-weight:700;line-height:1;letter-spacing:.02em}
+.cnt2{position:absolute;top:6px;right:5px;font-size:8.5px;font-weight:700;
+  min-width:13px;height:13px;border-radius:7px;color:#fff;display:flex;
+  align-items:center;justify-content:center;background:var(--bl);padding:0 3px}
+/* -- bottom nav bar (view_browser_navigation_bar.xml) -- */
+.navbar{display:flex;align-items:center;justify-content:space-between;flex:none;
+  padding:8px 18px 4px;border-top:.5px solid rgba(0,0,0,.2)}
+.nic{width:40px;height:40px;display:flex;align-items:center;justify-content:center;position:relative}
+.nic svg{width:24px;height:24px}
+.homebar{width:96px;height:4px;border-radius:2px;background:rgba(0,0,0,.24);margin:2px auto 6px;flex:none}
+/* -- page content -- */
+.pbody{flex:1;overflow:hidden;background:#fff;padding:16px;display:flex;flex-direction:column;gap:12px}
+.sk1{height:20px;width:55%;border-radius:6px;background:#E5E5E5}
+.sk2{height:11px;width:92%;border-radius:6px;background:#EEEEEE}
+.sk2b{height:11px;width:84%;border-radius:6px;background:#EEEEEE}
+.dot-note{font-size:10px;color:#8a8a8a;text-align:center;margin-top:auto;margin-bottom:8px}
+/* -- ntp -- */
+.ntp{flex:1;overflow:hidden;display:flex;flex-direction:column;align-items:center}
+.ntp .logo{margin-top:64px}
+.ntp h4{font-size:12px;font-weight:700;margin:34px 0 12px;align-self:flex-start;padding:0 20px}
+.favgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;width:100%}
+.fav{display:flex;flex-direction:column;align-items:center;gap:5px}
+.fav .tile{width:50px;height:50px;border-radius:12px;background:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:16px;font-weight:700;
+  box-shadow:0 0 0 1px rgba(31,31,31,.06),0 1px 3px rgba(0,0,0,.06)}
+.fav small{font-size:9px;color:rgba(28,31,33,.72);max-width:62px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.editbtn{align-self:flex-end;margin:26px 20px 0;width:48px;height:36px;border-radius:10px;
+  background:%CTRL%;display:flex;align-items:center;justify-content:center}
+/* -- tab switcher -- */
+.swtitle{font-size:16px;font-weight:700;padding:14px 16px 10px}
+.swgrid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;overflow:hidden;align-content:start}
+.tcard{border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.trow1{display:flex;align-items:center;gap:7px}
+.tfav{width:16px;height:16px;border-radius:4px;flex:none}
+.ttitle{font-size:11px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tclose{display:flex;opacity:.75}
+.tprev{height:118px;border-radius:8px 8px 4px 4px;align-self:stretch}
+.swbot{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 4px;flex:none}
+/* -- legend & tokens -- */
+.legend{display:flex;flex-direction:column;gap:6px;max-width:300px}
+.legend div{font-size:11px;color:#5b5b5b;line-height:1.45}
+.legend b{color:#1F1F1F}
+.chip{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.04em;
+  padding:2px 7px;border-radius:6px;background:rgba(222,88,51,.12);color:#BC4726;
+  margin-right:6px;font-family:ui-monospace,Menlo,monospace}
+.tokens{background:#fff;border:1px solid rgba(31,31,31,.09);border-radius:20px;
+  padding:26px;margin:0 auto 50px;max-width:1240px}
+.tokens h2{font-size:17px;font-weight:700;margin-bottom:6px}
+.tokens .src{font-size:12px;color:rgba(28,31,33,.72);line-height:1.6;margin-bottom:18px}
+.tokens code{font-family:ui-monospace,Menlo,monospace;font-size:11px;
+  background:rgba(31,31,31,.05);padding:1px 5px;border-radius:5px}
+.swrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.sw{border:1px solid rgba(31,31,31,.09);border-radius:12px;overflow:hidden}
+.sw .c{height:48px}
+.sw .m{padding:7px 10px}
 .sw .m b{font-size:10.5px;display:block}
-.sw .m code{font-size:9.5px;color:var(--l-text-2);font-family:ui-monospace,Menlo,monospace}
-.sec{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--l-text-2);margin:20px 0 10px}
-.struct{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-.struct div{background:var(--l-surface);border:1px solid var(--l-line);border-radius:12px;padding:13px 15px;font-size:12px;line-height:1.55;color:var(--l-text-2)}
-.struct b{color:var(--l-text);display:block;margin-bottom:3px;font-size:12px}
-.foot{margin-top:46px;text-align:center;color:#8a8a8a;font-size:11.5px;line-height:1.7}
-.foot b{color:#1F1F1F}
-</style>
-</head>
-<body>
-<div class="wrap">
+.sw .m code{font-size:9.5px;background:none;padding:0;color:rgba(28,31,33,.72)}
+.sechead{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(28,31,33,.72);margin:22px 0 10px}
+.foot{text-align:center;color:#8a8a8a;font-size:11.5px;line-height:1.7}
+</style></head>
+<body><div class='wrap'>
+<div class='kick'>Skin 1/3 · faithful copy</div>
+<h1>DuckDuckGo frontend — rebuilt from the actual repo source</h1>
+<p class='sub'>Same icons (real vector paths), same colors (verbatim tokens), same layout
+structure (mirrored from the real layout XMLs), same dimensions (keylines &amp; radii from
+the design system). Omnibar pill on the left with fire → tabs → menu on its right —
+not an invented arrangement. Bottom-nav and top-omnibar are both real DDG modes.</p>
+<div class='screens'>
+<div class='stage'>
+  <div class='slabel'>01 · browser · top omnibar · light</div>
+  <div class='phone'><div class='status' style='color:#1F1F1F'><span>9:41</span><span>▲ ● ▮</span></div><div class='tbar' style='background:#F9F9F9'><div class='pill'><span class='pill-ic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M10.625,3a7.625,7.625 0,1 0,4.836 13.521l4.259,4.26a0.75,0.75 0,0 0,1.06 -1.061l-4.259,-4.26A7.625,7.625 0,0 0,10.625 3ZM4.5,10.625a6.125,6.125 0,1 1,12.25 0,6.125 6.125,0 0,1 -12.25,0Z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg></span><span class='pill-txt'>example.com/article</span></div><span class='tic' style='color:rgba(31,31,31,.84)'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M10.073,2.036a0.75,0.75 0,0 1,0.635 0.084c1.027,0.662 1.555,1.59 1.884,2.525 0.163,0.462 0.281,0.937 0.386,1.384 0.107,0.46 0.197,0.879 0.311,1.29l0.01,0.032c0.033,0.093 0.127,0.312 0.31,0.508 0.19,0.203 0.485,0.396 0.98,0.396 0.463,0 0.733,-0.148 0.902,-0.295 0.184,-0.16 0.29,-0.357 0.345,-0.493l0.017,-0.045c0.039,-0.12 0.081,-0.332 0.132,-0.6 0.023,-0.125 0.05,-0.277 0.08,-0.39 0.012,-0.044 0.04,-0.153 0.096,-0.257 0.018,-0.034 0.104,-0.2 0.297,-0.313a0.762,0.762 0,0 1,0.854 0.055l0.034,0.028 0.061,0.055C17.9,6.45 21,9.472 21,14.478l-0.001,0.147c-0.071,3.078 -2.367,5.569 -5.352,6.678a0.75,0.75 0,0 1,-0.822 -1.202c0.485,-0.544 0.758,-1.265 0.79,-2.062l0.003,-0.16c0,-0.71 -0.445,-1.537 -1.276,-2.508 -0.678,-0.792 -1.509,-1.566 -2.344,-2.36 -0.84,0.79 -1.663,1.527 -2.345,2.307 -0.819,0.938 -1.27,1.768 -1.27,2.56l0.003,0.161c0.032,0.797 0.304,1.518 0.789,2.062l0.04,0.05a0.75,0.75 0,0 1,-0.861 1.152c-2.986,-1.11 -5.281,-3.6 -5.352,-6.678L3,14.478c0,-2.775 1.237,-4.512 2.633,-6.171C7.031,6.645 8.57,5.069 9.605,2.472l0.017,-0.038a0.75,0.75 0,0 1,0.451 -0.398Z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/></svg></span><span class='tabsbtn'><svg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M27,54c14.912,0 27,-12.088 27,-27S41.912,0 27,0 0,12.088 0,27s12.088,27 27,27z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M30.797,47.145c0,-0.211 0.051,-0.26 -0.62,-1.596 -1.781,-3.569 -3.572,-8.6 -2.758,-11.844 0.149,-0.59 -1.678,-21.83 -2.97,-22.514 -1.435,-0.764 -3.202,-1.978 -4.817,-2.248 -0.82,-0.131 -1.894,-0.07 -2.735,0.044 -0.149,0.02 -0.155,0.289 -0.012,0.337 0.551,0.187 1.221,0.511 1.616,1.002 0.075,0.093 -0.026,0.239 -0.145,0.243 -0.372,0.014 -1.047,0.17 -1.938,0.926 -0.102,0.088 -0.017,0.25 0.116,0.224 1.914,-0.379 3.868,-0.192 5.02,0.855 0.075,0.068 0.036,0.19 -0.062,0.216 -9.996,2.717 -8.017,11.412 -5.356,22.083 2.412,9.672 3.293,12.674 3.558,13.549 0.018,0.06 0.06,0.107 0.118,0.13 3.42,1.389 10.985,1.46 10.985,-0.88z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M32.169,49.148c-1.213,0.475 -3.586,0.686 -4.958,0.686 -2.01,0 -4.904,-0.316 -5.959,-0.791 -0.65,-2.005 -2.6,-8.218 -4.525,-16.11l-0.189,-0.77 -0.001,-0.007c-2.289,-9.347 -4.158,-16.981 6.086,-19.38 0.094,-0.021 0.14,-0.133 0.078,-0.207 -1.176,-1.394 -3.378,-1.851 -6.162,-0.89 -0.114,0.039 -0.213,-0.077 -0.142,-0.174 0.546,-0.753 1.613,-1.331 2.14,-1.585 0.108,-0.053 0.102,-0.212 -0.014,-0.248a11.754,11.754 0,0 0,-1.59 -0.38c-0.157,-0.025 -0.17,-0.292 -0.014,-0.313 3.947,-0.531 8.068,0.654 10.137,3.26a0.14,0.14 0,0 0,0.078 0.047c7.574,1.627 8.116,13.6 7.244,14.145 -0.172,0.107 -0.724,0.046 -1.45,-0.036 -2.948,-0.33 -8.783,-0.982 -3.967,7.994 0.048,0.088 -0.015,0.206 -0.115,0.221 -2.716,0.422 0.764,8.932 3.323,14.538z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M35.556,38.263c-0.577,-0.267 -2.794,1.323 -4.265,2.543 -0.308,-0.435 -0.888,-0.751 -2.196,-0.523 -1.144,0.198 -1.776,0.474 -2.058,0.95 -1.807,-0.685 -4.847,-1.742 -5.581,-0.72 -0.803,1.115 0.2,6.395 1.267,7.08 0.556,0.358 3.219,-1.353 4.609,-2.533 0.224,0.316 0.585,0.497 1.328,0.48 1.123,-0.026 2.944,-0.288 3.227,-0.81a0.58,0.58 0,0 0,0.044 -0.113c1.43,0.534 3.944,1.1 4.506,1.015 1.465,-0.22 -0.204,-7.055 -0.881,-7.369z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.425,40.963c0.061,0.108 0.11,0.222 0.151,0.338 0.204,0.57 0.536,2.382 0.285,2.83 -0.251,0.447 -1.881,0.664 -2.887,0.681s-1.232,-0.35 -1.436,-0.92c-0.163,-0.456 -0.243,-1.528 -0.241,-2.141 -0.041,-0.91 0.291,-1.23 1.828,-1.48 1.138,-0.183 1.739,0.03 2.086,0.397 1.615,-1.205 4.31,-2.906 4.572,-2.595 1.31,1.55 1.476,5.24 1.192,6.724 -0.092,0.486 -4.431,-0.48 -4.431,-1.004 0,-2.173 -0.564,-2.77 -1.119,-2.83zM21.92,40.284c0.356,-0.563 3.238,0.137 4.82,0.84 0,0 -0.325,1.474 0.192,3.209 0.152,0.507 -3.64,2.766 -4.134,2.378 -0.572,-0.45 -1.624,-5.245 -0.877,-6.427z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M23.316,28.859c0.233,-1.014 1.32,-2.925 5.198,-2.878 1.961,-0.008 4.397,0 6.012,-0.184 2.4,-0.273 4.181,-0.854 5.369,-1.306 1.679,-0.64 2.274,-0.498 2.483,-0.114 0.23,0.42 -0.04,1.148 -0.627,1.817 -1.12,1.279 -3.135,2.27 -6.693,2.564s-5.915,-0.66 -6.93,0.893c-0.438,0.67 -0.1,2.25 3.341,2.747 4.65,0.671 8.468,-0.808 8.94,0.085 0.472,0.894 -2.246,2.712 -6.903,2.75s-7.566,-1.63 -8.597,-2.46c-1.309,-1.052 -1.894,-2.587 -1.593,-3.914z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M29.247,17.772c0.26,-0.425 0.836,-0.753 1.778,-0.753 0.943,0 1.386,0.375 1.694,0.793 0.062,0.085 -0.033,0.185 -0.13,0.143l-0.07,-0.03c-0.345,-0.151 -0.768,-0.336 -1.494,-0.346 -0.775,-0.011 -1.264,0.183 -1.572,0.35 -0.104,0.057 -0.268,-0.056 -0.206,-0.157zM18.634,18.317c0.915,-0.383 1.635,-0.334 2.143,-0.213 0.107,0.025 0.182,-0.09 0.096,-0.16 -0.394,-0.318 -1.278,-0.713 -2.43,-0.283 -1.028,0.383 -1.512,1.18 -1.515,1.703 0,0.123 0.253,0.134 0.319,0.03 0.177,-0.283 0.472,-0.695 1.387,-1.077z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.826,23.591c-0.81,0 -1.466,-0.654 -1.466,-1.46s0.657,-1.46 1.466,-1.46c0.81,0 1.466,0.654 1.466,1.46s-0.657,1.46 -1.466,1.46zM32.858,21.647a0.38,0.38 0,0 0,-0.759 0,0.38 0.38,0 0,0 0.76,0zM22.116,23.142c0,0.94 -0.765,1.703 -1.709,1.703a1.707,1.707 0,0 1,-1.708 -1.703c0,-0.941 0.766,-1.703 1.708,-1.703 0.943,0 1.709,0.762 1.709,1.703zM21.612,22.577a0.442,0.442 0,1 0,-0.883 0.002,0.442 0.442,0 0,0 0.883,-0.002z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M27,49.676c12.523,0 22.676,-10.153 22.676,-22.676C49.676,14.476 39.523,4.324 27,4.324 14.476,4.324 4.324,14.476 4.324,27c0,12.523 10.152,22.676 22.676,22.676zM27,51.786c13.688,0 24.785,-11.098 24.785,-24.786S40.69,2.215 27,2.215C13.312,2.215 2.215,13.312 2.215,27S13.312,51.785 27,51.785z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg><i class='cnt'>4</i></span><span class='tic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12,6.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,13.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,20.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3Z' fill='@color/primary_icon_color_selector' fill-rule='nonzero'/></svg></span></div><div class='pbody'><div class='sk1'></div><div class='sk2'></div><div class='sk2b'></div><div class='sk2'></div><div class='sk2b' style='width:60%'></div><div class='dot-note'>top-omnibar mode — no bottom bar (include_new_browser_tab.xml)</div></div><div class='homebar'></div></div>
+  <div class='legend'><div><span class='chip'>omnibar pill</span> r=16 card, shadow, <b>search icon 20px</b> + placeholder — exactly include_omnibar_toolbar_mockup.xml</div><div><span class='chip'>fire</span> fire icon <b>left of tabs</b>, 40dp tap target, 24dp glyph — same order as the XML</div><div><span class='chip'>tabs</span> tab button = <b>Dax head + count</b> (NewTabSwitcherButton), then ⋮ menu</div></div>
+</div>
+<div class='stage'>
+  <div class='slabel'>02 · browser · bottom nav bar · light</div>
+  <div class='phone'><div class='status' style='color:#1F1F1F'><span>9:41</span><span>▲ ● ▮</span></div><div class='tbar' style='background:#F9F9F9'><div class='pill'><span class='pill-ic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M10.625,3a7.625,7.625 0,1 0,4.836 13.521l4.259,4.26a0.75,0.75 0,0 0,1.06 -1.061l-4.259,-4.26A7.625,7.625 0,0 0,10.625 3ZM4.5,10.625a6.125,6.125 0,1 1,12.25 0,6.125 6.125,0 0,1 -12.25,0Z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg></span><span class='pill-txt'>example.com/article</span></div><span class='tic' style='color:rgba(31,31,31,.84)'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M10.073,2.036a0.75,0.75 0,0 1,0.635 0.084c1.027,0.662 1.555,1.59 1.884,2.525 0.163,0.462 0.281,0.937 0.386,1.384 0.107,0.46 0.197,0.879 0.311,1.29l0.01,0.032c0.033,0.093 0.127,0.312 0.31,0.508 0.19,0.203 0.485,0.396 0.98,0.396 0.463,0 0.733,-0.148 0.902,-0.295 0.184,-0.16 0.29,-0.357 0.345,-0.493l0.017,-0.045c0.039,-0.12 0.081,-0.332 0.132,-0.6 0.023,-0.125 0.05,-0.277 0.08,-0.39 0.012,-0.044 0.04,-0.153 0.096,-0.257 0.018,-0.034 0.104,-0.2 0.297,-0.313a0.762,0.762 0,0 1,0.854 0.055l0.034,0.028 0.061,0.055C17.9,6.45 21,9.472 21,14.478l-0.001,0.147c-0.071,3.078 -2.367,5.569 -5.352,6.678a0.75,0.75 0,0 1,-0.822 -1.202c0.485,-0.544 0.758,-1.265 0.79,-2.062l0.003,-0.16c0,-0.71 -0.445,-1.537 -1.276,-2.508 -0.678,-0.792 -1.509,-1.566 -2.344,-2.36 -0.84,0.79 -1.663,1.527 -2.345,2.307 -0.819,0.938 -1.27,1.768 -1.27,2.56l0.003,0.161c0.032,0.797 0.304,1.518 0.789,2.062l0.04,0.05a0.75,0.75 0,0 1,-0.861 1.152c-2.986,-1.11 -5.281,-3.6 -5.352,-6.678L3,14.478c0,-2.775 1.237,-4.512 2.633,-6.171C7.031,6.645 8.57,5.069 9.605,2.472l0.017,-0.038a0.75,0.75 0,0 1,0.451 -0.398Z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/></svg></span><span class='tabsbtn'><svg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M27,54c14.912,0 27,-12.088 27,-27S41.912,0 27,0 0,12.088 0,27s12.088,27 27,27z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M30.797,47.145c0,-0.211 0.051,-0.26 -0.62,-1.596 -1.781,-3.569 -3.572,-8.6 -2.758,-11.844 0.149,-0.59 -1.678,-21.83 -2.97,-22.514 -1.435,-0.764 -3.202,-1.978 -4.817,-2.248 -0.82,-0.131 -1.894,-0.07 -2.735,0.044 -0.149,0.02 -0.155,0.289 -0.012,0.337 0.551,0.187 1.221,0.511 1.616,1.002 0.075,0.093 -0.026,0.239 -0.145,0.243 -0.372,0.014 -1.047,0.17 -1.938,0.926 -0.102,0.088 -0.017,0.25 0.116,0.224 1.914,-0.379 3.868,-0.192 5.02,0.855 0.075,0.068 0.036,0.19 -0.062,0.216 -9.996,2.717 -8.017,11.412 -5.356,22.083 2.412,9.672 3.293,12.674 3.558,13.549 0.018,0.06 0.06,0.107 0.118,0.13 3.42,1.389 10.985,1.46 10.985,-0.88z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M32.169,49.148c-1.213,0.475 -3.586,0.686 -4.958,0.686 -2.01,0 -4.904,-0.316 -5.959,-0.791 -0.65,-2.005 -2.6,-8.218 -4.525,-16.11l-0.189,-0.77 -0.001,-0.007c-2.289,-9.347 -4.158,-16.981 6.086,-19.38 0.094,-0.021 0.14,-0.133 0.078,-0.207 -1.176,-1.394 -3.378,-1.851 -6.162,-0.89 -0.114,0.039 -0.213,-0.077 -0.142,-0.174 0.546,-0.753 1.613,-1.331 2.14,-1.585 0.108,-0.053 0.102,-0.212 -0.014,-0.248a11.754,11.754 0,0 0,-1.59 -0.38c-0.157,-0.025 -0.17,-0.292 -0.014,-0.313 3.947,-0.531 8.068,0.654 10.137,3.26a0.14,0.14 0,0 0,0.078 0.047c7.574,1.627 8.116,13.6 7.244,14.145 -0.172,0.107 -0.724,0.046 -1.45,-0.036 -2.948,-0.33 -8.783,-0.982 -3.967,7.994 0.048,0.088 -0.015,0.206 -0.115,0.221 -2.716,0.422 0.764,8.932 3.323,14.538z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M35.556,38.263c-0.577,-0.267 -2.794,1.323 -4.265,2.543 -0.308,-0.435 -0.888,-0.751 -2.196,-0.523 -1.144,0.198 -1.776,0.474 -2.058,0.95 -1.807,-0.685 -4.847,-1.742 -5.581,-0.72 -0.803,1.115 0.2,6.395 1.267,7.08 0.556,0.358 3.219,-1.353 4.609,-2.533 0.224,0.316 0.585,0.497 1.328,0.48 1.123,-0.026 2.944,-0.288 3.227,-0.81a0.58,0.58 0,0 0,0.044 -0.113c1.43,0.534 3.944,1.1 4.506,1.015 1.465,-0.22 -0.204,-7.055 -0.881,-7.369z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.425,40.963c0.061,0.108 0.11,0.222 0.151,0.338 0.204,0.57 0.536,2.382 0.285,2.83 -0.251,0.447 -1.881,0.664 -2.887,0.681s-1.232,-0.35 -1.436,-0.92c-0.163,-0.456 -0.243,-1.528 -0.241,-2.141 -0.041,-0.91 0.291,-1.23 1.828,-1.48 1.138,-0.183 1.739,0.03 2.086,0.397 1.615,-1.205 4.31,-2.906 4.572,-2.595 1.31,1.55 1.476,5.24 1.192,6.724 -0.092,0.486 -4.431,-0.48 -4.431,-1.004 0,-2.173 -0.564,-2.77 -1.119,-2.83zM21.92,40.284c0.356,-0.563 3.238,0.137 4.82,0.84 0,0 -0.325,1.474 0.192,3.209 0.152,0.507 -3.64,2.766 -4.134,2.378 -0.572,-0.45 -1.624,-5.245 -0.877,-6.427z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M23.316,28.859c0.233,-1.014 1.32,-2.925 5.198,-2.878 1.961,-0.008 4.397,0 6.012,-0.184 2.4,-0.273 4.181,-0.854 5.369,-1.306 1.679,-0.64 2.274,-0.498 2.483,-0.114 0.23,0.42 -0.04,1.148 -0.627,1.817 -1.12,1.279 -3.135,2.27 -6.693,2.564s-5.915,-0.66 -6.93,0.893c-0.438,0.67 -0.1,2.25 3.341,2.747 4.65,0.671 8.468,-0.808 8.94,0.085 0.472,0.894 -2.246,2.712 -6.903,2.75s-7.566,-1.63 -8.597,-2.46c-1.309,-1.052 -1.894,-2.587 -1.593,-3.914z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M29.247,17.772c0.26,-0.425 0.836,-0.753 1.778,-0.753 0.943,0 1.386,0.375 1.694,0.793 0.062,0.085 -0.033,0.185 -0.13,0.143l-0.07,-0.03c-0.345,-0.151 -0.768,-0.336 -1.494,-0.346 -0.775,-0.011 -1.264,0.183 -1.572,0.35 -0.104,0.057 -0.268,-0.056 -0.206,-0.157zM18.634,18.317c0.915,-0.383 1.635,-0.334 2.143,-0.213 0.107,0.025 0.182,-0.09 0.096,-0.16 -0.394,-0.318 -1.278,-0.713 -2.43,-0.283 -1.028,0.383 -1.512,1.18 -1.515,1.703 0,0.123 0.253,0.134 0.319,0.03 0.177,-0.283 0.472,-0.695 1.387,-1.077z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.826,23.591c-0.81,0 -1.466,-0.654 -1.466,-1.46s0.657,-1.46 1.466,-1.46c0.81,0 1.466,0.654 1.466,1.46s-0.657,1.46 -1.466,1.46zM32.858,21.647a0.38,0.38 0,0 0,-0.759 0,0.38 0.38,0 0,0 0.76,0zM22.116,23.142c0,0.94 -0.765,1.703 -1.709,1.703a1.707,1.707 0,0 1,-1.708 -1.703c0,-0.941 0.766,-1.703 1.708,-1.703 0.943,0 1.709,0.762 1.709,1.703zM21.612,22.577a0.442,0.442 0,1 0,-0.883 0.002,0.442 0.442,0 0,0 0.883,-0.002z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M27,49.676c12.523,0 22.676,-10.153 22.676,-22.676C49.676,14.476 39.523,4.324 27,4.324 14.476,4.324 4.324,14.476 4.324,27c0,12.523 10.152,22.676 22.676,22.676zM27,51.786c13.688,0 24.785,-11.098 24.785,-24.786S40.69,2.215 27,2.215C13.312,2.215 2.215,13.312 2.215,27S13.312,51.785 27,51.785z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg><i class='cnt'>4</i></span><span class='tic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12,6.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,13.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,20.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3Z' fill='@color/primary_icon_color_selector' fill-rule='nonzero'/></svg></span></div><div class='pbody' style='padding-bottom:6px'><div class='sk1'></div><div class='sk2'></div><div class='sk2b'></div><div class='sk2'></div></div><div style='background:#FFFFFF'><div class='navbar'><span class='nic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12.25,3C12.664,3 13,3.336 13,3.75V11H20.5C20.914,11 21.25,11.336 21.25,11.75C21.25,12.164 20.914,12.5 20.5,12.5H13V19.75C13,20.164 12.664,20.5 12.25,20.5C11.836,20.5 11.5,20.164 11.5,19.75V12.5H4C3.586,12.5 3.25,12.164 3.25,11.75C3.25,11.336 3.586,11 4,11H11.5V3.75C11.5,3.336 11.836,3 12.25,3Z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg></span><span class='nic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M8.75,2A4.75,4.75 0,0 0,4 6.75v8.865c0,1.33 0.983,2.296 2.126,2.475 0.35,0.055 0.624,-0.253 0.624,-0.609 0,-0.453 -0.486,-0.795 -0.85,-1.065a0.985,0.985 0,0 1,-0.4 -0.8V6.75A3.25,3.25 0,0 1,8.75 3.5h4c0.802,0 1.524,0.343 2.026,0.89 0.193,0.21 0.45,0.36 0.735,0.36 0.588,0 0.986,-0.592 0.63,-1.062A4.243,4.243 0,0 0,12.752 2h-4Z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M8,10.25A4.25,4.25 0,0 1,12.25 6h4.5A4.25,4.25 0,0 1,21 10.25v9.244c0,2.062 -2.355,3.238 -4.002,1.998L15.1,20.067a1,1 0,0 0,-1.202 0l-1.896,1.427c-1.647,1.238 -4.002,0.061 -4.002,-2L8,10.25ZM12.25,7.5a2.75,2.75 0,0 0,-2.75 2.75v9.244a1,1 0,0 0,1.601 0.8l1.897,-1.426a2.5,2.5 0,0 1,3.005 0l1.896,1.426a1,1 0,0 0,1.601 -0.8L19.5,10.25a2.75,2.75 0,0 0,-2.75 -2.75h-4.5Z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg></span><span class='nic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M10.073,2.036a0.75,0.75 0,0 1,0.635 0.084c1.027,0.662 1.555,1.59 1.884,2.525 0.163,0.462 0.281,0.937 0.386,1.384 0.107,0.46 0.197,0.879 0.311,1.29l0.01,0.032c0.033,0.093 0.127,0.312 0.31,0.508 0.19,0.203 0.485,0.396 0.98,0.396 0.463,0 0.733,-0.148 0.902,-0.295 0.184,-0.16 0.29,-0.357 0.345,-0.493l0.017,-0.045c0.039,-0.12 0.081,-0.332 0.132,-0.6 0.023,-0.125 0.05,-0.277 0.08,-0.39 0.012,-0.044 0.04,-0.153 0.096,-0.257 0.018,-0.034 0.104,-0.2 0.297,-0.313a0.762,0.762 0,0 1,0.854 0.055l0.034,0.028 0.061,0.055C17.9,6.45 21,9.472 21,14.478l-0.001,0.147c-0.071,3.078 -2.367,5.569 -5.352,6.678a0.75,0.75 0,0 1,-0.822 -1.202c0.485,-0.544 0.758,-1.265 0.79,-2.062l0.003,-0.16c0,-0.71 -0.445,-1.537 -1.276,-2.508 -0.678,-0.792 -1.509,-1.566 -2.344,-2.36 -0.84,0.79 -1.663,1.527 -2.345,2.307 -0.819,0.938 -1.27,1.768 -1.27,2.56l0.003,0.161c0.032,0.797 0.304,1.518 0.789,2.062l0.04,0.05a0.75,0.75 0,0 1,-0.861 1.152c-2.986,-1.11 -5.281,-3.6 -5.352,-6.678L3,14.478c0,-2.775 1.237,-4.512 2.633,-6.171C7.031,6.645 8.57,5.069 9.605,2.472l0.017,-0.038a0.75,0.75 0,0 1,0.451 -0.398Z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/></svg></span><span class='nic'><svg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M27,54c14.912,0 27,-12.088 27,-27S41.912,0 27,0 0,12.088 0,27s12.088,27 27,27z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M30.797,47.145c0,-0.211 0.051,-0.26 -0.62,-1.596 -1.781,-3.569 -3.572,-8.6 -2.758,-11.844 0.149,-0.59 -1.678,-21.83 -2.97,-22.514 -1.435,-0.764 -3.202,-1.978 -4.817,-2.248 -0.82,-0.131 -1.894,-0.07 -2.735,0.044 -0.149,0.02 -0.155,0.289 -0.012,0.337 0.551,0.187 1.221,0.511 1.616,1.002 0.075,0.093 -0.026,0.239 -0.145,0.243 -0.372,0.014 -1.047,0.17 -1.938,0.926 -0.102,0.088 -0.017,0.25 0.116,0.224 1.914,-0.379 3.868,-0.192 5.02,0.855 0.075,0.068 0.036,0.19 -0.062,0.216 -9.996,2.717 -8.017,11.412 -5.356,22.083 2.412,9.672 3.293,12.674 3.558,13.549 0.018,0.06 0.06,0.107 0.118,0.13 3.42,1.389 10.985,1.46 10.985,-0.88z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M32.169,49.148c-1.213,0.475 -3.586,0.686 -4.958,0.686 -2.01,0 -4.904,-0.316 -5.959,-0.791 -0.65,-2.005 -2.6,-8.218 -4.525,-16.11l-0.189,-0.77 -0.001,-0.007c-2.289,-9.347 -4.158,-16.981 6.086,-19.38 0.094,-0.021 0.14,-0.133 0.078,-0.207 -1.176,-1.394 -3.378,-1.851 -6.162,-0.89 -0.114,0.039 -0.213,-0.077 -0.142,-0.174 0.546,-0.753 1.613,-1.331 2.14,-1.585 0.108,-0.053 0.102,-0.212 -0.014,-0.248a11.754,11.754 0,0 0,-1.59 -0.38c-0.157,-0.025 -0.17,-0.292 -0.014,-0.313 3.947,-0.531 8.068,0.654 10.137,3.26a0.14,0.14 0,0 0,0.078 0.047c7.574,1.627 8.116,13.6 7.244,14.145 -0.172,0.107 -0.724,0.046 -1.45,-0.036 -2.948,-0.33 -8.783,-0.982 -3.967,7.994 0.048,0.088 -0.015,0.206 -0.115,0.221 -2.716,0.422 0.764,8.932 3.323,14.538z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M35.556,38.263c-0.577,-0.267 -2.794,1.323 -4.265,2.543 -0.308,-0.435 -0.888,-0.751 -2.196,-0.523 -1.144,0.198 -1.776,0.474 -2.058,0.95 -1.807,-0.685 -4.847,-1.742 -5.581,-0.72 -0.803,1.115 0.2,6.395 1.267,7.08 0.556,0.358 3.219,-1.353 4.609,-2.533 0.224,0.316 0.585,0.497 1.328,0.48 1.123,-0.026 2.944,-0.288 3.227,-0.81a0.58,0.58 0,0 0,0.044 -0.113c1.43,0.534 3.944,1.1 4.506,1.015 1.465,-0.22 -0.204,-7.055 -0.881,-7.369z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.425,40.963c0.061,0.108 0.11,0.222 0.151,0.338 0.204,0.57 0.536,2.382 0.285,2.83 -0.251,0.447 -1.881,0.664 -2.887,0.681s-1.232,-0.35 -1.436,-0.92c-0.163,-0.456 -0.243,-1.528 -0.241,-2.141 -0.041,-0.91 0.291,-1.23 1.828,-1.48 1.138,-0.183 1.739,0.03 2.086,0.397 1.615,-1.205 4.31,-2.906 4.572,-2.595 1.31,1.55 1.476,5.24 1.192,6.724 -0.092,0.486 -4.431,-0.48 -4.431,-1.004 0,-2.173 -0.564,-2.77 -1.119,-2.83zM21.92,40.284c0.356,-0.563 3.238,0.137 4.82,0.84 0,0 -0.325,1.474 0.192,3.209 0.152,0.507 -3.64,2.766 -4.134,2.378 -0.572,-0.45 -1.624,-5.245 -0.877,-6.427z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M23.316,28.859c0.233,-1.014 1.32,-2.925 5.198,-2.878 1.961,-0.008 4.397,0 6.012,-0.184 2.4,-0.273 4.181,-0.854 5.369,-1.306 1.679,-0.64 2.274,-0.498 2.483,-0.114 0.23,0.42 -0.04,1.148 -0.627,1.817 -1.12,1.279 -3.135,2.27 -6.693,2.564s-5.915,-0.66 -6.93,0.893c-0.438,0.67 -0.1,2.25 3.341,2.747 4.65,0.671 8.468,-0.808 8.94,0.085 0.472,0.894 -2.246,2.712 -6.903,2.75s-7.566,-1.63 -8.597,-2.46c-1.309,-1.052 -1.894,-2.587 -1.593,-3.914z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M29.247,17.772c0.26,-0.425 0.836,-0.753 1.778,-0.753 0.943,0 1.386,0.375 1.694,0.793 0.062,0.085 -0.033,0.185 -0.13,0.143l-0.07,-0.03c-0.345,-0.151 -0.768,-0.336 -1.494,-0.346 -0.775,-0.011 -1.264,0.183 -1.572,0.35 -0.104,0.057 -0.268,-0.056 -0.206,-0.157zM18.634,18.317c0.915,-0.383 1.635,-0.334 2.143,-0.213 0.107,0.025 0.182,-0.09 0.096,-0.16 -0.394,-0.318 -1.278,-0.713 -2.43,-0.283 -1.028,0.383 -1.512,1.18 -1.515,1.703 0,0.123 0.253,0.134 0.319,0.03 0.177,-0.283 0.472,-0.695 1.387,-1.077z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.826,23.591c-0.81,0 -1.466,-0.654 -1.466,-1.46s0.657,-1.46 1.466,-1.46c0.81,0 1.466,0.654 1.466,1.46s-0.657,1.46 -1.466,1.46zM32.858,21.647a0.38,0.38 0,0 0,-0.759 0,0.38 0.38,0 0,0 0.76,0zM22.116,23.142c0,0.94 -0.765,1.703 -1.709,1.703a1.707,1.707 0,0 1,-1.708 -1.703c0,-0.941 0.766,-1.703 1.708,-1.703 0.943,0 1.709,0.762 1.709,1.703zM21.612,22.577a0.442,0.442 0,1 0,-0.883 0.002,0.442 0.442,0 0,0 0.883,-0.002z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M27,49.676c12.523,0 22.676,-10.153 22.676,-22.676C49.676,14.476 39.523,4.324 27,4.324 14.476,4.324 4.324,14.476 4.324,27c0,12.523 10.152,22.676 22.676,22.676zM27,51.786c13.688,0 24.785,-11.098 24.785,-24.786S40.69,2.215 27,2.215C13.312,2.215 2.215,13.312 2.215,27S13.312,51.785 27,51.785z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg><i class='cnt cnt2'>4</i></span><span class='nic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12,6.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,13.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,20.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3Z' fill='@color/primary_icon_color_selector' fill-rule='nonzero'/></svg></span></div></div><div class='homebar'></div></div>
+  <div class='legend'><div><span class='chip'>nav bar</span> <b>[+|key] bookmarks fire tabs menu</b> spread edge-to-edge — view_browser_navigation_bar.xml order</div><div><span class='chip'>hairline</span> 0.5dp solid shade line on top of the bar (shadowView)</div><div><span class='chip'>icons</span> all 40dp touch / 24dp glyph, keyline-4 (16dp→18px) horizontal padding</div></div>
+</div>
+<div class='stage'>
+  <div class='slabel'>03 · new tab page · light</div>
+  <div class='phone'><div class='status' style='color:#1F1F1F'><span>9:41</span><span>▲ ● ▮</span></div><div class='tbar' style='background:#F9F9F9'><div class='pill'><span class='pill-ic'><svg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M27,54c14.912,0 27,-12.088 27,-27S41.912,0 27,0 0,12.088 0,27s12.088,27 27,27z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M30.797,47.145c0,-0.211 0.051,-0.26 -0.62,-1.596 -1.781,-3.569 -3.572,-8.6 -2.758,-11.844 0.149,-0.59 -1.678,-21.83 -2.97,-22.514 -1.435,-0.764 -3.202,-1.978 -4.817,-2.248 -0.82,-0.131 -1.894,-0.07 -2.735,0.044 -0.149,0.02 -0.155,0.289 -0.012,0.337 0.551,0.187 1.221,0.511 1.616,1.002 0.075,0.093 -0.026,0.239 -0.145,0.243 -0.372,0.014 -1.047,0.17 -1.938,0.926 -0.102,0.088 -0.017,0.25 0.116,0.224 1.914,-0.379 3.868,-0.192 5.02,0.855 0.075,0.068 0.036,0.19 -0.062,0.216 -9.996,2.717 -8.017,11.412 -5.356,22.083 2.412,9.672 3.293,12.674 3.558,13.549 0.018,0.06 0.06,0.107 0.118,0.13 3.42,1.389 10.985,1.46 10.985,-0.88z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M32.169,49.148c-1.213,0.475 -3.586,0.686 -4.958,0.686 -2.01,0 -4.904,-0.316 -5.959,-0.791 -0.65,-2.005 -2.6,-8.218 -4.525,-16.11l-0.189,-0.77 -0.001,-0.007c-2.289,-9.347 -4.158,-16.981 6.086,-19.38 0.094,-0.021 0.14,-0.133 0.078,-0.207 -1.176,-1.394 -3.378,-1.851 -6.162,-0.89 -0.114,0.039 -0.213,-0.077 -0.142,-0.174 0.546,-0.753 1.613,-1.331 2.14,-1.585 0.108,-0.053 0.102,-0.212 -0.014,-0.248a11.754,11.754 0,0 0,-1.59 -0.38c-0.157,-0.025 -0.17,-0.292 -0.014,-0.313 3.947,-0.531 8.068,0.654 10.137,3.26a0.14,0.14 0,0 0,0.078 0.047c7.574,1.627 8.116,13.6 7.244,14.145 -0.172,0.107 -0.724,0.046 -1.45,-0.036 -2.948,-0.33 -8.783,-0.982 -3.967,7.994 0.048,0.088 -0.015,0.206 -0.115,0.221 -2.716,0.422 0.764,8.932 3.323,14.538z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M35.556,38.263c-0.577,-0.267 -2.794,1.323 -4.265,2.543 -0.308,-0.435 -0.888,-0.751 -2.196,-0.523 -1.144,0.198 -1.776,0.474 -2.058,0.95 -1.807,-0.685 -4.847,-1.742 -5.581,-0.72 -0.803,1.115 0.2,6.395 1.267,7.08 0.556,0.358 3.219,-1.353 4.609,-2.533 0.224,0.316 0.585,0.497 1.328,0.48 1.123,-0.026 2.944,-0.288 3.227,-0.81a0.58,0.58 0,0 0,0.044 -0.113c1.43,0.534 3.944,1.1 4.506,1.015 1.465,-0.22 -0.204,-7.055 -0.881,-7.369z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.425,40.963c0.061,0.108 0.11,0.222 0.151,0.338 0.204,0.57 0.536,2.382 0.285,2.83 -0.251,0.447 -1.881,0.664 -2.887,0.681s-1.232,-0.35 -1.436,-0.92c-0.163,-0.456 -0.243,-1.528 -0.241,-2.141 -0.041,-0.91 0.291,-1.23 1.828,-1.48 1.138,-0.183 1.739,0.03 2.086,0.397 1.615,-1.205 4.31,-2.906 4.572,-2.595 1.31,1.55 1.476,5.24 1.192,6.724 -0.092,0.486 -4.431,-0.48 -4.431,-1.004 0,-2.173 -0.564,-2.77 -1.119,-2.83zM21.92,40.284c0.356,-0.563 3.238,0.137 4.82,0.84 0,0 -0.325,1.474 0.192,3.209 0.152,0.507 -3.64,2.766 -4.134,2.378 -0.572,-0.45 -1.624,-5.245 -0.877,-6.427z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M23.316,28.859c0.233,-1.014 1.32,-2.925 5.198,-2.878 1.961,-0.008 4.397,0 6.012,-0.184 2.4,-0.273 4.181,-0.854 5.369,-1.306 1.679,-0.64 2.274,-0.498 2.483,-0.114 0.23,0.42 -0.04,1.148 -0.627,1.817 -1.12,1.279 -3.135,2.27 -6.693,2.564s-5.915,-0.66 -6.93,0.893c-0.438,0.67 -0.1,2.25 3.341,2.747 4.65,0.671 8.468,-0.808 8.94,0.085 0.472,0.894 -2.246,2.712 -6.903,2.75s-7.566,-1.63 -8.597,-2.46c-1.309,-1.052 -1.894,-2.587 -1.593,-3.914z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M29.247,17.772c0.26,-0.425 0.836,-0.753 1.778,-0.753 0.943,0 1.386,0.375 1.694,0.793 0.062,0.085 -0.033,0.185 -0.13,0.143l-0.07,-0.03c-0.345,-0.151 -0.768,-0.336 -1.494,-0.346 -0.775,-0.011 -1.264,0.183 -1.572,0.35 -0.104,0.057 -0.268,-0.056 -0.206,-0.157zM18.634,18.317c0.915,-0.383 1.635,-0.334 2.143,-0.213 0.107,0.025 0.182,-0.09 0.096,-0.16 -0.394,-0.318 -1.278,-0.713 -2.43,-0.283 -1.028,0.383 -1.512,1.18 -1.515,1.703 0,0.123 0.253,0.134 0.319,0.03 0.177,-0.283 0.472,-0.695 1.387,-1.077z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.826,23.591c-0.81,0 -1.466,-0.654 -1.466,-1.46s0.657,-1.46 1.466,-1.46c0.81,0 1.466,0.654 1.466,1.46s-0.657,1.46 -1.466,1.46zM32.858,21.647a0.38,0.38 0,0 0,-0.759 0,0.38 0.38,0 0,0 0.76,0zM22.116,23.142c0,0.94 -0.765,1.703 -1.709,1.703a1.707,1.707 0,0 1,-1.708 -1.703c0,-0.941 0.766,-1.703 1.708,-1.703 0.943,0 1.709,0.762 1.709,1.703zM21.612,22.577a0.442,0.442 0,1 0,-0.883 0.002,0.442 0.442,0 0,0 0.883,-0.002z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M27,49.676c12.523,0 22.676,-10.153 22.676,-22.676C49.676,14.476 39.523,4.324 27,4.324 14.476,4.324 4.324,14.476 4.324,27c0,12.523 10.152,22.676 22.676,22.676zM27,51.786c13.688,0 24.785,-11.098 24.785,-24.786S40.69,2.215 27,2.215C13.312,2.215 2.215,13.312 2.215,27S13.312,51.785 27,51.785z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg></span><span class='pill-txt'>Search or type URL</span></div><span class='tic' style='color:rgba(31,31,31,.84)'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M10.073,2.036a0.75,0.75 0,0 1,0.635 0.084c1.027,0.662 1.555,1.59 1.884,2.525 0.163,0.462 0.281,0.937 0.386,1.384 0.107,0.46 0.197,0.879 0.311,1.29l0.01,0.032c0.033,0.093 0.127,0.312 0.31,0.508 0.19,0.203 0.485,0.396 0.98,0.396 0.463,0 0.733,-0.148 0.902,-0.295 0.184,-0.16 0.29,-0.357 0.345,-0.493l0.017,-0.045c0.039,-0.12 0.081,-0.332 0.132,-0.6 0.023,-0.125 0.05,-0.277 0.08,-0.39 0.012,-0.044 0.04,-0.153 0.096,-0.257 0.018,-0.034 0.104,-0.2 0.297,-0.313a0.762,0.762 0,0 1,0.854 0.055l0.034,0.028 0.061,0.055C17.9,6.45 21,9.472 21,14.478l-0.001,0.147c-0.071,3.078 -2.367,5.569 -5.352,6.678a0.75,0.75 0,0 1,-0.822 -1.202c0.485,-0.544 0.758,-1.265 0.79,-2.062l0.003,-0.16c0,-0.71 -0.445,-1.537 -1.276,-2.508 -0.678,-0.792 -1.509,-1.566 -2.344,-2.36 -0.84,0.79 -1.663,1.527 -2.345,2.307 -0.819,0.938 -1.27,1.768 -1.27,2.56l0.003,0.161c0.032,0.797 0.304,1.518 0.789,2.062l0.04,0.05a0.75,0.75 0,0 1,-0.861 1.152c-2.986,-1.11 -5.281,-3.6 -5.352,-6.678L3,14.478c0,-2.775 1.237,-4.512 2.633,-6.171C7.031,6.645 8.57,5.069 9.605,2.472l0.017,-0.038a0.75,0.75 0,0 1,0.451 -0.398Z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/></svg></span><span class='tabsbtn'><svg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M27,54c14.912,0 27,-12.088 27,-27S41.912,0 27,0 0,12.088 0,27s12.088,27 27,27z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M30.797,47.145c0,-0.211 0.051,-0.26 -0.62,-1.596 -1.781,-3.569 -3.572,-8.6 -2.758,-11.844 0.149,-0.59 -1.678,-21.83 -2.97,-22.514 -1.435,-0.764 -3.202,-1.978 -4.817,-2.248 -0.82,-0.131 -1.894,-0.07 -2.735,0.044 -0.149,0.02 -0.155,0.289 -0.012,0.337 0.551,0.187 1.221,0.511 1.616,1.002 0.075,0.093 -0.026,0.239 -0.145,0.243 -0.372,0.014 -1.047,0.17 -1.938,0.926 -0.102,0.088 -0.017,0.25 0.116,0.224 1.914,-0.379 3.868,-0.192 5.02,0.855 0.075,0.068 0.036,0.19 -0.062,0.216 -9.996,2.717 -8.017,11.412 -5.356,22.083 2.412,9.672 3.293,12.674 3.558,13.549 0.018,0.06 0.06,0.107 0.118,0.13 3.42,1.389 10.985,1.46 10.985,-0.88z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M32.169,49.148c-1.213,0.475 -3.586,0.686 -4.958,0.686 -2.01,0 -4.904,-0.316 -5.959,-0.791 -0.65,-2.005 -2.6,-8.218 -4.525,-16.11l-0.189,-0.77 -0.001,-0.007c-2.289,-9.347 -4.158,-16.981 6.086,-19.38 0.094,-0.021 0.14,-0.133 0.078,-0.207 -1.176,-1.394 -3.378,-1.851 -6.162,-0.89 -0.114,0.039 -0.213,-0.077 -0.142,-0.174 0.546,-0.753 1.613,-1.331 2.14,-1.585 0.108,-0.053 0.102,-0.212 -0.014,-0.248a11.754,11.754 0,0 0,-1.59 -0.38c-0.157,-0.025 -0.17,-0.292 -0.014,-0.313 3.947,-0.531 8.068,0.654 10.137,3.26a0.14,0.14 0,0 0,0.078 0.047c7.574,1.627 8.116,13.6 7.244,14.145 -0.172,0.107 -0.724,0.046 -1.45,-0.036 -2.948,-0.33 -8.783,-0.982 -3.967,7.994 0.048,0.088 -0.015,0.206 -0.115,0.221 -2.716,0.422 0.764,8.932 3.323,14.538z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M35.556,38.263c-0.577,-0.267 -2.794,1.323 -4.265,2.543 -0.308,-0.435 -0.888,-0.751 -2.196,-0.523 -1.144,0.198 -1.776,0.474 -2.058,0.95 -1.807,-0.685 -4.847,-1.742 -5.581,-0.72 -0.803,1.115 0.2,6.395 1.267,7.08 0.556,0.358 3.219,-1.353 4.609,-2.533 0.224,0.316 0.585,0.497 1.328,0.48 1.123,-0.026 2.944,-0.288 3.227,-0.81a0.58,0.58 0,0 0,0.044 -0.113c1.43,0.534 3.944,1.1 4.506,1.015 1.465,-0.22 -0.204,-7.055 -0.881,-7.369z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.425,40.963c0.061,0.108 0.11,0.222 0.151,0.338 0.204,0.57 0.536,2.382 0.285,2.83 -0.251,0.447 -1.881,0.664 -2.887,0.681s-1.232,-0.35 -1.436,-0.92c-0.163,-0.456 -0.243,-1.528 -0.241,-2.141 -0.041,-0.91 0.291,-1.23 1.828,-1.48 1.138,-0.183 1.739,0.03 2.086,0.397 1.615,-1.205 4.31,-2.906 4.572,-2.595 1.31,1.55 1.476,5.24 1.192,6.724 -0.092,0.486 -4.431,-0.48 -4.431,-1.004 0,-2.173 -0.564,-2.77 -1.119,-2.83zM21.92,40.284c0.356,-0.563 3.238,0.137 4.82,0.84 0,0 -0.325,1.474 0.192,3.209 0.152,0.507 -3.64,2.766 -4.134,2.378 -0.572,-0.45 -1.624,-5.245 -0.877,-6.427z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M23.316,28.859c0.233,-1.014 1.32,-2.925 5.198,-2.878 1.961,-0.008 4.397,0 6.012,-0.184 2.4,-0.273 4.181,-0.854 5.369,-1.306 1.679,-0.64 2.274,-0.498 2.483,-0.114 0.23,0.42 -0.04,1.148 -0.627,1.817 -1.12,1.279 -3.135,2.27 -6.693,2.564s-5.915,-0.66 -6.93,0.893c-0.438,0.67 -0.1,2.25 3.341,2.747 4.65,0.671 8.468,-0.808 8.94,0.085 0.472,0.894 -2.246,2.712 -6.903,2.75s-7.566,-1.63 -8.597,-2.46c-1.309,-1.052 -1.894,-2.587 -1.593,-3.914z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M29.247,17.772c0.26,-0.425 0.836,-0.753 1.778,-0.753 0.943,0 1.386,0.375 1.694,0.793 0.062,0.085 -0.033,0.185 -0.13,0.143l-0.07,-0.03c-0.345,-0.151 -0.768,-0.336 -1.494,-0.346 -0.775,-0.011 -1.264,0.183 -1.572,0.35 -0.104,0.057 -0.268,-0.056 -0.206,-0.157zM18.634,18.317c0.915,-0.383 1.635,-0.334 2.143,-0.213 0.107,0.025 0.182,-0.09 0.096,-0.16 -0.394,-0.318 -1.278,-0.713 -2.43,-0.283 -1.028,0.383 -1.512,1.18 -1.515,1.703 0,0.123 0.253,0.134 0.319,0.03 0.177,-0.283 0.472,-0.695 1.387,-1.077z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/><path d='M31.826,23.591c-0.81,0 -1.466,-0.654 -1.466,-1.46s0.657,-1.46 1.466,-1.46c0.81,0 1.466,0.654 1.466,1.46s-0.657,1.46 -1.466,1.46zM32.858,21.647a0.38,0.38 0,0 0,-0.759 0,0.38 0.38,0 0,0 0.76,0zM22.116,23.142c0,0.94 -0.765,1.703 -1.709,1.703a1.707,1.707 0,0 1,-1.708 -1.703c0,-0.941 0.766,-1.703 1.708,-1.703 0.943,0 1.709,0.762 1.709,1.703zM21.612,22.577a0.442,0.442 0,1 0,-0.883 0.002,0.442 0.442,0 0,0 0.883,-0.002z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/><path d='M27,49.676c12.523,0 22.676,-10.153 22.676,-22.676C49.676,14.476 39.523,4.324 27,4.324 14.476,4.324 4.324,14.476 4.324,27c0,12.523 10.152,22.676 22.676,22.676zM27,51.786c13.688,0 24.785,-11.098 24.785,-24.786S40.69,2.215 27,2.215C13.312,2.215 2.215,13.312 2.215,27S13.312,51.785 27,51.785z' fill='rgba(31,31,31,.84)' fill-rule='evenodd'/></svg><i class='cnt'>4</i></span><span class='tic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12,6.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,13.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,20.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3Z' fill='@color/primary_icon_color_selector' fill-rule='nonzero'/></svg></span></div><div class='ntp' style='background:#F2F2F2'><div class='logo'><svg width='140' height='112' viewBox='0 0 207 165' xmlns='http://www.w3.org/2000/svg'><path d='M78.95,144.3H75.05L67.95,151.6V137H64.95V161.9H67.95V153.7L76.05,161.8L76.15,161.9H79.55H79.75V161.6L70.65,152.6L78.95,144.3Z' fill='#14307E' fill-rule='nonzero'/><path d='M59.75,157.6C58.65,158.7 57.05,159.3 55.25,159.3C52.15,159.3 49.05,157.4 49.05,153C49.05,149.3 51.65,146.7 55.25,146.7C56.85,146.7 58.35,147.3 59.55,148.4L59.65,148.5L61.55,146.5L61.45,146.4C59.65,144.7 57.55,143.9 55.15,143.9C49.65,143.9 45.95,147.6 45.95,153C45.95,159.3 50.55,162.1 55.15,162.1H55.25C57.65,162.1 59.95,161.2 61.55,159.5L61.65,159.4L59.65,157.4L59.75,157.6Z' fill='#14307E' fill-rule='nonzero'/><path d='M39.45,153.7C39.45,156.9 37.25,159.3 34.15,159.4C30.85,159.4 28.85,157.4 28.85,154V144.3H25.85V154C25.85,159 28.85,162.2 33.55,162.2H33.65C35.95,162.2 38.05,161.1 39.45,159.4L39.55,159.2L39.65,161.9H42.45V144.3H39.45V153.7Z' fill='#14307E' fill-rule='nonzero'/><path d='M9.95,136.9H0.85V161.9H9.95C18.65,161.9 22.45,155.5 22.45,149.2C22.45,143.3 18.55,136.9 9.95,136.9ZM19.35,149.1C19.35,153.9 16.45,158.7 10.05,158.7H4.05V140H9.95C16.35,140 19.35,144.7 19.35,149.1Z' fill='#14307E' fill-rule='nonzero'/><path d='M174.25,151H181.95V156.8C180.05,158.4 177.75,159.3 175.25,159.3C168.45,159.3 165.35,154.4 165.35,149.6C165.35,144.7 168.45,139.4 175.15,139.4C177.85,139.4 180.35,140.4 182.35,142.2L182.45,142.3L184.25,140.2L184.15,140.1C181.75,137.7 178.55,136.5 175.05,136.5C171.25,136.5 168.05,137.7 165.75,140.1C163.35,142.5 162.05,145.9 162.15,149.7C162.15,155.6 165.55,162.4 175.15,162.4C175.25,162.4 175.25,162.4 175.35,162.4C178.95,162.4 182.35,160.9 184.75,158.2V148.3H174.15V151H174.25Z' fill='#14307E' fill-rule='nonzero'/><path d='M91.65,136.9H82.55V161.9H91.65C100.35,161.9 104.15,155.5 104.15,149.2C104.15,143.3 100.25,136.9 91.65,136.9ZM101.05,149.1C101.05,153.9 98.15,158.7 91.75,158.7H85.85V140H91.75C98.05,140 101.05,144.7 101.05,149.1Z' fill='#14307E' fill-rule='nonzero'/><path d='M196.95,143.9C191.65,143.9 187.85,147.8 187.85,153.1C187.85,158.4 191.65,162.2 196.95,162.2C202.25,162.2 206.15,158.4 206.15,153.1C206.15,147.7 202.35,143.9 196.95,143.9ZM203.15,153.1C203.15,156.8 200.55,159.4 196.95,159.4C193.45,159.4 190.85,156.8 190.85,153.1C190.85,149.3 193.35,146.6 197.05,146.6C200.55,146.7 203.15,149.4 203.15,153.1Z' fill='#14307E' fill-rule='nonzero'/><path d='M121.15,153.7C121.15,156.9 118.95,159.3 115.85,159.4C112.55,159.4 110.55,157.4 110.55,154V144.3H107.55V154C107.55,159 110.55,162.2 115.15,162.2H115.25C117.55,162.2 119.65,161.1 121.05,159.4L121.15,159.2L121.25,161.9H124.05V144.3H121.05V153.7H121.15Z' fill='#14307E' fill-rule='nonzero'/><path d='M141.45,157.6C140.35,158.7 138.75,159.3 136.95,159.3C133.85,159.3 130.75,157.4 130.75,153C130.75,149.3 133.35,146.7 136.95,146.7C138.55,146.7 140.05,147.3 141.25,148.4L141.35,148.5L143.25,146.5L143.15,146.4C141.35,144.7 139.25,143.9 136.85,143.9C131.35,143.9 127.65,147.6 127.65,153C127.65,159.3 132.25,162.1 136.85,162.1H136.95C139.35,162.1 141.65,161.2 143.25,159.5L143.35,159.4L141.35,157.4L141.45,157.6Z' fill='#14307E' fill-rule='nonzero'/><path d='M160.65,144.3H156.75L149.65,151.6V137H146.65V161.9H149.65V153.7L157.75,161.8L157.85,161.9H161.25H161.45V161.6L152.35,152.6L160.65,144.3Z' fill='#14307E' fill-rule='nonzero'/><path d='M103.5,119.52C136.5,119.52 163.26,92.76 163.26,59.76C163.26,26.76 136.5,0 103.5,0C70.5,0 43.74,26.76 43.74,59.76C43.74,92.76 70.5,119.52 103.5,119.52Z' fill='#DE5833' fill-rule='evenodd'/><path d='M111.9,104.35C111.9,103.88 112.02,103.77 110.53,100.81C106.59,92.92 102.63,81.78 104.43,74.6C104.76,73.29 100.71,26.28 97.85,24.77C94.68,23.08 90.77,20.39 87.19,19.79C85.38,19.5 83,19.64 81.14,19.89C80.81,19.94 80.8,20.53 81.11,20.64C82.33,21.05 83.82,21.77 84.69,22.85C84.85,23.06 84.63,23.38 84.37,23.39C83.55,23.42 82.05,23.77 80.08,25.44C79.85,25.64 80.04,26 80.34,25.94C84.57,25.1 88.9,25.51 91.45,27.83C91.61,27.98 91.53,28.25 91.31,28.31C69.19,34.32 73.57,53.57 79.46,77.18C84.7,98.22 86.67,105 87.3,107.07C87.36,107.27 87.5,107.43 87.69,107.5C95.31,110.54 111.9,110.67 111.9,105.51V104.35Z' fill='#DDDDDD' fill-rule='evenodd'/><path d='M158.36,59.76C158.36,90.06 133.8,114.62 103.5,114.62C73.2,114.62 48.64,90.06 48.64,59.76C48.64,29.46 73.2,4.9 103.5,4.9C133.8,4.9 158.36,29.46 158.36,59.76ZM90.7,108.3C89.18,103.62 84.95,90.04 80.76,72.89C80.62,72.32 80.48,71.75 80.34,71.19L80.34,71.17C75.28,50.48 71.14,33.59 93.81,28.28C94.02,28.23 94.12,27.98 93.98,27.82C91.38,24.73 86.51,23.72 80.35,25.85C80.09,25.93 79.87,25.68 80.03,25.46C81.24,23.8 83.6,22.52 84.77,21.96C85.01,21.84 84.99,21.49 84.74,21.41C83.97,21.17 82.68,20.8 81.22,20.57C80.87,20.51 80.84,19.92 81.19,19.87C89.92,18.7 99.04,21.32 103.62,27.09C103.67,27.14 103.73,27.18 103.8,27.19C120.56,30.79 121.76,57.29 119.83,58.5C119.45,58.74 118.23,58.6 116.62,58.42C110.1,57.69 97.18,56.25 107.84,76.11C107.94,76.31 107.81,76.57 107.58,76.6C101.59,77.53 109.22,96.24 114.88,108.65C137.12,103.5 153.69,83.56 153.69,59.76C153.69,32.04 131.22,9.57 103.5,9.57C75.78,9.57 53.31,32.04 53.31,59.76C53.31,83.05 69.18,102.64 90.7,108.3Z' fill='#ffffff' fill-rule='evenodd'/><path d='M122.44,84.69C121.16,84.1 116.25,87.62 113,90.32C112.32,89.35 111.03,88.65 108.14,89.16C105.6,89.6 104.21,90.21 103.58,91.26C99.58,89.75 92.85,87.41 91.23,89.67C89.45,92.14 91.67,103.82 94.03,105.34C95.26,106.13 101.16,102.34 104.24,99.73C104.73,100.43 105.53,100.83 107.17,100.79C109.66,100.74 113.69,100.16 114.32,99C114.35,98.93 114.39,98.85 114.42,98.75C117.58,99.93 123.14,101.18 124.39,101C127.63,100.51 123.94,85.38 122.44,84.69Z' fill='#3CA82B' fill-rule='nonzero'/><path d='M113.29,90.66C113.43,90.9 113.54,91.15 113.63,91.41C114.08,92.67 114.81,96.68 114.26,97.68C113.7,98.67 110.1,99.14 107.87,99.18C105.64,99.22 105.14,98.41 104.69,97.15C104.33,96.14 104.15,93.77 104.16,92.41C104.07,90.39 104.8,89.68 108.2,89.13C110.72,88.73 112.05,89.2 112.82,90.01C116.39,87.34 122.36,83.58 122.94,84.27C125.84,87.7 126.21,95.86 125.58,99.15C125.37,100.22 115.77,98.09 115.77,96.93C115.77,92.12 114.52,90.8 113.29,90.66Z' fill='#4CBA3C' fill-rule='nonzero'/><path d='M92.26,89.16C93.04,87.92 99.42,89.46 102.93,91.02C102.93,91.02 102.21,94.28 103.35,98.12C103.69,99.25 95.3,104.25 94.2,103.39C92.93,102.39 90.61,91.78 92.26,89.16Z' fill='#4CBA3C' fill-rule='nonzero'/><path d='M95.35,63.87C95.86,61.63 98.27,57.4 106.85,57.5C111.19,57.49 116.58,57.5 120.16,57.1C125.47,56.49 129.41,55.21 132.04,54.21C135.76,52.79 137.07,53.1 137.54,53.95C138.04,54.88 137.45,56.49 136.15,57.98C133.67,60.81 129.21,63 121.33,63.65C113.46,64.3 108.24,62.19 106,65.63C105.03,67.11 105.78,70.61 113.39,71.71C123.68,73.19 132.13,69.92 133.18,71.9C134.22,73.87 128.21,77.9 117.9,77.98C107.59,78.07 101.15,74.37 98.87,72.54C95.98,70.21 94.68,66.81 95.35,63.87Z' fill='#FFCC33' fill-rule='evenodd'/><path d='M108.47,39.34C109.05,38.39 110.32,37.67 112.41,37.67C114.5,37.67 115.48,38.5 116.16,39.42C116.3,39.61 116.09,39.83 115.87,39.74C115.82,39.72 115.77,39.7 115.71,39.67C114.95,39.34 114.01,38.93 112.41,38.91C110.69,38.88 109.61,39.31 108.93,39.68C108.7,39.81 108.34,39.56 108.47,39.34Z' fill='#14307E' fill-rule='nonzero'/><path d='M84.98,40.54C87.01,39.69 88.6,39.8 89.73,40.07C89.97,40.13 90.13,39.87 89.94,39.72C89.07,39.01 87.11,38.14 84.56,39.09C82.29,39.94 81.21,41.7 81.21,42.86C81.21,43.13 81.77,43.15 81.91,42.92C82.31,42.3 82.96,41.39 84.98,40.54Z' fill='#14307E' fill-rule='nonzero'/><path d='M114.18,52.21C112.39,52.21 110.94,50.77 110.94,48.98C110.94,47.2 112.39,45.75 114.18,45.75C115.97,45.75 117.43,47.2 117.43,48.98C117.43,50.77 115.97,52.21 114.18,52.21ZM116.47,47.91C116.47,47.45 116.09,47.08 115.63,47.08C115.17,47.08 114.79,47.45 114.79,47.91C114.79,48.37 115.17,48.75 115.63,48.75C116.09,48.75 116.47,48.37 116.47,47.91Z' fill='#14307E' fill-rule='evenodd'/><path d='M92.69,51.22C92.69,53.3 91,54.99 88.91,54.99C86.82,54.99 85.13,53.3 85.13,51.22C85.13,49.14 86.82,47.45 88.91,47.45C91,47.45 92.69,49.14 92.69,51.22ZM91.58,49.97C91.58,49.43 91.14,48.99 90.6,48.99C90.06,48.99 89.62,49.43 89.62,49.97C89.62,50.51 90.06,50.94 90.6,50.94C91.14,50.94 91.58,50.51 91.58,49.97Z' fill='#14307E' fill-rule='evenodd'/></svg></div><h4>Favorites</h4><div class='favgrid'><div class='fav'><div class='tile' style='color:#DE5833'>N</div><small>News</small></div><div class='fav'><div class='tile' style='color:#3969EF'>G</div><small>GitHub</small></div><div class='fav'><div class='tile' style='color:#4CBA3C'>W</div><small>Wiki</small></div><div class='fav'><div class='tile' style='color:#7A4BDC'>Y</div><small>YouTube</small></div><div class='fav'><div class='tile' style='color:#3969EF'>M</div><small>Mail</small></div><div class='fav'><div class='tile' style='color:#DE5833'>D</div><small>Docs</small></div><div class='fav'><div class='tile' style='color:#4CBA3C'>S</div><small>Shop</small></div></div><div class='editbtn' style='background:rgba(31,31,31,.09)'><svg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M13.817,3.067a0.625,0.625 0,1 0,-0.884 -0.884L8,7.116 3.067,2.183a0.625,0.625 0,1 0,-0.884 0.884L7.116,8l-4.933,4.933a0.625,0.625 0,1 0,0.884 0.884L8,8.884l4.933,4.933a0.625,0.625 0,1 0,0.884 -0.884L8.884,8l4.933,-4.933Z' fill='rgba(31,31,31,.84)' fill-rule='nonzero'/></svg></div></div><div class='homebar'></div></div>
+  <div class='legend'><div><span class='chip'>logo</span> the <b>real logo_full vector</b> (207×165 viewBox, all 21 paths), 140dp wide</div><div><span class='chip'>ntp</span> omnibar pill shows <b>Dax head + 'Search or type URL'</b> (home state)</div><div><span class='chip'>favorites</span> white tiles r=12 on #F2F2F2 background (daxColorBackground)</div></div>
+</div>
+<div class='stage'>
+  <div class='slabel'>04 · tab switcher · dark</div>
+  <div class='phone'><div class='status' style='color:#99FFFFFF'><span>9:41</span><span>▲ ● ▮</span></div><div style='background:#282828'><div class='swtitle' style='color:#E6FFFFFF'>Open tabs</div></div><div class='swgrid' style='background:#282828'><div class='tcard' style='background:#3D3D3D;outline:1px solid #DE5833;'><div class='trow1'><div class='tfav' style='background:linear-gradient(150deg,#5a3226,#3d2a24)'></div><span class='ttitle' style='color:#E6FFFFFF'>Slashdot</span><span class='tclose'><svg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M13.817,3.067a0.625,0.625 0,1 0,-0.884 -0.884L8,7.116 3.067,2.183a0.625,0.625 0,1 0,-0.884 0.884L7.116,8l-4.933,4.933a0.625,0.625 0,1 0,0.884 0.884L8,8.884l4.933,4.933a0.625,0.625 0,1 0,0.884 -0.884L8.884,8l4.933,-4.933Z' fill='#C7FFFFFF' fill-rule='nonzero'/></svg></span></div><div class='tprev' style='background:linear-gradient(150deg,#5a3226,#3d2a24)'></div></div><div class='tcard' style='background:#3D3D3D;'><div class='trow1'><div class='tfav' style='background:linear-gradient(150deg,#2e4157,#26333f)'></div><span class='ttitle' style='color:#E6FFFFFF'>Hacker News</span><span class='tclose'><svg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M13.817,3.067a0.625,0.625 0,1 0,-0.884 -0.884L8,7.116 3.067,2.183a0.625,0.625 0,1 0,-0.884 0.884L7.116,8l-4.933,4.933a0.625,0.625 0,1 0,0.884 0.884L8,8.884l4.933,4.933a0.625,0.625 0,1 0,0.884 -0.884L8.884,8l4.933,-4.933Z' fill='#C7FFFFFF' fill-rule='nonzero'/></svg></span></div><div class='tprev' style='background:linear-gradient(150deg,#2e4157,#26333f)'></div></div><div class='tcard' style='background:#3D3D3D;'><div class='trow1'><div class='tfav' style='background:linear-gradient(150deg,#4a4a4a,#383838)'></div><span class='ttitle' style='color:#E6FFFFFF'>Wikipedia</span><span class='tclose'><svg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M13.817,3.067a0.625,0.625 0,1 0,-0.884 -0.884L8,7.116 3.067,2.183a0.625,0.625 0,1 0,-0.884 0.884L7.116,8l-4.933,4.933a0.625,0.625 0,1 0,0.884 0.884L8,8.884l4.933,4.933a0.625,0.625 0,1 0,0.884 -0.884L8.884,8l4.933,-4.933Z' fill='#C7FFFFFF' fill-rule='nonzero'/></svg></span></div><div class='tprev' style='background:linear-gradient(150deg,#4a4a4a,#383838)'></div></div><div class='tcard' style='background:#3D3D3D;'><div class='trow1'><div class='tfav' style='background:linear-gradient(150deg,#3d2f52,#2e2440)'></div><span class='ttitle' style='color:#E6FFFFFF'>GitHub</span><span class='tclose'><svg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><path d='M13.817,3.067a0.625,0.625 0,1 0,-0.884 -0.884L8,7.116 3.067,2.183a0.625,0.625 0,1 0,-0.884 0.884L7.116,8l-4.933,4.933a0.625,0.625 0,1 0,0.884 0.884L8,8.884l4.933,4.933a0.625,0.625 0,1 0,0.884 -0.884L8.884,8l4.933,-4.933Z' fill='#C7FFFFFF' fill-rule='nonzero'/></svg></span></div><div class='tprev' style='background:linear-gradient(150deg,#3d2f52,#2e2440)'></div></div></div><div class='swbot' style='background:#282828;border-top:1px solid #414141'><span class='nic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M10.073,2.036a0.75,0.75 0,0 1,0.635 0.084c1.027,0.662 1.555,1.59 1.884,2.525 0.163,0.462 0.281,0.937 0.386,1.384 0.107,0.46 0.197,0.879 0.311,1.29l0.01,0.032c0.033,0.093 0.127,0.312 0.31,0.508 0.19,0.203 0.485,0.396 0.98,0.396 0.463,0 0.733,-0.148 0.902,-0.295 0.184,-0.16 0.29,-0.357 0.345,-0.493l0.017,-0.045c0.039,-0.12 0.081,-0.332 0.132,-0.6 0.023,-0.125 0.05,-0.277 0.08,-0.39 0.012,-0.044 0.04,-0.153 0.096,-0.257 0.018,-0.034 0.104,-0.2 0.297,-0.313a0.762,0.762 0,0 1,0.854 0.055l0.034,0.028 0.061,0.055C17.9,6.45 21,9.472 21,14.478l-0.001,0.147c-0.071,3.078 -2.367,5.569 -5.352,6.678a0.75,0.75 0,0 1,-0.822 -1.202c0.485,-0.544 0.758,-1.265 0.79,-2.062l0.003,-0.16c0,-0.71 -0.445,-1.537 -1.276,-2.508 -0.678,-0.792 -1.509,-1.566 -2.344,-2.36 -0.84,0.79 -1.663,1.527 -2.345,2.307 -0.819,0.938 -1.27,1.768 -1.27,2.56l0.003,0.161c0.032,0.797 0.304,1.518 0.789,2.062l0.04,0.05a0.75,0.75 0,0 1,-0.861 1.152c-2.986,-1.11 -5.281,-3.6 -5.352,-6.678L3,14.478c0,-2.775 1.237,-4.512 2.633,-6.171C7.031,6.645 8.57,5.069 9.605,2.472l0.017,-0.038a0.75,0.75 0,0 1,0.451 -0.398Z' fill='#C7FFFFFF' fill-rule='nonzero'/></svg></span><span class='nic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12.25,3C12.664,3 13,3.336 13,3.75V11H20.5C20.914,11 21.25,11.336 21.25,11.75C21.25,12.164 20.914,12.5 20.5,12.5H13V19.75C13,20.164 12.664,20.5 12.25,20.5C11.836,20.5 11.5,20.164 11.5,19.75V12.5H4C3.586,12.5 3.25,12.164 3.25,11.75C3.25,11.336 3.586,11 4,11H11.5V3.75C11.5,3.336 11.836,3 12.25,3Z' fill='#C7FFFFFF' fill-rule='evenodd'/></svg></span><span class='nic'><svg class='' width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M12,6.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,13.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3ZM12,20.5a1.5,1.5 0,1 0,0 -3,1.5 1.5,0 0,0 0,3Z' fill='@color/primary_icon_color_selector' fill-rule='nonzero'/></svg></span></div><div class='homebar' style='background:rgba(255,255,255,.25)'></div></div>
+  <div class='legend'><div><span class='chip'>switcher</span> toolbar bg #282828, cards <b>#3D3D3D r=12</b>, 2-col grid, 8dp margins (item_tab_grid.xml)</div><div><span class='chip'>card</b></span> favicon 16px + title + 16px close + preview area (162dp on phone)</div><div><span class='chip'>bottom</span> switcher toolbar: <b>fire · + · ⋮</b> (menu_tab_switcher_activity.xml icons)</div></div>
+</div></div>
 
-  <div class="head">
-    <span class="kicker">Skin 1 of 3 · DuckDuckGo</span>
-    <h1>DDG skin — exact colors &amp; structure from the app source</h1>
-    <p>
-      Not inspired-by: every hex below is copied from the app's real
-      <code>design-system-colors.xml</code> — <b>#DE5833</b> orange, <b>#3969EF</b> blue,
-      <b>#F2F2F2 / #FFFFFF</b> light stack, <b>#282828 / #373737 / #3D3D3D</b> dark stack,
-      <b>#4CBA3C</b> protection green. Structure is DDG Android: top omnibar pill with
-      tracker-shield count, orange fire button, favorites grid, list-style tab switcher with
-      the raised fire button. Your AI can port these tokens 1:1 into the app theme.
-    </p>
+<div class='tokens'>
+  <h2>Everything above is copied from this repo's source</h2>
+  <div class='src'>
+    Colors: <code>design-system/src/main/res/values/design-system-colors.xml</code> +
+    <code>values-night</code> &nbsp;·&nbsp; Sizes: <code>design-system-dimensions.xml</code>
+    (keyline_1=4dp, keyline_2=8dp, toolbarIcon=40dp, bottomNavIcon=24dp,
+    largeShapeCornerRadius=16dp, mediumShapeCornerRadius=12dp, gridItemPreviewHeight=162dp)
+    &nbsp;·&nbsp; Layouts mirrored: <code>include_omnibar_toolbar_mockup.xml</code>,
+    <code>view_omnibar.xml</code>, <code>view_browser_navigation_bar.xml</code>,
+    <code>activity_tab_switcher.xml</code>, <code>item_tab_grid.xml</code>,
+    <code>view_configurable_new_tab_page.xml</code>.
+    Icons &amp; logo are the repo's actual vector path data, converted to SVG.
   </div>
-
-  <div class="screens">
-
-    <!-- ============ 1. BROWSER VIEW (LIGHT) ============ -->
-    <div class="stage">
-      <span class="stage-label">01 · Browser view · light</span>
-      <div class="phone s1">
-        <div class="status" style="color:#1F1F1F"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
-
-        <div class="omnibar-zone">
-          <div class="omnibar">
-            <div class="shield-count">
-              <svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3z"/></svg>
-              <b>12</b>
-            </div>
-            <div class="url">example.com<span>/article</span></div>
-            <div class="fire-btn"><svg viewBox="0 0 24 24"><path d="M13.5 1s.9 3-1.2 6C10.5 9.5 8 10.6 8 14a4 4 0 008 0c0-1.4-.5-2.5-1.2-3.4.2 1.5-.5 2.4-1.2 2.6.7-2.3-.5-5.2-2.1-6.7.6 2-.3 3.3-1.5 4.9C8.8 12.6 8 14.1 8 16a6 6 0 1012 0c0-6.7-6.5-8.6-6.5-15z" transform="scale(.9) translate(1.3 1.3)"/></svg></div>
-          </div>
-        </div>
-
-        <div class="page">
-          <div class="serp">
-            <div class="site">
-              <div class="fav">E</div>
-              <div><b>example.com</b><small>Connection secured · trackers blocked</small></div>
-            </div>
-            <h3>How the DDG omnibar shows protection state</h3>
-            <p>The shield sits left of the address with a live count of blocked trackers.
-               Green means the page is protected; tapping it opens the privacy dashboard.</p>
-            <div class="badge"><svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2 20 8.2l-1.4-1.4z"/></svg>12 trackers blocked on this page</div>
-          </div>
-        </div>
-
-        <div class="botnav">
-          <div class="bn"><svg viewBox="0 0 24 24"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20v-2z"/></svg><small>BACK</small></div>
-          <div class="bn"><svg viewBox="0 0 24 24"><path d="M4 5h16v2H4zm0 6h16v2H4zm0 6h16v2H4z"/></svg><small>MENU</small></div>
-          <div class="bn tabs"><svg viewBox="0 0 24 24"><path d="M3 5h12v10H3V5zm2 2v6h8V7H5zm12-2h4v12h-4v-2h2V7h-2V5z" transform="scale(.92) translate(1 1.2)"/></svg><span class="cnt">4</span><small>TABS</small></div>
-          <div class="bn"><svg viewBox="0 0 24 24"><path d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/></svg><small>BOOKMARKS</small></div>
-        </div>
-        <div class="homebar"></div>
-
-        <div class="dot" style="top:64px;left:16px">1</div>
-        <div class="dot" style="top:64px;right:18px">2</div>
-        <div class="dot" style="bottom:86px;left:150px">3</div>
-      </div>
-      <div class="legend">
-        <div><span class="chip g">SHIELD</span><span><b>1</b> — tracker count in protection green #4CBA3C, left of URL</span></div>
-        <div><span class="chip o">FIRE</span><span><b>2</b> — fire button #DE5833 inside the omnibar, right side</span></div>
-        <div><span class="chip b">BLUE</span><span><b>3</b> — tab counter badge #3969EF (DDG's primary blue)</span></div>
-      </div>
-    </div>
-
-    <!-- ============ 2. NEW TAB / HOME (LIGHT) ============ -->
-    <div class="stage">
-      <span class="stage-label">02 · New tab · light</span>
-      <div class="phone s2">
-        <div class="status" style="color:#1F1F1F"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
-
-        <div class="ntp-top">
-          <div class="logo">
-            <div class="mark"><svg viewBox="0 0 24 24"><path d="M21 5h-9.3C7 5 3.9 7.9 3.9 11.7c0 1.9.8 3.6 2 4.8-.3 1-.9 2.3-1.9 3.5 2 0 3.7-.8 4.9-1.7.9.3 1.8.4 2.8.4 4.7 0 8.5-3 8.5-6.9 0-.7-.1-1.4-.4-2H21V5z" transform="scale(.92) translate(1 1)"/></svg></div>
-            <b>Private Search</b>
-          </div>
-        </div>
-
-        <div class="ntp-search">
-          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 10-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"/></svg>
-          <span>Search privately</span>
-        </div>
-
-        <div class="fav-head"><h4>Favorites</h4><a>Edit</a></div>
-        <div class="favgrid">
-          <div class="fav"><div class="tile c1">N</div><small>News</small></div>
-          <div class="fav"><div class="tile c2">V</div><small>Videos</small></div>
-          <div class="fav"><div class="tile c3">M</div><small>Mail</small></div>
-          <div class="fav"><div class="tile c4">S</div><small>Shop</small></div>
-          <div class="fav"><div class="tile c2">D</div><small>Docs</small></div>
-          <div class="fav"><div class="tile c3">P</div><small>Play</small></div>
-          <div class="fav"><div class="tile c1">R</div><small>Read</small></div>
-          <div class="fav"><div class="tile" style="color:#ABABAB">＋</div><small>Add</small></div>
-        </div>
-
-        <div class="privacy-card">
-          <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3z"/></svg></div>
-          <div>
-            <b>3,241 trackers blocked</b>
-            <small>Across 187 sites since you installed</small>
-          </div>
-          <span class="link">View</span>
-        </div>
-
-        <div class="footer-note">Fire button clears tabs &amp; data instantly · nothing is saved</div>
-
-        <div class="dot" style="top:60px;left:16px">4</div>
-        <div class="dot" style="top:432px;left:14px">5</div>
-      </div>
-      <div class="legend">
-        <div><span class="chip o">BRAND</span><span><b>4</b> — orange logo mark #DE5833, white glyph on rounded square</span></div>
-        <div><span class="chip g">STATS</span><span><b>5</b> — privacy stats card: green icon plate, white surface #F9F9F9 on #F2F2F2</span></div>
-        <div><span class="chip b">TILES</span><span><b>·</b> — favorites use white tiles with letter favicons in brand colors</span></div>
-      </div>
-    </div>
-
-    <!-- ============ 3. TAB SWITCHER (DARK) ============ -->
-    <div class="stage">
-      <span class="stage-label">03 · Tab switcher · dark</span>
-      <div class="phone s3">
-        <div class="status" style="color:#99FFFFFF"><span>9:41</span><span class="sig">▲ ● ▮</span></div>
-
-        <div class="sw-head">
-          <span class="ttl">4 open tabs</span>
-          <div class="actions">
-            <div class="icbtn"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 10-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"/></svg></div>
-            <div class="icbtn"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></div>
-          </div>
-        </div>
-
-        <div class="tablist">
-          <div class="trow active"><div class="thumb g1"></div><div class="info"><b>example.com/article</b><small>active now</small></div><div class="x"></div></div>
-          <div class="trow"><div class="thumb g2"></div><div class="info"><b>news-site.com</b><small>2 min ago</small></div><div class="x"></div></div>
-          <div class="trow"><div class="thumb g3"></div><div class="info"><b>shop.example.io</b><small>yesterday</small></div><div class="x"></div></div>
-          <div class="trow"><div class="thumb g4"></div><div class="info"><b>docs.example.dev</b><small>tuesday</small></div><div class="x"></div></div>
-        </div>
-
-        <div class="firebar">
-          <div class="grp">
-            <div class="fb"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg><small>MENU</small></div>
-            <div class="fb"><svg viewBox="0 0 24 24"><path d="M12 4a4 4 0 100 8 4 4 0 000-8zm0 10c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/></svg><small>BOOKMARKS</small></div>
-          </div>
-          <div class="fire-big"><svg viewBox="0 0 24 24"><path d="M13.5 1s.9 3-1.2 6C10.5 9.5 8 10.6 8 14a4 4 0 008 0c0-1.4-.5-2.5-1.2-3.4.2 1.5-.5 2.4-1.2 2.6.7-2.3-.5-5.2-2.1-6.7.6 2-.3 3.3-1.5 4.9C8.8 12.6 8 14.1 8 16a6 6 0 1012 0c0-6.7-6.5-8.6-6.5-15z" transform="scale(.92) translate(1 1)"/></svg></div>
-          <div class="grp">
-            <div class="tcount">4</div>
-            <div class="plus"><svg viewBox="0 0 24 24"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"/></svg></div>
-          </div>
-        </div>
-
-        <div class="dot" style="top:98px;left:20px">6</div>
-        <div class="dot" style="bottom:60px;left:150px">7</div>
-      </div>
-      <div class="legend">
-        <div><span class="chip o">ACTIVE</span><span><b>6</b> — active tab outlined in fire orange; cards are #373737 on #282828</span></div>
-        <div><span class="chip o">FIRE</span><span><b>7</b> — raised orange fire button, DDG's signature tab-switcher move</span></div>
-        <div><span class="chip b">PLUS</span><span><b>·</b> — new tab is a blue #3969EF circle; count chip uses dark fill</span></div>
-      </div>
-    </div>
+  <div class='sechead'>Brand</div>
+  <div class='swrow'>
+    <div class='sw'><div class='c' style='background:#DE5833'></div><div class='m'><b>fire / brand (red50)</b><code>#DE5833</code></div></div>
+    <div class='sw'><div class='c' style='background:#3969EF'></div><div class='m'><b>primary blue (blue50)</b><code>#3969EF</code></div></div>
+    <div class='sw'><div class='c' style='background:#4CBA3C'></div><div class='m'><b>protection green (green50)</b><code>#4CBA3C</code></div></div>
+    <div class='sw'><div class='c' style='background:#FFCC33'></div><div class='m'><b>accent yellow (yellow50)</b><code>#FFCC33</code></div></div>
   </div>
-
-  <!-- ============ TOKEN SHEET ============ -->
-  <div class="tokens">
-    <h2>Exact token sheet — hand this to your AI</h2>
-    <div class="sub">Source: <code>android-design-system/design-system/src/main/res/values/design-system-colors.xml</code> (light) and <code>*_dark</code> tokens (dark). Values are verbatim, not approximations.</div>
-
-    <div class="sec">Core brand</div>
-    <div class="swrow">
-      <div class="sw"><div class="c" style="background:#DE5833"></div><div class="m"><b>Fire / Brand (red50)</b><code>#DE5833 · pressed #BC4726</code></div></div>
-      <div class="sw"><div class="c" style="background:#3969EF"></div><div class="m"><b>Primary blue (blue50)</b><code>#3969EF · pressed #2B55CA</code></div></div>
-      <div class="sw"><div class="c" style="background:#4CBA3C"></div><div class="m"><b>Protection green (green50)</b><code>#4CBA3C · deep #288419</code></div></div>
-      <div class="sw"><div class="c" style="background:#FFCC33"></div><div class="m"><b>Accent yellow (yellow50)</b><code>#FFCC33</code></div></div>
-    </div>
-
-    <div class="sec">Light mode</div>
-    <div class="swrow">
-      <div class="sw"><div class="c" style="background:#FFFFFF;border-bottom:1px solid #eee"></div><div class="m"><b>Window</b><code>#FFFFFF</code></div></div>
-      <div class="sw"><div class="c" style="background:#F2F2F2"></div><div class="m"><b>Background</b><code>#F2F2F2</code></div></div>
-      <div class="sw"><div class="c" style="background:#F9F9F9;border-bottom:1px solid #eee"></div><div class="m"><b>Surface</b><code>#F9F9F9</code></div></div>
-      <div class="sw"><div class="c" style="background:#1F1F1F"></div><div class="m"><b>Text primary</b><code>#1F1F1F</code></div></div>
-      <div class="sw"><div class="c" style="background:rgba(28,31,33,.72)"></div><div class="m"><b>Text secondary</b><code>rgba(28,31,33,.72)</code></div></div>
-      <div class="sw"><div class="c" style="background:rgba(31,31,31,.09)"></div><div class="m"><b>Lines / controls</b><code>rgba(31,31,31,.09)</code></div></div>
-    </div>
-
-    <div class="sec">Dark mode</div>
-    <div class="swrow">
-      <div class="sw"><div class="c" style="background:#3D3D3D"></div><div class="m"><b>Window</b><code>#3D3D3D</code></div></div>
-      <div class="sw"><div class="c" style="background:#282828"></div><div class="m"><b>Background</b><code>#282828</code></div></div>
-      <div class="sw"><div class="c" style="background:#373737"></div><div class="m"><b>Surface</b><code>#373737</code></div></div>
-      <div class="sw"><div class="c" style="background:#1F1F1F"></div><div class="m"><b>Canvas</b><code>#1F1F1F</code></div></div>
-      <div class="sw"><div class="c" style="background:#E6FFFFFF"></div><div class="m"><b>Text primary</b><code>#E6FFFFFF</code></div></div>
-      <div class="sw"><div class="c" style="background:rgba(249,249,249,.12)"></div><div class="m"><b>Lines / controls</b><code>rgba(249,249,249,.12)</code></div></div>
-    </div>
-
-    <div class="sec">Structure rules (what makes it read as DDG)</div>
-    <div class="struct">
-      <div><b>Omnibar</b>Top pill: fully rounded (r=22), surface #F9F9F9 on white zone, 1px hairline border, shield-count left + orange fire right.</div>
-      <div><b>Buttons</b>Fully rounded pills. Primary = blue #3969EF; destructive/fire = orange #DE5833; secondary = transparent with hairline.</div>
-      <div><b>Cards</b>Radius 12–14, white (light) / #373737 (dark), hairline border, tiny shadow — no big elevation.</div>
-      <div><b>Favorites</b>4-column grid, white letter tiles r=14, favicon letters tinted brand colors.</div>
-      <div><b>Tab switcher</b>Vertical list rows, not grid; raised orange fire button overlapping the bottom bar.</div>
-      <div><b>Type</b>Duck Sans (proprietary) → closest free match Inter. Titles 700, body 400–500, tight letter-spacing on headers.</div>
-    </div>
+  <div class='sechead'>Light</div>
+  <div class='swrow'>
+    <div class='sw'><div class='c' style='background:#FFFFFF'></div><div class='m'><b>window</b><code>#FFFFFF</code></div></div>
+    <div class='sw'><div class='c' style='background:#F2F2F2'></div><div class='m'><b>background</b><code>#F2F2F2</code></div></div>
+    <div class='sw'><div class='c' style='background:#F9F9F9'></div><div class='m'><b>surface / toolbar</b><code>#F9F9F9</code></div></div>
+    <div class='sw'><div class='c' style='background:#1F1F1F'></div><div class='m'><b>text / icon primary</b><code>#1F1F1F</code></div></div>
+    <div class='sw'><div class='c' style='background:#CBCBCB'></div><div class='m'><b>shade solid hairline</b><code>#CBCBCB</code></div></div>
   </div>
-
-  <div class="foot">
-    Skin <b>1 / 3</b> — DuckDuckGo · colors copied 100% from app source, structure mirrors DDG Android.<br>
-    Next skins: <b>2 = Firefox (Fenix)</b>, <b>3 = Chromium</b> — then we mix all three into your invented design.
+  <div class='sechead'>Dark</div>
+  <div class='swrow'>
+    <div class='sw'><div class='c' style='background:#282828'></div><div class='m'><b>background / toolbar</b><code>#282828</code></div></div>
+    <div class='sw'><div class='c' style='background:#373737'></div><div class='m'><b>surface / omnibar card</b><code>#373737</code></div></div>
+    <div class='sw'><div class='c' style='background:#3D3D3D'></div><div class='m'><b>window / tab cards</b><code>#3D3D3D</code></div></div>
+    <div class='sw'><div class='c' style='background:#1F1F1F'></div><div class='m'><b>canvas</b><code>#1F1F1F</code></div></div>
+    <div class='sw'><div class='c' style='background:#414141'></div><div class='m'><b>shade solid hairline</b><code>#414141</code></div></div>
   </div>
 </div>
-</body>
-</html>
+<div class='foot'>Skin 1/3 · DuckDuckGo — generated by design/gen_ddg_mockup.py from repo source<br>
+Next: skin 2/3 Firefox (Fenix), skin 3/3 Chromium, then the invented mix.</div>
+</div></body></html>
