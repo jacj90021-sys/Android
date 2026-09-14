@@ -1210,7 +1210,7 @@ class NewUserOnboardingPlanProvider @Inject constructor(
         when (resolved) {
             OmnibarType.SINGLE_BOTTOM -> pixel.fire(PREONBOARDING_BOTTOM_ADDRESS_BAR_SELECTED_UNIQUE)
             OmnibarType.SPLIT -> pixel.fire(PREONBOARDING_SPLIT_ADDRESS_BAR_SELECTED_UNIQUE)
-            OmnibarType.SINGLE_TOP -> Unit
+            OmnibarType.SINGLE_TOP, OmnibarType.CUSTOM -> Unit
         }
     }
 

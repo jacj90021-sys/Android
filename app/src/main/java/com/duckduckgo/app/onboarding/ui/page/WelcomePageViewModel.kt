@@ -241,6 +241,10 @@ class WelcomePageViewModel @Inject constructor(
                             settingsDataStore.omnibarType = OmnibarType.SINGLE_TOP
                             // Top is the default, no pixel needed
                         }
+                        OmnibarType.CUSTOM -> {
+                            settingsDataStore.omnibarType = OmnibarType.CUSTOM
+                            // Local-only mode, not offered in onboarding: no pixel
+                        }
                     }
                     _commands.send(Command.ShowInputScreenDialog(showDuckAiCopy = isDuckAiCopyEnabled()))
                 }

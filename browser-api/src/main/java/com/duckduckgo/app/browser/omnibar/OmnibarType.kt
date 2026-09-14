@@ -20,6 +20,7 @@ enum class OmnibarType(val typeName: String) {
     SINGLE_TOP("TOP"),
     SINGLE_BOTTOM("BOTTOM"),
     SPLIT("SPLIT_TOP"),
+    CUSTOM("CUSTOM_TOP"),
     ;
 
     companion object {
@@ -28,6 +29,7 @@ enum class OmnibarType(val typeName: String) {
                 "TOP" -> SINGLE_TOP
                 "BOTTOM" -> SINGLE_BOTTOM
                 "SPLIT_TOP" -> SPLIT
+                "CUSTOM_TOP" -> CUSTOM
                 else -> throw IllegalStateException("Unknown OmnibarType: $name")
             }
         }

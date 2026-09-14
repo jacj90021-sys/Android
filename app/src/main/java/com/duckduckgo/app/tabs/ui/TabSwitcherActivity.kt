@@ -285,7 +285,7 @@ class TabSwitcherActivity :
             OmnibarType.SINGLE_TOP -> {
                 null
             }
-            OmnibarType.SPLIT -> {
+            OmnibarType.SPLIT, OmnibarType.CUSTOM -> {
                 binding.navigationBar
             }
         }
@@ -421,7 +421,7 @@ class TabSwitcherActivity :
                     getColorFromAttr(com.duckduckgo.mobile.android.R.attr.daxColorToolbar),
                 )
             }
-            OmnibarType.SPLIT -> {
+            OmnibarType.SPLIT, OmnibarType.CUSTOM -> {
                 edgeToEdgeHandler.applyStatusBarInsets(binding.tabSwitcherToolbarTop.root)
                 edgeToEdgeHandler.applyNavigationBarInsets(binding.navigationBar)
             }
@@ -429,7 +429,7 @@ class TabSwitcherActivity :
     }
 
     private fun configureNavigationBar() {
-        if (omnibarRepository.omnibarType == OmnibarType.SPLIT) {
+        if (omnibarRepository.omnibarType == OmnibarType.SPLIT || omnibarRepository.omnibarType == OmnibarType.CUSTOM) {
             binding.navigationBar.browserNavigationBarObserver =
                 object : BrowserNavigationBarObserver {
                     override fun onMenuButtonClicked() {
@@ -467,7 +467,7 @@ class TabSwitcherActivity :
             OmnibarType.SINGLE_BOTTOM -> {
                 binding.root.removeView(binding.tabSwitcherToolbarTop.root)
             }
-            OmnibarType.SPLIT -> {
+            OmnibarType.SPLIT, OmnibarType.CUSTOM -> {
                 binding.root.removeView(binding.tabSwitcherToolbarBottom.root)
             }
         }

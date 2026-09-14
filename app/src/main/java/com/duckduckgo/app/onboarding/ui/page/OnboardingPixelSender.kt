@@ -372,6 +372,7 @@ class RealOnboardingPixelSender @Inject constructor(
         OmnibarType.SINGLE_TOP -> ADDRESS_BAR_TOP
         OmnibarType.SINGLE_BOTTOM -> ADDRESS_BAR_BOTTOM
         OmnibarType.SPLIT -> ADDRESS_BAR_SPLIT
+        OmnibarType.CUSTOM -> ADDRESS_BAR_TOP
     }
 
     private fun onOff(value: Boolean): String = if (value) "on" else "off"

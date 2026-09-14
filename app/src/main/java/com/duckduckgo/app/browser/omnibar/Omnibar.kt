@@ -164,7 +164,7 @@ class Omnibar(
     }
 
     val omnibarView: OmnibarView by lazy {
-        if (omnibarType == OmnibarType.SPLIT) {
+        if (omnibarType == OmnibarType.SPLIT || omnibarType == OmnibarType.CUSTOM) {
             binding.bottomBrowserOutlineStroke.gone()
             binding.includeNewBrowserTab.bottomNtpOutlineStroke.gone()
         } else if (omnibarType == OmnibarType.SINGLE_BOTTOM) {

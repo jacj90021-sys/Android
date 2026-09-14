@@ -166,18 +166,14 @@ class AppearanceActivity : DuckDuckGoActivity() {
                     isLightMode = appTheme.isLightModeEnabled(),
                 ),
                 custom = InputScreenToggleButton.Custom(
-                    isActive = false,
+                    isActive = viewState.omnibarType == OmnibarType.CUSTOM,
                     isLightMode = appTheme.isLightModeEnabled(),
                 ),
             )
 
-            // Visual chooser always shows. Split card stays flag-gated (its omnibar mode
-            // belongs to the removed AI input experiment) — hide just that card when off.
-            if (!viewState.isSplitOmnibarAvailable) {
-                binding.splitOmnibarContainer.gone()
-            } else {
-                binding.splitOmnibarContainer.show()
-            }
+            // Visual chooser always shows. Split card follows its own flag (kept for
+            // parity with upstream); Custom is always ours and always available.
+            binding.splitOmnibarContainer.isVisible = viewState.isSplitOmnibarAvailable
 
             binding.omnibarTypeSettingsTitle.show()
             binding.omnibarTypeToggleContainer.show()
@@ -199,7 +195,7 @@ class AppearanceActivity : DuckDuckGoActivity() {
         binding.topOmnibarContainer.setOnClickListener { viewModel.onOmnibarTypeSelected(OmnibarType.SINGLE_TOP) }
         binding.bottomOmnibarContainer.setOnClickListener { viewModel.onOmnibarTypeSelected(OmnibarType.SINGLE_BOTTOM) }
         binding.splitOmnibarContainer.setOnClickListener { viewModel.onOmnibarTypeSelected(OmnibarType.SPLIT) }
-        binding.customOmnibarContainer.setOnClickListener { viewModel.onCustomOmnibarSelected() }
+        binding.customOmnibarContainer.setOnClickListener { viewModel.onOmnibarTypeSelected(OmnibarType.CUSTOM) }
     }
 
     private fun observeViewModel() {
@@ -252,7 +248,7 @@ class AppearanceActivity : DuckDuckGoActivity() {
         val subtitle =
             getString(
                 when (omnibarType) {
-                    OmnibarType.SPLIT, OmnibarType.SINGLE_TOP -> R.string.settingsAddressBarPositionTop
+                    OmnibarType.SPLIT, OmnibarType.SINGLE_TOP, OmnibarType.CUSTOM -> R.string.settingsAddressBarPositionTop
                     OmnibarType.SINGLE_BOTTOM -> R.string.settingsAddressBarPositionBottom
                 },
             )
@@ -436,7 +432,7 @@ class AppearanceActivity : DuckDuckGoActivity() {
                 }
         }
 
-        /** Placeholder card — scaffold for a future Custom address bar mode. */
+        /** The user's own address bar mode — fully offline, no remote flag involved. */
         class Custom(
             isActive: Boolean,
             isLightMode: Boolean,

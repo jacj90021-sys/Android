@@ -48,21 +48,22 @@ open class OmnibarFeatureRepository @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     @AppCoroutineScope private val coroutineScope: CoroutineScope,
 ) : OmnibarRepository, MainProcessLifecycleObserver, PrivacyConfigCallbackPlugin {
-    private var isSplitOmnibarFlagEnabled: Boolean = false
     private var isNewCustomTabFlagEnabled: Boolean = false
 
     override val omnibarType: OmnibarType
         get() = settingsDataStore.omnibarType
 
+    // The split rendering mode is fully local (BrowserActivity/OmnibarLayout read the saved
+    // OmnibarType directly), so availability no longer depends on a remote server flag.
+    // This is our browser: no external server decides which address bar modes work.
     override val isSplitOmnibarAvailable: Boolean
-        get() = isSplitOmnibarFlagEnabled
+        get() = true
 
     override val isNewCustomTabEnabled: Boolean
         get() = isNewCustomTabFlagEnabled
 
     override fun onStart(owner: LifecycleOwner) {
         coroutineScope.launch(dispatcherProvider.io()) {
-            isSplitOmnibarFlagEnabled = browserFeatures.splitOmnibar().isEnabled()
             isNewCustomTabFlagEnabled = browserFeatures.newCustomTab().isEnabled()
 
             resetOmnibarTypeIfNecessary()
@@ -78,13 +79,15 @@ open class OmnibarFeatureRepository @Inject constructor(
             settingsDataStore.omnibarType = OmnibarType.SPLIT
             settingsDataStore.isSplitOmnibarSelected = false
         }
+
+        // Restore the user's Custom bar choice across app restarts.
+        if (settingsDataStore.isCustomOmnibarSelected) {
+            settingsDataStore.omnibarType = OmnibarType.CUSTOM
+        }
     }
 
     override fun onPrivacyConfigDownloaded() {
         coroutineScope.launch(dispatcherProvider.io()) {
-            if (settingsDataStore.omnibarType != OmnibarType.SPLIT) {
-                isSplitOmnibarFlagEnabled = browserFeatures.splitOmnibar().isEnabled()
-            }
             isNewCustomTabFlagEnabled = browserFeatures.newCustomTab().isEnabled()
         }
     }

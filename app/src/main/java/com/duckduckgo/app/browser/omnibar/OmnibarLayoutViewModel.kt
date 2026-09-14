@@ -118,7 +118,8 @@ class OmnibarLayoutViewModel @Inject constructor(
     appBrandDesignUpdateToggles: AppBrandDesignUpdateToggles,
 ) : ViewModel() {
 
-    private val isSplitOmnibarEnabled = settingsDataStore.omnibarType == OmnibarType.SPLIT
+    private val isSplitOmnibarEnabled =
+        settingsDataStore.omnibarType == OmnibarType.SPLIT || settingsDataStore.omnibarType == OmnibarType.CUSTOM
     private val isProgressBarUpgradeEnabled = progressBarUpgradeFeature.behaviourUpdate().isEnabled()
     private val isProgressBarIndeterminateEnabled =
         isProgressBarUpgradeEnabled && progressBarUpgradeFeature.indeterminateFallback().isEnabled()

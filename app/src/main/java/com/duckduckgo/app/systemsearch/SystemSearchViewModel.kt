@@ -176,7 +176,7 @@ class SystemSearchViewModel @Inject constructor(
     private var omnibarType: OmnibarType = appSettingsPreferencesStore.omnibarType
 
     val isOmnibarAtTop: Boolean
-        get() = omnibarType == OmnibarType.SINGLE_TOP || omnibarType == OmnibarType.SPLIT
+        get() = omnibarType == OmnibarType.SINGLE_TOP || omnibarType == OmnibarType.SPLIT || omnibarType == OmnibarType.CUSTOM
 
     private val autoComplete: AutoComplete = autoCompleteFactory.create(
         AutoComplete.Config(showInstalledApps = true),

@@ -138,6 +138,13 @@ class BrandDesignAddressBarPositionPicker @JvmOverloads constructor(
                 isLight -> R.drawable.mobile_toolbar_split_unselected_brand_design_update_light
                 else -> R.drawable.mobile_toolbar_split_unselected_brand_design_update_dark
             }
+            // Custom is not offered during onboarding; reuse Top art if it ever resolves here.
+            OmnibarType.CUSTOM -> when {
+                active && isLight -> R.drawable.mobile_toolbar_top_selected_brand_design_update_light
+                active -> R.drawable.mobile_toolbar_top_selected_brand_design_update_dark
+                isLight -> R.drawable.mobile_toolbar_top_unselected_brand_design_update_light
+                else -> R.drawable.mobile_toolbar_top_unselected_brand_design_update_dark
+            }
         }
     }
 

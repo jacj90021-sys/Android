@@ -1138,7 +1138,7 @@ class BrowserTabFragment :
         if (edgeToEdgeProvider.isEnabled(EdgeToEdgeBucket.BROWSER)) {
             edgeToEdgeHandler.applyNavigationBarInsetsAsMargin(binding.rootView)
             val hasBottomBar = !tabDisplayedInCustomTabScreen &&
-                (omnibar.omnibarType == OmnibarType.SPLIT || omnibar.omnibarType == OmnibarType.SINGLE_BOTTOM)
+                (omnibar.omnibarType == OmnibarType.SPLIT || omnibar.omnibarType == OmnibarType.CUSTOM || omnibar.omnibarType == OmnibarType.SINGLE_BOTTOM)
             if (hasBottomBar) {
                 edgeToEdgeHandler.applyNavigationBarScrim(
                     binding.rootView,
@@ -1410,7 +1410,7 @@ class BrowserTabFragment :
         browserNavigationBarIntegration = BrowserNavigationBarViewIntegration(
             lifecycleScope = lifecycleScope,
             browserTabFragmentBinding = binding,
-            isEnabled = omnibarRepository.omnibarType == OmnibarType.SPLIT,
+            isEnabled = omnibarRepository.omnibarType == OmnibarType.SPLIT || omnibarRepository.omnibarType == OmnibarType.CUSTOM,
             omnibar = omnibar,
             browserNavigationBarObserver = observer,
         )
@@ -1985,7 +1985,8 @@ class BrowserTabFragment :
                 .flowWithLifecycle(lifecycle, Lifecycle.State.RESUMED)
                 .collectLatest { hasFavorites ->
                     binding.includeNewBrowserTab.topNtpOutlineStroke.isVisible = hasFavorites
-                    binding.includeNewBrowserTab.bottomNtpOutlineStroke.isVisible = hasFavorites && omnibarRepository.omnibarType != OmnibarType.SPLIT
+                    binding.includeNewBrowserTab.bottomNtpOutlineStroke.isVisible =
+                        hasFavorites && omnibarRepository.omnibarType != OmnibarType.SPLIT && omnibarRepository.omnibarType != OmnibarType.CUSTOM
                 }
         }
 
@@ -2100,8 +2101,8 @@ class BrowserTabFragment :
 
     private fun showPdfDownloadTooltip() {
         val omnibarType = omnibarRepository.omnibarType
-        val isBottomAnchored = omnibarType == OmnibarType.SPLIT || omnibarType == OmnibarType.SINGLE_BOTTOM
-        val anchor: View = if (omnibarType == OmnibarType.SPLIT) {
+        val isBottomAnchored = omnibarType == OmnibarType.SPLIT || omnibarType == OmnibarType.CUSTOM || omnibarType == OmnibarType.SINGLE_BOTTOM
+        val anchor: View = if (omnibarType == OmnibarType.SPLIT || omnibarType == OmnibarType.CUSTOM) {
             browserNavigationBarIntegration.navigationBarView.popupMenuAnchor
         } else {
             view?.findViewById(R.id.browserMenu) ?: return

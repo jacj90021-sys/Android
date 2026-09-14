@@ -2293,7 +2293,7 @@ fun DaxCta.canSendShownPixel(): Boolean =
 
 fun String.getStringForOmnibarPosition(position: OmnibarType): String =
     when (position) {
-        OmnibarType.SINGLE_TOP, OmnibarType.SPLIT -> this
+        OmnibarType.SINGLE_TOP, OmnibarType.SPLIT, OmnibarType.CUSTOM -> this
         OmnibarType.SINGLE_BOTTOM -> replace("☝", "\uD83D\uDC47")
     }
 

@@ -3520,7 +3520,10 @@ class BrowserTabViewModel @Inject constructor(
                     showMenuButton = HighlightableButton.Visible(highlighted = false),
                 )
         }
-        command.value = LaunchPopupMenu(anchorToNavigationBar = !isCustomTab && omnibarRepository.omnibarType == OmnibarType.SPLIT)
+        command.value = LaunchPopupMenu(
+            anchorToNavigationBar = !isCustomTab &&
+                (omnibarRepository.omnibarType == OmnibarType.SPLIT || omnibarRepository.omnibarType == OmnibarType.CUSTOM),
+        )
     }
 
     fun onBrowserMenuLaunched(viewMode: ViewMode) {
@@ -3636,7 +3639,7 @@ class BrowserTabViewModel @Inject constructor(
     private fun showOrHideKeyboard(cta: Cta?, reportLandingFocus: Boolean = true) {
         val shouldHideKeyboard = cta?.shouldDropAddressBarFocusWhenShown() == true ||
             currentBrowserViewState().lastQueryOrigin == QueryOrigin.FromBookmark ||
-            (settingsDataStore.omnibarType == OmnibarType.SPLIT && alreadyShownKeyboard)
+            ((settingsDataStore.omnibarType == OmnibarType.SPLIT || settingsDataStore.omnibarType == OmnibarType.CUSTOM) && alreadyShownKeyboard)
 
         logcat { "shouldHideKeyboard: $shouldHideKeyboard" }
 

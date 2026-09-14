@@ -1550,13 +1550,13 @@ class OmnibarLayout @JvmOverloads constructor(
 
     override fun getBehavior(): CoordinatorLayout.Behavior<AppBarLayout> =
         when (omnibarType) {
-            OmnibarType.SINGLE_TOP, OmnibarType.SPLIT -> TopAppBarBehavior(context, this)
+            OmnibarType.SINGLE_TOP, OmnibarType.SPLIT, OmnibarType.CUSTOM -> TopAppBarBehavior(context, this)
             OmnibarType.SINGLE_BOTTOM -> BottomAppBarBehavior(context, this)
         }
 
     override fun setExpanded(expanded: Boolean) {
         when (omnibarType) {
-            OmnibarType.SINGLE_TOP, OmnibarType.SPLIT -> super.setExpanded(expanded)
+            OmnibarType.SINGLE_TOP, OmnibarType.SPLIT, OmnibarType.CUSTOM -> super.setExpanded(expanded)
             OmnibarType.SINGLE_BOTTOM -> (behavior as BottomAppBarBehavior).setExpanded(expanded)
         }
     }
@@ -1594,7 +1594,7 @@ class OmnibarLayout @JvmOverloads constructor(
         animate: Boolean,
     ) {
         when (omnibarType) {
-            OmnibarType.SINGLE_TOP, OmnibarType.SPLIT -> super.setExpanded(expanded, animate)
+            OmnibarType.SINGLE_TOP, OmnibarType.SPLIT, OmnibarType.CUSTOM -> super.setExpanded(expanded, animate)
             OmnibarType.SINGLE_BOTTOM -> (behavior as BottomAppBarBehavior).setExpanded(expanded)
         }
     }

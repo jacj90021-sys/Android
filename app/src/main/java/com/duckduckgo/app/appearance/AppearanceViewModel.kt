@@ -174,14 +174,10 @@ class AppearanceViewModel @Inject constructor(
         pixel.fire(pixelName)
     }
 
-    /** Placeholder hook for the Custom card — user's future own omnibar mode. */
-    fun onCustomOmnibarSelected() {
-        // Intentionally a no-op for now: the card exists so a Custom mode can be
-        // built on it later. Keep the current selection unchanged.
-    }
-
     fun onOmnibarTypeSelected(type: OmnibarType) {
         viewModelScope.launch(dispatcherProvider.io()) {
+            settingsDataStore.isSplitOmnibarSelected = false
+            settingsDataStore.isCustomOmnibarSelected = type == OmnibarType.CUSTOM
             settingsDataStore.omnibarType = type
             viewState.update { it.copy(omnibarType = type) }
 
@@ -189,6 +185,7 @@ class AppearanceViewModel @Inject constructor(
                 OmnibarType.SINGLE_TOP -> pixel.fire(AppPixelName.SETTINGS_ADDRESS_BAR_POSITION_SELECTED_TOP)
                 OmnibarType.SINGLE_BOTTOM -> pixel.fire(AppPixelName.SETTINGS_ADDRESS_BAR_POSITION_SELECTED_BOTTOM)
                 OmnibarType.SPLIT -> pixel.fire(AppPixelName.SETTINGS_ADDRESS_BAR_POSITION_SELECTED_SPLIT_TOP)
+                OmnibarType.CUSTOM -> {} // local-only mode: no analytics pixel fired
             }
         }
     }

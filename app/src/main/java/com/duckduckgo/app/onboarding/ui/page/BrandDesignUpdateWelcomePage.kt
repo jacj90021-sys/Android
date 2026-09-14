@@ -2371,12 +2371,14 @@ class BrandDesignUpdateWelcomePage : OnboardingPageFragment(R.layout.content_onb
         OmnibarType.SINGLE_TOP -> R.drawable.ic_address_bar_top_24
         OmnibarType.SINGLE_BOTTOM -> R.drawable.ic_address_bar_bottom_24
         OmnibarType.SPLIT -> R.drawable.ic_address_bar_split_24
+        OmnibarType.CUSTOM -> R.drawable.ic_address_bar_top_24
     }
 
     private fun addressBarPositionLabelRes(type: OmnibarType): Int = when (type) {
         OmnibarType.SINGLE_TOP -> R.string.preOnboardingAddressBarPositionTop
         OmnibarType.SINGLE_BOTTOM -> R.string.preOnboardingAddressBarPositionBottom
         OmnibarType.SPLIT -> R.string.preOnboardingAddressBarPositionSplit
+        OmnibarType.CUSTOM -> R.string.preOnboardingAddressBarPositionTop
     }
 
     private fun searchOptionsIconRes(withAi: Boolean): Int =

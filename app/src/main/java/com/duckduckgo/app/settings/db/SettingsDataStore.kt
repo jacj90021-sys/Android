@@ -88,6 +88,8 @@ interface SettingsDataStore {
     var appNotificationsEnabled: Boolean
     var notifyMeInDownloadsDismissed: Boolean
     var experimentalWebsiteDarkMode: Boolean
+    var isCustomOmnibarSelected: Boolean
+
     var isFullUrlEnabled: Boolean
 
     /**
@@ -275,6 +277,10 @@ class SettingsSharedPreferences @Inject constructor(
         get() = preferences.getBoolean(KEY_SPLIT_OMNIBAR, false)
         set(value) = preferences.edit { putBoolean(KEY_SPLIT_OMNIBAR, value) }
 
+    override var isCustomOmnibarSelected: Boolean
+        get() = preferences.getBoolean(KEY_CUSTOM_OMNIBAR, false)
+        set(value) = preferences.edit { putBoolean(KEY_CUSTOM_OMNIBAR, value) }
+
     override var isFullUrlEnabled: Boolean
         get() = preferences.getBoolean(KEY_IS_FULL_URL_ENABLED, true)
         set(enabled) = preferences.edit { putBoolean(KEY_IS_FULL_URL_ENABLED, enabled) }
@@ -397,6 +403,7 @@ class SettingsSharedPreferences @Inject constructor(
         const val KEY_EXPERIMENTAL_SITE_DARK_MODE = "KEY_EXPERIMENTAL_SITE_DARK_MODE"
         const val KEY_OMNIBAR_TYPE = "KEY_OMNIBAR_POSITION"
         const val KEY_SPLIT_OMNIBAR = "KEY_SPLIT_OMNIBAR"
+        const val KEY_CUSTOM_OMNIBAR = "KEY_CUSTOM_OMNIBAR"
         const val KEY_IS_FULL_URL_ENABLED = "KEY_IS_FULL_URL_ENABLED"
         const val URL_PREFERENCE_MIGRATED = "URL_PREFERENCE_MIGRATED"
         const val URL_PREFERENCE_SET_BY_USER = "URL_PREFERENCE_SET_BY_USER"

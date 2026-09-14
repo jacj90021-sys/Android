@@ -136,7 +136,8 @@ class TabSwitcherViewModel @Inject constructor(
 
     private val _viewState = MutableStateFlow(
         ViewState(
-            isSplitOmnibarEnabled = omnibarRepository.omnibarType == OmnibarType.SPLIT,
+            isSplitOmnibarEnabled =
+                omnibarRepository.omnibarType == OmnibarType.SPLIT || omnibarRepository.omnibarType == OmnibarType.CUSTOM,
             isBrowserModeToggleVisible = fireModeAvailable,
             browserMode = currentMode.value,
         ),

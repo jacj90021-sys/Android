@@ -524,7 +524,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
                 OmnibarType.SINGLE_BOTTOM -> currentTab?.getOmnibar()?.omnibarView?.toolbar
                     ?: binding.fragmentContainer
 
-                OmnibarType.SPLIT -> currentTab?.navigationBar ?: binding.fragmentContainer
+                OmnibarType.SPLIT, OmnibarType.CUSTOM -> currentTab?.navigationBar ?: binding.fragmentContainer
             }
             DefaultSnackbar(
                 parentView = binding.fragmentContainer,
@@ -552,7 +552,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
                 OmnibarType.SINGLE_BOTTOM -> currentTab?.getOmnibar()?.omnibarView?.toolbar
                     ?: binding.fragmentContainer
 
-                OmnibarType.SPLIT -> currentTab?.navigationBar ?: binding.fragmentContainer
+                OmnibarType.SPLIT, OmnibarType.CUSTOM -> currentTab?.navigationBar ?: binding.fragmentContainer
             }
             DefaultSnackbar(
                 parentView = binding.fragmentContainer,
@@ -953,7 +953,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
                 when (settingsDataStore.omnibarType) {
                     OmnibarType.SINGLE_TOP -> null
                     OmnibarType.SINGLE_BOTTOM -> currentTab?.getOmnibar()?.omnibarView?.toolbar ?: binding.fragmentContainer
-                    OmnibarType.SPLIT -> currentTab?.navigationBar ?: binding.fragmentContainer
+                    OmnibarType.SPLIT, OmnibarType.CUSTOM -> currentTab?.navigationBar ?: binding.fragmentContainer
                 }
             DefaultSnackbar(
                 parentView = binding.fragmentContainer,
@@ -1643,7 +1643,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
         binding.navigationBarMockup.browserMenuImageView.setImageResource(mockupBrowserMenuIcon)
 
         when (settingsDataStore.omnibarType) {
-            OmnibarType.SINGLE_TOP, OmnibarType.SPLIT -> {
+            OmnibarType.SINGLE_TOP, OmnibarType.SPLIT, OmnibarType.CUSTOM -> {
                 binding.bottomMockupToolbar.appBarLayoutMockup.gone()
                 omnibarToolbarMockupBinding = binding.topMockupToolbar
                 applyAddressBarRebrandRadius(
@@ -1658,7 +1658,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
 
                 omnibarToolbarMockupBinding.mockOmniBarContainerShadow.addBottomShadow()
 
-                if (settingsDataStore.omnibarType == OmnibarType.SPLIT) {
+                if (settingsDataStore.omnibarType == OmnibarType.SPLIT || settingsDataStore.omnibarType == OmnibarType.CUSTOM) {
                     binding.topMockupToolbar.tabsMenu.gone()
                     binding.topMockupToolbar.browserMenu.gone()
                     binding.topMockupToolbar.fireIconMenu.gone()
