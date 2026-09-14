@@ -23,6 +23,7 @@ import androidx.lifecycle.viewModelScope
 import com.duckduckgo.anvil.annotations.ContributesViewModel
 import com.duckduckgo.app.browser.menu.BrowserMenuHighlight
 import com.duckduckgo.app.browser.menu.BrowserViewMode
+import com.duckduckgo.app.browser.omnibar.OmnibarType
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarView.ViewMode
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarView.ViewMode.Browser
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarView.ViewMode.CustomTab
@@ -67,7 +68,11 @@ class BrowserNavigationBarViewModel @Inject constructor(
     dispatcherProvider: DispatcherProvider,
     browserMenuHighlight: BrowserMenuHighlight,
     private val browserMode: BrowserMode,
+    omnibarRepository: com.duckduckgo.app.browser.api.OmnibarRepository,
 ) : ViewModel(), DefaultLifecycleObserver {
+
+    // Custom mode swaps the first two slots of the bar for back/forward.
+    private val isCustomOmnibar = omnibarRepository.omnibarType == OmnibarType.CUSTOM
     private val _commands = Channel<Command>(capacity = Channel.CONFLATED)
     val commands: Flow<Command> = _commands.receiveAsFlow()
 
@@ -134,6 +139,20 @@ class BrowserNavigationBarViewModel @Inject constructor(
         _commands.trySend(NotifyAutofillButtonClicked)
     }
 
+    fun onBackButtonClicked() {
+        _commands.trySend(NotifyBackButtonClicked)
+    }
+
+    fun onForwardButtonClicked() {
+        _commands.trySend(NotifyForwardButtonClicked)
+    }
+
+    fun onNavigationStateChanged(canGoBack: Boolean, canGoForward: Boolean) {
+        _viewState.update {
+            it.copy(canGoBack = canGoBack, canGoForward = canGoForward)
+        }
+    }
+
     fun onBookmarksButtonClicked() {
         pixel.fire(AppPixelName.BROWSER_NAV_BOOKMARKS_PRESSED.pixelName)
         _commands.trySend(NotifyBookmarksButtonClicked)
@@ -146,6 +165,9 @@ class BrowserNavigationBarViewModel @Inject constructor(
                     it.copy(
                         newTabButtonVisible = false,
                         autofillButtonVisible = true,
+                        backButtonVisible = false,
+                        forwardButtonVisible = false,
+                        bookmarksButtonVisible = true,
                         viewMode = viewMode,
                     )
                 }
@@ -153,11 +175,22 @@ class BrowserNavigationBarViewModel @Inject constructor(
 
             Browser -> {
                 _viewState.update {
-                    it.copy(
-                        newTabButtonVisible = true,
-                        autofillButtonVisible = false,
-                        viewMode = viewMode,
-                    )
+                    if (isCustomOmnibar) {
+                        it.copy(
+                            newTabButtonVisible = false,
+                            autofillButtonVisible = false,
+                            bookmarksButtonVisible = false,
+                            backButtonVisible = true,
+                            forwardButtonVisible = true,
+                            viewMode = viewMode,
+                        )
+                    } else {
+                        it.copy(
+                            newTabButtonVisible = true,
+                            autofillButtonVisible = false,
+                            viewMode = viewMode,
+                        )
+                    }
                 }
             }
 
@@ -166,6 +199,9 @@ class BrowserNavigationBarViewModel @Inject constructor(
                     it.copy(
                         newTabButtonVisible = true,
                         autofillButtonVisible = false,
+                        backButtonVisible = false,
+                        forwardButtonVisible = false,
+                        bookmarksButtonVisible = true,
                         viewMode = viewMode,
                     )
                 }
@@ -178,6 +214,8 @@ class BrowserNavigationBarViewModel @Inject constructor(
                         autofillButtonVisible = false,
                         tabsButtonVisible = false,
                         bookmarksButtonVisible = false,
+                        backButtonVisible = false,
+                        forwardButtonVisible = false,
                         showShadow = false,
                         viewMode = viewMode,
                     )
@@ -224,6 +262,8 @@ class BrowserNavigationBarViewModel @Inject constructor(
         data object NotifyNewTabButtonClicked : Command()
         data object NotifyAutofillButtonClicked : Command()
         data object NotifyBookmarksButtonClicked : Command()
+        data object NotifyBackButtonClicked : Command()
+        data object NotifyForwardButtonClicked : Command()
     }
 
     /**
@@ -238,6 +278,10 @@ class BrowserNavigationBarViewModel @Inject constructor(
         val isVisible: Boolean = true,
         val newTabButtonVisible: Boolean = true,
         val autofillButtonVisible: Boolean = false,
+        val backButtonVisible: Boolean = false,
+        val forwardButtonVisible: Boolean = false,
+        val canGoBack: Boolean = false,
+        val canGoForward: Boolean = false,
         val bookmarksButtonVisible: Boolean = true,
         val fireButtonVisible: Boolean = true,
         val fireButtonHighlighted: Boolean = false,

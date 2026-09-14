@@ -73,6 +73,24 @@
                     android:src="@drawable/ic_key_24" />
             </FrameLayout>
 
+            <!-- Custom-mode back button: replaces the contextual new-tab/password slot -->
+            <FrameLayout
+                android:id="@+id/backButton"
+                android:layout_width="@dimen/toolbarIcon"
+                android:layout_height="@dimen/toolbarIcon"
+                android:background="@drawable/selectable_item_rounded_corner_background"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/backButtonImageView"
+                    android:layout_width="@dimen/bottomNavIcon"
+                    android:layout_height="@dimen/bottomNavIcon"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/browserMenuBack"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_arrow_left_24" />
+            </FrameLayout>
+
         </FrameLayout>
 
         <Space
@@ -94,6 +112,24 @@
                 android:contentDescription="@string/bookmarksMenuTitle"
                 android:scaleType="center"
                 android:src="@drawable/ic_bookmarks_24" />
+        </FrameLayout>
+
+        <!-- Custom-mode forward button: takes the bookmarks slot -->
+        <FrameLayout
+            android:id="@+id/forwardButton"
+            android:layout_width="@dimen/toolbarIcon"
+            android:layout_height="@dimen/toolbarIcon"
+            android:background="@drawable/selectable_item_rounded_corner_background"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/forwardButtonImageView"
+                android:layout_width="@dimen/bottomNavIcon"
+                android:layout_height="@dimen/bottomNavIcon"
+                android:layout_gravity="center"
+                android:contentDescription="@string/browserMenuForward"
+                android:scaleType="center"
+                android:src="@drawable/ic_arrow_right_24" />
         </FrameLayout>
 
         <Space

@@ -37,8 +37,10 @@ import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.browser.databinding.ViewBrowserNavigationBarBinding
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command.NotifyAutofillButtonClicked
+import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command.NotifyBackButtonClicked
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command.NotifyBookmarksButtonClicked
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command.NotifyFireButtonClicked
+import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command.NotifyForwardButtonClicked
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command.NotifyMenuButtonClicked
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command.NotifyNewTabButtonClicked
 import com.duckduckgo.app.browser.navigation.bar.view.BrowserNavigationBarViewModel.Command.NotifyTabsButtonClicked
@@ -127,6 +129,12 @@ class BrowserNavigationBarView @JvmOverloads constructor(
         }
     }
 
+    fun updateNavigationState(canGoBack: Boolean, canGoForward: Boolean) {
+        doOnAttach {
+            viewModel.onNavigationStateChanged(canGoBack, canGoForward)
+        }
+    }
+
     fun setBrowserMenuIcon(@DrawableRes icon: Int) {
         doOnAttach {
             ContextCompat.getDrawable(this.context, icon)?.let {
@@ -142,6 +150,8 @@ class BrowserNavigationBarView @JvmOverloads constructor(
         binding.bookmarksImageView.isSaveEnabled = false
         binding.autofillButtonImageView.isSaveEnabled = false
         binding.newTabButtonImageView.isSaveEnabled = false
+        binding.backButtonImageView.isSaveEnabled = false
+        binding.forwardButtonImageView.isSaveEnabled = false
     }
 
     override fun onAttachedToWindow() {
@@ -166,6 +176,14 @@ class BrowserNavigationBarView @JvmOverloads constructor(
 
         binding.autofillButton.setOnClickListener {
             viewModel.onAutofillButtonClicked()
+        }
+
+        binding.backButton.setOnClickListener {
+            viewModel.onBackButtonClicked()
+        }
+
+        binding.forwardButton.setOnClickListener {
+            viewModel.onForwardButtonClicked()
         }
 
         binding.bookmarksButton.setOnClickListener {
@@ -205,6 +223,8 @@ class BrowserNavigationBarView @JvmOverloads constructor(
 
         binding.newTabButton.isVisible = viewState.newTabButtonVisible
         binding.autofillButton.isVisible = viewState.autofillButtonVisible
+        binding.backButton.isVisible = viewState.backButtonVisible
+        binding.forwardButton.isVisible = viewState.forwardButtonVisible
         binding.bookmarksButton.isVisible = viewState.bookmarksButtonVisible
         binding.fireButton.isVisible = viewState.fireButtonVisible
         binding.tabsButton.isVisible = viewState.tabsButtonVisible
@@ -214,12 +234,12 @@ class BrowserNavigationBarView @JvmOverloads constructor(
         binding.shadowView.isVisible = viewState.showShadow
 
         renderFireButtonPulseAnimation(enabled = viewState.fireButtonHighlighted)
-        applyEnabledState(viewState.enabledState)
+        applyEnabledState(viewState)
     }
 
-    private fun applyEnabledState(state: EnabledState) {
-        val enabled = state == EnabledState.ALL
-        val fireEnabled = enabled || state == EnabledState.FIRE_BUTTON_ONLY
+    private fun applyEnabledState(state: ViewState) {
+        val enabled = state.enabledState == EnabledState.ALL
+        val fireEnabled = enabled || state.enabledState == EnabledState.FIRE_BUTTON_ONLY
 
         applyEnabled(binding.newTabButton, enabled)
         applyEnabled(binding.autofillButton, enabled)
@@ -227,6 +247,9 @@ class BrowserNavigationBarView @JvmOverloads constructor(
         applyEnabled(binding.tabsButton, enabled)
         applyEnabled(binding.menuButton, enabled)
         applyEnabled(binding.fireButton, fireEnabled)
+        // Custom-mode back/forward: gated by both the lock state and navigation availability
+        applyEnabled(binding.backButton, enabled && state.canGoBack)
+        applyEnabled(binding.forwardButton, enabled && state.canGoForward)
     }
 
     private fun applyEnabled(view: View, enabled: Boolean) {
@@ -243,6 +266,8 @@ class BrowserNavigationBarView @JvmOverloads constructor(
             NotifyBookmarksButtonClicked -> browserNavigationBarObserver?.onBookmarksButtonClicked()
             NotifyNewTabButtonClicked -> browserNavigationBarObserver?.onNewTabButtonClicked()
             NotifyAutofillButtonClicked -> browserNavigationBarObserver?.onAutofillButtonClicked()
+            NotifyBackButtonClicked -> browserNavigationBarObserver?.onBackButtonClicked()
+            NotifyForwardButtonClicked -> browserNavigationBarObserver?.onForwardButtonClicked()
         }
     }
 

@@ -1405,6 +1405,14 @@ class BrowserTabFragment :
                 override fun onBookmarksButtonClicked() {
                     viewModel.onNavigationBarBookmarksButtonClicked()
                 }
+
+                override fun onBackButtonClicked() {
+                    viewModel.onUserPressedBack()
+                }
+
+                override fun onForwardButtonClicked() {
+                    viewModel.onUserPressedForward()
+                }
             }
 
         browserNavigationBarIntegration = BrowserNavigationBarViewIntegration(
@@ -2455,10 +2463,22 @@ class BrowserTabFragment :
     val navigationBar: BrowserNavigationBarView
         get() = binding.navigationBar
 
+    /**
+     * Pushes the WebView's current back/forward availability into the bottom bar so the
+     * Custom-mode back/forward buttons can enable/disable themselves.
+     */
+    private fun updateBarNavigationState() {
+        navigationBar.updateNavigationState(
+            canGoBack = webView?.canGoBack() == true,
+            canGoForward = webView?.canGoForward() == true,
+        )
+    }
+
     private fun processCommand(it: Command?) {
         if (it is NavigationCommand) {
             omnibar.cancelTrackersAnimation()
         }
+        updateBarNavigationState()
 
         when (it) {
             is NavigationCommand.Refresh -> refresh()
