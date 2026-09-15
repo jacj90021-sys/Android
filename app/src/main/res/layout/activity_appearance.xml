@@ -108,18 +108,24 @@
                 android:layout_height="wrap_content"
                 app:primaryText="@string/settingsAddressBarPositionHeaderTitle" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/omnibarTypeToggleContainer"
+            <HorizontalScrollView
+                android:id="@+id/omnibarTypeToggleScroll"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#33FF0000"
+                android:layout_marginHorizontal="@dimen/keyline_4"
+                android:overScrollMode="never"
+                android:scrollbars="none">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/omnibarTypeToggleContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/keyline_1"
-                android:layout_marginBottom="@dimen/keyline_2"
-                android:layout_marginHorizontal="@dimen/keyline_4">
+                android:layout_marginBottom="@dimen/keyline_2">
 
                 <LinearLayout
                     android:id="@+id/topOmnibarContainer"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
@@ -128,8 +134,7 @@
                     app:layout_constraintEnd_toStartOf="@+id/bottomOmnibarContainer"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintWidth_max="160dp">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/topOmnibarToggleImage"
@@ -161,13 +166,12 @@
 
                 <LinearLayout
                     android:id="@+id/bottomOmnibarContainer"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/inputScreenUserPrefToggleSpacing"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="@dimen/keyline_2"
-                    app:layout_constraintWidth_max="160dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/splitOmnibarContainer"
                     app:layout_constraintStart_toEndOf="@+id/topOmnibarContainer"
@@ -211,13 +215,12 @@
 
                 <LinearLayout
                     android:id="@+id/splitOmnibarContainer"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/inputScreenUserPrefToggleSpacing"
                     android:padding="@dimen/keyline_2"
                     android:gravity="center"
                     android:orientation="vertical"
-                    app:layout_constraintWidth_max="160dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/customOmnibarContainer"
                     app:layout_constraintStart_toEndOf="@+id/bottomOmnibarContainer"
@@ -261,13 +264,12 @@
 
                 <LinearLayout
                     android:id="@+id/customOmnibarContainer"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/inputScreenUserPrefToggleSpacing"
                     android:padding="@dimen/keyline_2"
                     android:gravity="center"
                     android:orientation="vertical"
-                    app:layout_constraintWidth_max="160dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/splitOmnibarContainer"
@@ -310,6 +312,8 @@
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </HorizontalScrollView>
 
             <com.duckduckgo.common.ui.view.divider.HorizontalDivider
                 android:id="@+id/showFullUrlSettingDivider"
