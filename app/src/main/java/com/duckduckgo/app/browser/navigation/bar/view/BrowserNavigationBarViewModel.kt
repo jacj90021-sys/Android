@@ -71,7 +71,7 @@ class BrowserNavigationBarViewModel @Inject constructor(
     dispatcherProvider: DispatcherProvider,
     browserMenuHighlight: BrowserMenuHighlight,
     private val browserMode: BrowserMode,
-    omnibarRepository: com.duckduckgo.app.browser.api.OmnibarRepository,
+    private val omnibarRepository: com.duckduckgo.app.browser.api.OmnibarRepository,
 ) : ViewModel(), DefaultLifecycleObserver {
 
     // Custom mode swaps the first two slots of the bar for back/forward.
