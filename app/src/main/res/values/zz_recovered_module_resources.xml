@@ -10,5 +10,5 @@
     <string name="input_screen_user_pref_without_ai">Само търсене</string>
     <string name="autocompleteDuckAiPrompt">Попитай Duck.ai</string>
     <string name="voiceSearchTitle">Гласово търсене</string>
-    <dimen name="inputScreenUserPrefToggleSpacing">160dp</dimen>
+    <dimen name="inputScreenUserPrefToggleSpacing">16dp</dimen>
 </resources>

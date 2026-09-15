@@ -118,14 +118,24 @@ class OmnibarLayoutViewModel @Inject constructor(
     appBrandDesignUpdateToggles: AppBrandDesignUpdateToggles,
 ) : ViewModel() {
 
-    private val isSplitOmnibarEnabled =
-        settingsDataStore.omnibarType == OmnibarType.SPLIT || settingsDataStore.omnibarType == OmnibarType.CUSTOM
+    // Live getters (not constructor snapshots): switching the address bar mode in Settings
+    // takes effect without needing the app to be restarted.
+    private val isSplitOmnibarEnabled: Boolean
+        get() = settingsDataStore.omnibarType == OmnibarType.SPLIT || settingsDataStore.omnibarType == OmnibarType.CUSTOM
+
     // Custom mode keeps ONLY the fire button in the top omnibar (tabs/menu moved to the
     // bottom bar), so the address field gets all their width back.
-    private val isCustomOmnibar = settingsDataStore.omnibarType == OmnibarType.CUSTOM
-    private val showTopFireIcon = !isSplitOmnibarEnabled || isCustomOmnibar
-    private val showTopTabsMenu = !isSplitOmnibarEnabled
-    private val showTopBrowserMenu = !isSplitOmnibarEnabled
+    private val isCustomOmnibar: Boolean
+        get() = settingsDataStore.omnibarType == OmnibarType.CUSTOM
+
+    private val showTopFireIcon: Boolean
+        get() = !isSplitOmnibarEnabled || isCustomOmnibar
+
+    private val showTopTabsMenu: Boolean
+        get() = !isSplitOmnibarEnabled
+
+    private val showTopBrowserMenu: Boolean
+        get() = !isSplitOmnibarEnabled
     private val isProgressBarUpgradeEnabled = progressBarUpgradeFeature.behaviourUpdate().isEnabled()
     private val isProgressBarIndeterminateEnabled =
         isProgressBarUpgradeEnabled && progressBarUpgradeFeature.indeterminateFallback().isEnabled()

@@ -75,7 +75,9 @@ class BrowserNavigationBarViewModel @Inject constructor(
 ) : ViewModel(), DefaultLifecycleObserver {
 
     // Custom mode swaps the first two slots of the bar for back/forward.
-    private val isCustomOmnibar = omnibarRepository.omnibarType == OmnibarType.CUSTOM
+    // Live getter (not a constructor snapshot): picking Custom in Settings works immediately.
+    private val isCustomOmnibar: Boolean
+        get() = omnibarRepository.omnibarType == OmnibarType.CUSTOM
     private val _commands = Channel<Command>(capacity = Channel.CONFLATED)
     val commands: Flow<Command> = _commands.receiveAsFlow()
 
