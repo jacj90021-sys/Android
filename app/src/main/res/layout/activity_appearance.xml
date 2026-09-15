@@ -112,6 +112,7 @@
                 android:id="@+id/omnibarTypeToggleContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="#33FF0000"
                 android:layout_marginTop="@dimen/keyline_1"
                 android:layout_marginBottom="@dimen/keyline_2"
                 android:layout_marginHorizontal="@dimen/keyline_4">
