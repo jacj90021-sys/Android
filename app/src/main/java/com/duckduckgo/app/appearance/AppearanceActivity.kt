@@ -151,41 +151,32 @@ class AppearanceActivity : DuckDuckGoActivity() {
     }
 
     private fun configureOmnibarSettings(viewState: AppearanceViewModel.ViewState) {
-        if (viewState.shouldShowSplitOmnibarSettings) {
-            configureOmnibarTypeToggle(
-                top = InputScreenToggleButton.Top(
-                    isActive = viewState.omnibarType == OmnibarType.SINGLE_TOP,
-                    isLightMode = appTheme.isLightModeEnabled(),
-                ),
-                bottom = InputScreenToggleButton.Bottom(
-                    isActive = viewState.omnibarType == OmnibarType.SINGLE_BOTTOM,
-                    isLightMode = appTheme.isLightModeEnabled(),
-                ),
-                split = InputScreenToggleButton.Split(
-                    isActive = viewState.omnibarType == OmnibarType.SPLIT,
-                    isLightMode = appTheme.isLightModeEnabled(),
-                ),
-                custom = InputScreenToggleButton.Custom(
-                    isActive = viewState.omnibarType == OmnibarType.CUSTOM,
-                    isLightMode = appTheme.isLightModeEnabled(),
-                ),
-            )
+        configureOmnibarTypeToggle(
+            top = InputScreenToggleButton.Top(
+                isActive = viewState.omnibarType == OmnibarType.SINGLE_TOP,
+                isLightMode = appTheme.isLightModeEnabled(),
+            ),
+            bottom = InputScreenToggleButton.Bottom(
+                isActive = viewState.omnibarType == OmnibarType.SINGLE_BOTTOM,
+                isLightMode = appTheme.isLightModeEnabled(),
+            ),
+            split = InputScreenToggleButton.Split(
+                isActive = viewState.omnibarType == OmnibarType.SPLIT,
+                isLightMode = appTheme.isLightModeEnabled(),
+            ),
+            custom = InputScreenToggleButton.Custom(
+                isActive = viewState.omnibarType == OmnibarType.CUSTOM,
+                isLightMode = appTheme.isLightModeEnabled(),
+            ),
+        )
 
-            // Visual chooser always shows. Split card follows its own flag (kept for
-            // parity with upstream); Custom is always ours and always available.
-            binding.splitOmnibarContainer.isVisible = viewState.isSplitOmnibarAvailable
-
-            binding.omnibarTypeSettingsTitle.show()
-            binding.omnibarTypeToggleContainer.show()
-            binding.showFullUrlSettingDivider.show()
-            binding.addressBarPositionSetting.gone()
-        } else {
-            updateSelectedOmnibarPosition(viewState.omnibarType)
-            binding.omnibarTypeSettingsTitle.gone()
-            binding.omnibarTypeToggleContainer.gone()
-            binding.showFullUrlSettingDivider.gone()
-            binding.addressBarPositionSetting.show()
-        }
+        // Unconditional: the 4-card visual chooser always shows. There is no
+        // fallback text row anymore — nothing (flag, server, state) can hide the cards.
+        binding.splitOmnibarContainer.isVisible = true
+        binding.omnibarTypeSettingsTitle.show()
+        binding.omnibarTypeToggleContainer.show()
+        binding.showFullUrlSettingDivider.show()
+        binding.addressBarPositionSetting.gone()
     }
 
     private fun configureUiEventHandlers() {
